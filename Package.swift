@@ -1,4 +1,4 @@
-// swift-tools-version: 6.2
+// swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -14,13 +14,9 @@ let package = Package(
             name: "SwiftBuilder",
             targets: ["SwiftBuilder"]
         ),
-        .executable(
-            name: "SwiftBuilderCLI",
-            targets: ["SwiftBuilderCLI"]
-        ),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-syntax.git", from: "601.0.1")
+        .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -29,13 +25,8 @@ let package = Package(
             name: "SwiftBuilder",
             dependencies: [
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
-                .product(name: "SwiftOperators", package: "swift-syntax"),
                 .product(name: "SwiftParser", package: "swift-syntax")
             ]
-        ),
-        .executableTarget(
-            name: "SwiftBuilderCLI",
-            dependencies: ["SwiftBuilder"]
         ),
         .testTarget(
             name: "SwiftBuilderTests",

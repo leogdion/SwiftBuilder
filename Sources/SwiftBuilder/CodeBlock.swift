@@ -16,6 +16,10 @@ public struct CodeBlockBuilderResult {
         components
     }
     
+    public static func buildExpression(_ expression: CodeBlock) -> CodeBlock {
+        expression
+    }
+    
     public static func buildOptional(_ component: CodeBlock?) -> CodeBlock {
         component ?? EmptyCodeBlock()
     }
