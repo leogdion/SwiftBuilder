@@ -1,11 +1,16 @@
 import Foundation
 import SwiftSyntax
+import SwiftParser
+
+public enum VariableKind {
+    case `let`
+    case `var`
+}
 
 public struct Struct: CodeBlock {
     private let name: String
     private let members: [CodeBlock]
     private var inheritance: String?
-    private var comment: String?
     
     public init(_ name: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
         self.name = name
@@ -18,41 +23,28 @@ public struct Struct: CodeBlock {
         return copy
     }
     
-    public func comment(_ text: String) -> Self {
-        var copy = self
-        copy.comment = text
-        return copy
-    }
-    
     public var syntax: SyntaxProtocol {
         let structKeyword = TokenSyntax.keyword(.struct, trailingTrivia: .space)
         let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
         
-        var inheritanceClause: TypeInheritanceClauseSyntax?
+        var inheritanceClause: InheritanceClauseSyntax?
         if let inheritance = inheritance {
-            let inheritedType = InheritedTypeSyntax(type: SimpleTypeIdentifierSyntax(name: .identifier(inheritance)))
-            inheritanceClause = TypeInheritanceClauseSyntax(colon: .colonToken(), inheritedTypeCollection: InheritedTypeListSyntax([inheritedType]))
+            let inheritedType = InheritedTypeSyntax(type: IdentifierTypeSyntax(name: .identifier(inheritance)))
+            inheritanceClause = InheritanceClauseSyntax(colon: .colonToken(), inheritedTypes: InheritedTypeListSyntax([inheritedType]))
         }
         
         let memberBlock = MemberBlockSyntax(
             leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
-            members: MemberDeclListSyntax(members.compactMap { member in
+            members: MemberBlockItemListSyntax(members.compactMap { member in
                 guard let syntax = member.syntax.as(DeclSyntax.self) else { return nil }
-                return MemberDeclListItemSyntax(decl: syntax, trailingTrivia: .newline)
+                return MemberBlockItemSyntax(decl: syntax, trailingTrivia: .newline)
             }),
             rightBrace: .rightBraceToken(leadingTrivia: .newline)
         )
         
-        let modifiers = comment.map { _ in
-            DeclModifierListSyntax([
-                DeclModifierSyntax(name: .keyword(.public, trailingTrivia: .space))
-            ])
-        }
-        
         return StructDeclSyntax(
-            modifiers: modifiers ?? [],
             structKeyword: structKeyword,
-            identifier: identifier,
+            name: identifier,
             inheritanceClause: inheritanceClause,
             memberBlock: memberBlock
         )
@@ -61,13 +53,12 @@ public struct Struct: CodeBlock {
 
 public struct Enum: CodeBlock {
     private let name: String
-    private let content: [CodeBlock]
+    private let members: [CodeBlock]
     private var inheritance: String?
-    private var comment: String?
     
     public init(_ name: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
         self.name = name
-        self.content = content()
+        self.members = content()
     }
     
     public func inherits(_ type: String) -> Self {
@@ -76,48 +67,35 @@ public struct Enum: CodeBlock {
         return copy
     }
     
-    public func comment(_ text: String) -> Self {
-        var copy = self
-        copy.comment = text
-        return copy
-    }
-    
     public var syntax: SyntaxProtocol {
         let enumKeyword = TokenSyntax.keyword(.enum, trailingTrivia: .space)
         let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
         
-        var inheritanceClause: TypeInheritanceClauseSyntax?
+        var inheritanceClause: InheritanceClauseSyntax?
         if let inheritance = inheritance {
-            let inheritedType = InheritedTypeSyntax(type: SimpleTypeIdentifierSyntax(name: .identifier(inheritance)))
-            inheritanceClause = TypeInheritanceClauseSyntax(colon: .colonToken(), inheritedTypeCollection: InheritedTypeListSyntax([inheritedType]))
+            let inheritedType = InheritedTypeSyntax(type: IdentifierTypeSyntax(name: .identifier(inheritance)))
+            inheritanceClause = InheritanceClauseSyntax(colon: .colonToken(), inheritedTypes: InheritedTypeListSyntax([inheritedType]))
         }
         
         let memberBlock = MemberBlockSyntax(
             leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
-            members: MemberDeclListSyntax(content.compactMap { item in
-                guard let caseBlock = item as? Case else { return nil }
-                return MemberDeclListItemSyntax(decl: caseBlock.enumCaseDeclaration, trailingTrivia: .newline)
+            members: MemberBlockItemListSyntax(members.compactMap { member in
+                guard let syntax = member.syntax.as(DeclSyntax.self) else { return nil }
+                return MemberBlockItemSyntax(decl: syntax, trailingTrivia: .newline)
             }),
             rightBrace: .rightBraceToken(leadingTrivia: .newline)
         )
         
-        let modifiers = comment.map { _ in
-            DeclModifierListSyntax([
-                DeclModifierSyntax(name: .keyword(.public, trailingTrivia: .space))
-            ])
-        }
-        
         return EnumDeclSyntax(
-            modifiers: modifiers ?? [],
             enumKeyword: enumKeyword,
-            identifier: identifier,
+            name: identifier,
             inheritanceClause: inheritanceClause,
             memberBlock: memberBlock
         )
     }
 }
 
-public struct Case: CodeBlock {
+public struct EnumCase: CodeBlock {
     private let name: String
     private var value: String?
     
@@ -131,22 +109,27 @@ public struct Case: CodeBlock {
         return copy
     }
     
-    public var enumCaseDeclaration: EnumCaseDeclSyntax {
+    public func equals(_ value: Int) -> Self {
+        var copy = self
+        copy.value = String(value)
+        return copy
+    }
+    
+    public var syntax: SyntaxProtocol {
         let caseKeyword = TokenSyntax.keyword(.case, trailingTrivia: .space)
         let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
         
-        var rawValue: InitializerClauseSyntax?
+        var initializer: InitializerClauseSyntax?
         if let value = value {
-            let stringLiteral = StringLiteralExprSyntax(
-                openingQuote: .stringQuoteToken(),
-                segments: StringLiteralSegmentListSyntax([
-                    .stringSegment(StringSegmentSyntax(content: .stringSegment(value)))
-                ]),
-                closingQuote: .stringQuoteToken()
-            )
-            rawValue = InitializerClauseSyntax(
+            initializer = InitializerClauseSyntax(
                 equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-                value: stringLiteral
+                value: StringLiteralExprSyntax(
+                    openingQuote: .stringQuoteToken(),
+                    segments: StringLiteralSegmentListSyntax([
+                        .stringSegment(StringSegmentSyntax(content: .stringSegment(value)))
+                    ]),
+                    closingQuote: .stringQuoteToken()
+                )
             )
         }
         
@@ -154,15 +137,505 @@ public struct Case: CodeBlock {
             caseKeyword: caseKeyword,
             elements: EnumCaseElementListSyntax([
                 EnumCaseElementSyntax(
+                    leadingTrivia: .space,
+                    _: nil,
                     name: identifier,
-                    rawValue: rawValue
+                    _: nil,
+                    parameterClause: nil,
+                    _: nil,
+                    rawValue: initializer,
+                    _: nil,
+                    trailingComma: nil,
+                    trailingTrivia: .newline
                 )
             ])
         )
     }
+}
+
+public struct SwitchCase: CodeBlock {
+    private let patterns: [String]
+    private let body: [CodeBlock]
+    
+    public init(_ patterns: String..., @CodeBlockBuilderResult content: () -> [CodeBlock]) {
+        self.patterns = patterns
+        self.body = content()
+    }
+    
+    public var switchCaseSyntax: SwitchCaseSyntax {
+        let patternList = TuplePatternElementListSyntax(
+            patterns.map { TuplePatternElementSyntax(
+                label: nil,
+                colon: nil,
+                pattern: PatternSyntax(IdentifierPatternSyntax(identifier: .identifier($0)))
+            )}
+        )
+        let caseItems = CaseItemListSyntax([
+            CaseItemSyntax(
+                pattern: TuplePatternSyntax(
+                    leftParen: .leftParenToken(),
+                    elements: patternList,
+                    rightParen: .rightParenToken()
+                )
+            )
+        ])
+        let statements = CodeBlockItemListSyntax(body.compactMap { $0.syntax.as(CodeBlockItemSyntax.self) })
+        let label = SwitchCaseLabelSyntax(
+            caseKeyword: .keyword(.case, trailingTrivia: .space),
+            caseItems: caseItems,
+            colon: .colonToken()
+        )
+        return SwitchCaseSyntax(
+            label: .case(label),
+            statements: statements
+        )
+    }
+    
+    public var syntax: SyntaxProtocol { switchCaseSyntax }
+}
+
+public struct Case: CodeBlock {
+    private let patterns: [String]
+    private let body: [CodeBlock]
+    
+    public init(_ patterns: String..., @CodeBlockBuilderResult content: () -> [CodeBlock]) {
+        self.patterns = patterns
+        self.body = content()
+    }
+    
+    public var switchCaseSyntax: SwitchCaseSyntax {
+        let patternList = TuplePatternElementListSyntax(
+            patterns.map { TuplePatternElementSyntax(
+                label: nil,
+                colon: nil,
+                pattern: PatternSyntax(IdentifierPatternSyntax(identifier: .identifier($0)))
+            )}
+        )
+        let caseItems = CaseItemListSyntax([
+            CaseItemSyntax(
+                pattern: TuplePatternSyntax(
+                    leftParen: .leftParenToken(),
+                    elements: patternList,
+                    rightParen: .rightParenToken()
+                )
+            )
+        ])
+        let statements = CodeBlockItemListSyntax(body.compactMap { $0.syntax.as(CodeBlockItemSyntax.self) })
+        let label = SwitchCaseLabelSyntax(
+            caseKeyword: .keyword(.case, trailingTrivia: .space),
+            caseItems: caseItems,
+            colon: .colonToken()
+        )
+        return SwitchCaseSyntax(
+            label: .case(label),
+            statements: statements
+        )
+    }
+    
+    public var syntax: SyntaxProtocol { switchCaseSyntax }
+}
+
+public struct Variable: CodeBlock {
+    private let kind: VariableKind
+    private let name: String
+    private let type: String
+    
+    public init(_ kind: VariableKind, name: String, type: String) {
+        self.kind = kind
+        self.name = name
+        self.type = type
+    }
     
     public var syntax: SyntaxProtocol {
-        return self.enumCaseDeclaration
+        let bindingKeyword = TokenSyntax.keyword(kind == .let ? .let : .var, trailingTrivia: .space)
+        let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
+        let typeAnnotation = TypeAnnotationSyntax(
+            colon: .colonToken(leadingTrivia: .space, trailingTrivia: .space),
+            type: IdentifierTypeSyntax(name: .identifier(type))
+        )
+        
+        return VariableDeclSyntax(
+            bindingSpecifier: bindingKeyword,
+            bindings: PatternBindingListSyntax([
+                PatternBindingSyntax(
+                    pattern: IdentifierPatternSyntax(identifier: identifier),
+                    typeAnnotation: typeAnnotation
+                )
+            ])
+        )
+    }
+}
+
+public struct ComputedProperty: CodeBlock {
+    private let name: String
+    private let type: String?
+    private let body: [CodeBlock]
+    
+    public init(_ name: String, type: String? = nil, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
+        self.name = name
+        self.type = type
+        self.body = content()
+    }
+    
+    public var syntax: SyntaxProtocol {
+        let getKeyword = TokenSyntax.keyword(.get, trailingTrivia: .space)
+        let statements = CodeBlockItemListSyntax(self.body.compactMap { item in
+            guard let syntax = item.syntax.as(CodeBlockItemSyntax.self) else { return nil }
+            return syntax
+        })
+        let accessor = AccessorBlockSyntax(
+            leftBrace: TokenSyntax.leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
+            accessors: .getter(statements),
+            rightBrace: TokenSyntax.rightBraceToken(leadingTrivia: .newline)
+        )
+        let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
+        var typeAnnotation: TypeAnnotationSyntax?
+        if let type = type {
+            typeAnnotation = TypeAnnotationSyntax(
+                colon: TokenSyntax.colonToken(leadingTrivia: .space, trailingTrivia: .space),
+                type: IdentifierTypeSyntax(name: .identifier(type))
+            )
+        }
+        return VariableDeclSyntax(
+            bindingSpecifier: TokenSyntax.keyword(.var, trailingTrivia: .space),
+            bindings: PatternBindingListSyntax([
+                PatternBindingSyntax(
+                    pattern: IdentifierPatternSyntax(identifier: identifier),
+                    typeAnnotation: typeAnnotation,
+                    accessor: accessor
+                )
+            ])
+        )
+    }
+}
+
+public struct Switch: CodeBlock {
+    private let expression: String
+    private let cases: [CodeBlock]
+    
+    public init(_ expression: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
+        self.expression = expression
+        self.cases = content()
+    }
+    
+    public var syntax: SyntaxProtocol {
+        let expr = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(expression)))
+        let casesArr: [SwitchCaseSyntax] = self.cases.compactMap {
+            if let c = $0 as? SwitchCase { return c.switchCaseSyntax }
+            if let d = $0 as? Default { return d.switchCaseSyntax }
+            return nil
+        }
+      
+        let cases = SwitchCaseListSyntax(casesArr.map{
+            SwitchCaseListSyntax.Element.init($0)
+        })
+        return SwitchExprSyntax(
+            switchKeyword: .keyword(.switch, trailingTrivia: .space),
+            expression: expr,
+            leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
+            cases: cases,
+            rightBrace: .rightBraceToken(leadingTrivia: .newline)
+        )
+    }
+}
+
+public struct Default: CodeBlock {
+    private let body: [CodeBlock]
+    public init(@CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
+        self.body = content()
+    }
+    public var switchCaseSyntax: SwitchCaseSyntax {
+        let statements = CodeBlockItemListSyntax(body.compactMap { $0.syntax.as(CodeBlockItemSyntax.self) })
+        let label = SwitchDefaultLabelSyntax(
+            defaultKeyword: .keyword(.default, trailingTrivia: .space),
+            colon: .colonToken()
+        )
+        return SwitchCaseSyntax(
+            label: .default(label),
+            statements: statements
+        )
+    }
+    public var syntax: SyntaxProtocol { switchCaseSyntax }
+}
+
+public struct VariableDecl: CodeBlock {
+    private let kind: VariableKind
+    private let name: String
+    private let value: String?
+    
+    public init(_ kind: VariableKind, name: String, equals value: String? = nil) {
+        self.kind = kind
+        self.name = name
+        self.value = value
+    }
+    
+    public var syntax: SyntaxProtocol {
+        let bindingKeyword = TokenSyntax.keyword(kind == .let ? .let : .var, trailingTrivia: .space)
+        let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
+        
+        let initializer = value.map { value in
+            InitializerClauseSyntax(
+                equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+                value: StringLiteralExprSyntax(
+                    openingQuote: .stringQuoteToken(),
+                    segments: StringLiteralSegmentListSyntax([
+                        .stringSegment(StringSegmentSyntax(content: .stringSegment(value)))
+                    ]),
+                    closingQuote: .stringQuoteToken()
+                )
+            )
+        }
+        
+        return VariableDeclSyntax(
+            bindingSpecifier: bindingKeyword,
+            bindings: PatternBindingListSyntax([
+                PatternBindingSyntax(
+                    pattern: IdentifierPatternSyntax(identifier: identifier),
+                    typeAnnotation: nil,
+                    initializer: initializer
+                )
+            ])
+        )
+    }
+}
+
+public struct PlusAssign: CodeBlock {
+    private let target: String
+    private let value: String
+    
+    public init(_ target: String, _ value: String) {
+        self.target = target
+        self.value = value
+    }
+    
+    public var syntax: SyntaxProtocol {
+        let left = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(target)))
+        let right = ExprSyntax(StringLiteralExprSyntax(
+            openingQuote: .stringQuoteToken(),
+            segments: StringLiteralSegmentListSyntax([
+                .stringSegment(StringSegmentSyntax(content: .stringSegment(value)))
+            ]),
+            closingQuote: .stringQuoteToken()
+        ))
+        let assign = ExprSyntax(BinaryOperatorExprSyntax(operatorToken: .binaryOperator("+=", trailingTrivia: .space)))
+        return CodeBlockItemSyntax(
+            item: .expr(
+                ExprSyntax(
+                    SequenceExprSyntax(
+                        elements: ExprListSyntax([
+                            left,
+                            assign,
+                            right
+                        ])
+                    )
+                )
+            )
+        )
+    }
+}
+
+public struct If: CodeBlock {
+    private let condition: CodeBlock
+    private let body: [CodeBlock]
+    private let elseBody: [CodeBlock]?
+    
+    public init(_ condition: CodeBlock, @CodeBlockBuilderResult then: () -> [CodeBlock], else elseBody: (() -> [CodeBlock])? = nil) {
+        self.condition = condition
+        self.body = then()
+        self.elseBody = elseBody?()
+    }
+    
+    public var syntax: SyntaxProtocol {
+        let cond = ConditionElementSyntax(
+          condition: .expression(ExprSyntax(fromProtocol: condition.syntax.as(ExprSyntax.self) ?? DeclReferenceExprSyntax(baseName: .identifier(""))))
+        )
+        let bodyBlock = CodeBlockSyntax(statements: CodeBlockItemListSyntax(body.compactMap { $0.syntax.as(CodeBlockItemSyntax.self) }))
+        let elseBlock = elseBody.map {
+            IfExprSyntax.ElseBody.codeBlock(CodeBlockSyntax(statements: CodeBlockItemListSyntax($0.compactMap { $0.syntax.as(CodeBlockItemSyntax.self) })))
+        }
+        return IfExprSyntax(
+            ifKeyword: .keyword(.if, trailingTrivia: .space),
+            conditions: ConditionElementListSyntax([cond]),
+            body: bodyBlock,
+            elseKeyword: elseBlock != nil ? .keyword(.else, trailingTrivia: .space) : nil,
+            elseBody: elseBlock
+        )
+    }
+}
+
+public struct Let: CodeBlock {
+    private let name: String
+    private let value: String
+    public init(_ name: String, _ value: String) {
+        self.name = name
+        self.value = value
+    }
+    public var syntax: SyntaxProtocol {
+        return CodeBlockItemSyntax(
+            item: .decl(
+                DeclSyntax(
+                    VariableDeclSyntax(
+                        bindingSpecifier: .keyword(.let, trailingTrivia: .space),
+                        bindings: PatternBindingListSyntax([
+                            PatternBindingSyntax(
+                                pattern: IdentifierPatternSyntax(identifier: .identifier(name)),
+                                initializer: InitializerClauseSyntax(
+                                    equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+                                    value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
+                                )
+                            )
+                        ])
+                    )
+                )
+            )
+        )
+    }
+}
+
+public struct Return: CodeBlock {
+    private let exprs: [CodeBlock]
+    public init(@CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
+        self.exprs = content()
+    }
+    public var syntax: SyntaxProtocol {
+        guard let expr = exprs.first else {
+            fatalError("Return must have at least one expression.")
+        }
+        return CodeBlockItemSyntax(
+            item: .stmt(
+                StmtSyntax(
+                    ReturnStmtSyntax(
+                        returnKeyword: .keyword(.return, trailingTrivia: .space),
+                        expression: ExprSyntax(expr.syntax)
+                    )
+                )
+            )
+        )
+    }
+}
+
+@resultBuilder
+public struct ParameterBuilderResult {
+    public static func buildBlock(_ components: Parameter...) -> [Parameter] {
+        components
+    }
+    
+    public static func buildOptional(_ component: Parameter?) -> [Parameter] {
+        component.map { [$0] } ?? []
+    }
+    
+    public static func buildEither(first: Parameter) -> [Parameter] {
+        [first]
+    }
+    
+    public static func buildEither(second: Parameter) -> [Parameter] {
+        [second]
+    }
+    
+    public static func buildArray(_ components: [Parameter]) -> [Parameter] {
+        components
+    }
+}
+
+public struct Init: CodeBlock {
+    private let type: String
+    private let parameters: [Parameter]
+    public init(_ type: String, @ParameterBuilderResult _ params: () -> [Parameter]) {
+        self.type = type
+        self.parameters = params()
+    }
+    public var syntax: SyntaxProtocol {
+        let args = TupleExprElementListSyntax(parameters.map { $0.syntax as! TupleExprElementSyntax })
+        return ExprSyntax(FunctionCallExprSyntax(
+            calledExpression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(type))),
+            leftParen: .leftParenToken(),
+            argumentList: args,
+            rightParen: .rightParenToken()
+        ))
+    }
+}
+
+public struct Parameter: CodeBlock {
+    private let name: String
+    private let value: String
+    public init(name: String, value: String) {
+        self.name = name
+        self.value = value
+    }
+    public var syntax: SyntaxProtocol {
+        return TupleExprElementSyntax(
+            label: .identifier(name),
+            colon: .colonToken(),
+            expression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
+        )
+    }
+}
+
+public struct VariableExp: CodeBlock {
+    private let name: String
+    
+    public init(_ name: String) {
+        self.name = name
+    }
+    
+    public var syntax: SyntaxProtocol {
+       return TokenSyntax.identifier(self.name)
+    }
+}
+public struct OldVariableExp: CodeBlock {
+    private let name: String
+    private let value: String
+    
+    public init(_ name: String, _ value: String) {
+        self.name = name
+        self.value = value
+    }
+    
+    public var syntax: SyntaxProtocol {
+        let name = TokenSyntax.identifier(self.name)
+        let value = IdentifierExprSyntax(identifier: .identifier(self.value))
+        
+        return OptionalBindingConditionSyntax(
+            bindingSpecifier: .keyword(.let, trailingTrivia: .space),
+            pattern: IdentifierPatternSyntax(identifier: name),
+            initializer: InitializerClauseSyntax(
+                equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+                value: value
+            )
+        )
+    }
+}
+
+public struct Assignment: CodeBlock {
+    private let target: String
+    private let value: String
+    public init(_ target: String, _ value: String) {
+        self.target = target
+        self.value = value
+    }
+    public var syntax: SyntaxProtocol {
+        let left = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(target)))
+        let right = ExprSyntax(StringLiteralExprSyntax(
+            openingQuote: .stringQuoteToken(),
+            segments: StringLiteralSegmentListSyntax([
+                .stringSegment(StringSegmentSyntax(content: .stringSegment(value)))
+            ]),
+            closingQuote: .stringQuoteToken()
+        ))
+        let assign = ExprSyntax(AssignmentExprSyntax(assignToken: .equalToken()))
+        return CodeBlockItemSyntax(
+            item: .expr(
+                ExprSyntax(
+                    SequenceExprSyntax(
+                        elements: ExprListSyntax([
+                            left,
+                            assign,
+                            right
+                        ])
+                    )
+                )
+            )
+        )
     }
 }
 
@@ -191,3 +664,4 @@ public extension Array where Element == CodeBlock {
         return sourceFile.description
     }
 } 
+

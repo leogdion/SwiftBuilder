@@ -1,14 +1,14 @@
 import XCTest
 @testable import SwiftBuilder
 
-final class SwiftBuilderTests: XCTestCase {
+final class SwiftBuilderTestsA: XCTestCase {
     func testBlackjackCardExample() throws {
         let blackjackCard = Struct("BlackjackCard") {
             Enum("Suit") {
-                Case("spades").equals("♠")
-                Case("hearts").equals("♡")
-                Case("diamonds").equals("♢")
-                Case("clubs").equals("♣")
+                EnumCase("spades").equals("♠")
+                EnumCase("hearts").equals("♡")
+                EnumCase("diamonds").equals("♢")
+                EnumCase("clubs").equals("♣")
             }.inherits("Character")
         }
         
