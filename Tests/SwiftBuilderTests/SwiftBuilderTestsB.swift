@@ -107,29 +107,29 @@ final class SwiftBuilderTestsB: XCTestCase {
                     Variable(.let, name: "first", type: "Int")
                     Variable(.let, name: "second", type: "Int?")
                 }
-                ComputedProperty("values", type: "Values") {
+                ComputedProperty("values") {
                     Switch("self") {
                         SwitchCase(".ace") {
                             Return {
                                 Init("Values") {
-                                    Parameter(name: "first", type: "", defaultValue: "1")
-                                    Parameter(name: "second", type: "", defaultValue: "11")
+                                    Parameter(name: "first", value: "1")
+                                    Parameter(name: "second", value: "11")
                                 }
                             }
                         }
                         SwitchCase(".jack", ".queen", ".king") {
                             Return {
                                 Init("Values") {
-                                    Parameter(name: "first", type: "", defaultValue: "10")
-                                    Parameter(name: "second", type: "", defaultValue: "nil")
+                                    Parameter(name: "first", value: "10")
+                                    Parameter(name: "second", value: "nil")
                                 }
                             }
                         }
                         Default {
                             Return {
                                 Init("Values") {
-                                    Parameter(name: "first", type: "", defaultValue: "self.rawValue")
-                                    Parameter(name: "second", type: "", defaultValue: "nil")
+                                    Parameter(name: "first", value: "self.rawValue")
+                                    Parameter(name: "second", value: "nil")
                                 }
                             }
                         }
@@ -140,8 +140,8 @@ final class SwiftBuilderTestsB: XCTestCase {
 
             Variable(.let, name: "rank", type: "Rank")
             Variable(.let, name: "suit", type: "Suit")
-            ComputedProperty("description", type: "String") {
-                VariableDecl(.var, name: "output", equals: "\"suit is \\(suit.rawValue),\"")
+            ComputedProperty("description") {
+                VariableDecl(.var, name: "output", equals: "\"suit is \\(suit.rawValue)\"")
                 PlusAssign("output", "\" value is \\(rank.values.first)\"")
               If(
                 Let("second", "rank.values.second"), then: {
@@ -179,8 +179,7 @@ final class SwiftBuilderTestsB: XCTestCase {
             case ace
 
             struct Values {
-              let first: Int
-              let second: Int?
+              let first: Int, second: Int?
             }
 
             var values: Values {
@@ -198,10 +197,10 @@ final class SwiftBuilderTestsB: XCTestCase {
           let rank: Rank
           let suit: Suit
           var description: String {
-            var output = \"suit is \\(suit.rawValue),\"
-            output += \" value is \\(rank.values.first)\"
+            var output = \"suit is \u{005C}(suit.rawValue),\"
+            output += \" value is \u{005C}(rank.values.first)\"
             if let second = rank.values.second {
-              output += \" or \\(second)\"
+              output += \" or \u{005C}(second)\"
             }
             return output
           }
