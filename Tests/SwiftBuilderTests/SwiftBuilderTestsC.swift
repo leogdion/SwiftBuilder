@@ -3,10 +3,10 @@ import XCTest
 
 final class SwiftBuilderTestsC: XCTestCase {
     func testBasicFunction() throws {
-        let function = Function("calculateSum", returns: "Int") {
+        let function = Function("calculateSum", {
             Parameter(name: "a", type: "Int")
             Parameter(name: "b", type: "Int")
-        } _: {
+        }, returns: "Int") {
             Return {
                 VariableExp("a + b")
             }
@@ -37,9 +37,9 @@ final class SwiftBuilderTestsC: XCTestCase {
     }
     
     func testStaticFunction() throws {
-      let function = Function("createInstance", returns: "MyType", {
-        Parameter(name: "value", type: "String")
-      }) {
+        let function = Function("createInstance", {
+            Parameter(name: "value", type: "String")
+        }, returns: "MyType") {
             Return {
                 Init("MyType") {
                     Parameter(name: "value", type: "String")

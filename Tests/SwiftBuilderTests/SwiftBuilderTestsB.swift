@@ -112,24 +112,24 @@ final class SwiftBuilderTestsB: XCTestCase {
                         SwitchCase(".ace") {
                             Return {
                                 Init("Values") {
-                                    Parameter(name: "first", value: "1")
-                                    Parameter(name: "second", value: "11")
+                                    Parameter(name: "first", type: "", defaultValue: "1")
+                                    Parameter(name: "second", type: "", defaultValue: "11")
                                 }
                             }
                         }
                         SwitchCase(".jack", ".queen", ".king") {
                             Return {
                                 Init("Values") {
-                                    Parameter(name: "first", value: "10")
-                                    Parameter(name: "second", value: "nil")
+                                    Parameter(name: "first", type: "", defaultValue: "10")
+                                    Parameter(name: "second", type: "", defaultValue: "nil")
                                 }
                             }
                         }
                         Default {
                             Return {
                                 Init("Values") {
-                                    Parameter(name: "first", value: "self.rawValue")
-                                    Parameter(name: "second", value: "nil")
+                                    Parameter(name: "first", type: "", defaultValue: "self.rawValue")
+                                    Parameter(name: "second", type: "", defaultValue: "nil")
                                 }
                             }
                         }
