@@ -107,7 +107,7 @@ final class SwiftBuilderTestsB: XCTestCase {
                     Variable(.let, name: "first", type: "Int")
                     Variable(.let, name: "second", type: "Int?")
                 }
-                ComputedProperty("values") {
+                ComputedProperty("values", type: "Values") {
                     Switch("self") {
                         SwitchCase(".ace") {
                             Return {
@@ -140,8 +140,8 @@ final class SwiftBuilderTestsB: XCTestCase {
 
             Variable(.let, name: "rank", type: "Rank")
             Variable(.let, name: "suit", type: "Suit")
-            ComputedProperty("description") {
-                VariableDecl(.var, name: "output", equals: "\"suit is \\(suit.rawValue)\"")
+            ComputedProperty("description", type: "String") {
+                VariableDecl(.var, name: "output", equals: "\"suit is \\(suit.rawValue),\"")
                 PlusAssign("output", "\" value is \\(rank.values.first)\"")
               If(
                 Let("second", "rank.values.second"), then: {
@@ -179,7 +179,8 @@ final class SwiftBuilderTestsB: XCTestCase {
             case ace
 
             struct Values {
-              let first: Int, second: Int?
+              let first: Int
+              let second: Int?
             }
 
             var values: Values {
@@ -197,10 +198,10 @@ final class SwiftBuilderTestsB: XCTestCase {
           let rank: Rank
           let suit: Suit
           var description: String {
-            var output = \"suit is \u{005C}(suit.rawValue),\"
-            output += \" value is \u{005C}(rank.values.first)\"
+            var output = \"suit is \\(suit.rawValue),\"
+            output += \" value is \\(rank.values.first)\"
             if let second = rank.values.second {
-              output += \" or \u{005C}(second)\"
+              output += \" or \\(second)\"
             }
             return output
           }
