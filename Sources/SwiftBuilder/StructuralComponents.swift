@@ -98,6 +98,7 @@ public struct Enum: CodeBlock {
 public struct EnumCase: CodeBlock {
     private let name: String
     private var value: String?
+    private var intValue: Int?
     
     public init(_ name: String) {
         self.name = name
@@ -106,12 +107,14 @@ public struct EnumCase: CodeBlock {
     public func equals(_ value: String) -> Self {
         var copy = self
         copy.value = value
+        copy.intValue = nil
         return copy
     }
     
     public func equals(_ value: Int) -> Self {
         var copy = self
-        copy.value = String(value)
+        copy.value = nil
+        copy.intValue = value
         return copy
     }
     
@@ -130,6 +133,11 @@ public struct EnumCase: CodeBlock {
                     ]),
                     closingQuote: .stringQuoteToken()
                 )
+            )
+        } else if let intValue = intValue {
+            initializer = InitializerClauseSyntax(
+                equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+                value: IntegerLiteralExprSyntax(digits: .integerLiteral(String(intValue)))
             )
         }
         
@@ -163,27 +171,20 @@ public struct SwitchCase: CodeBlock {
     }
     
     public var switchCaseSyntax: SwitchCaseSyntax {
-        let patternList = TuplePatternElementListSyntax(
-            patterns.map { TuplePatternElementSyntax(
-                label: nil,
-                colon: nil,
-                pattern: PatternSyntax(IdentifierPatternSyntax(identifier: .identifier($0)))
-            )}
-        )
-        let caseItems = CaseItemListSyntax([
-            CaseItemSyntax(
-                pattern: TuplePatternSyntax(
-                    leftParen: .leftParenToken(),
-                    elements: patternList,
-                    rightParen: .rightParenToken()
-                )
+        let caseItems = SwitchCaseItemListSyntax(patterns.enumerated().map { index, pattern in
+            var item = SwitchCaseItemSyntax(
+                pattern: PatternSyntax(IdentifierPatternSyntax(identifier: .identifier(pattern)))
             )
-        ])
+            if index < patterns.count - 1 {
+                item = item.with(\.trailingComma, .commaToken(trailingTrivia: .space))
+            }
+            return item
+        })
         let statements = CodeBlockItemListSyntax(body.compactMap { $0.syntax.as(CodeBlockItemSyntax.self) })
         let label = SwitchCaseLabelSyntax(
             caseKeyword: .keyword(.case, trailingTrivia: .space),
             caseItems: caseItems,
-            colon: .colonToken()
+            colon: .colonToken(trailingTrivia: .newline)
         )
         return SwitchCaseSyntax(
             label: .case(label),
@@ -268,20 +269,25 @@ public struct Variable: CodeBlock {
 
 public struct ComputedProperty: CodeBlock {
     private let name: String
-    private let type: String?
+    private let type: String
     private let body: [CodeBlock]
     
-    public init(_ name: String, type: String? = nil, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
+    public init(_ name: String, type: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
         self.name = name
         self.type = type
         self.body = content()
     }
     
     public var syntax: SyntaxProtocol {
-        let getKeyword = TokenSyntax.keyword(.get, trailingTrivia: .space)
         let statements = CodeBlockItemListSyntax(self.body.compactMap { item in
-            guard let syntax = item.syntax.as(CodeBlockItemSyntax.self) else { return nil }
-            return syntax
+            if let cb = item.syntax as? CodeBlockItemSyntax { return cb.with(\ .trailingTrivia, .newline) }
+            if let stmt = item.syntax as? StmtSyntax {
+                return CodeBlockItemSyntax(item: .stmt(stmt), trailingTrivia: .newline)
+            }
+            if let expr = item.syntax as? ExprSyntax {
+                return CodeBlockItemSyntax(item: .expr(expr), trailingTrivia: .newline)
+            }
+            return nil
         })
         let accessor = AccessorBlockSyntax(
             leftBrace: TokenSyntax.leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
@@ -289,20 +295,17 @@ public struct ComputedProperty: CodeBlock {
             rightBrace: TokenSyntax.rightBraceToken(leadingTrivia: .newline)
         )
         let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
-        var typeAnnotation: TypeAnnotationSyntax?
-        if let type = type {
-            typeAnnotation = TypeAnnotationSyntax(
-                colon: TokenSyntax.colonToken(leadingTrivia: .space, trailingTrivia: .space),
-                type: IdentifierTypeSyntax(name: .identifier(type))
-            )
-        }
+        let typeAnnotation = TypeAnnotationSyntax(
+            colon: TokenSyntax.colonToken(leadingTrivia: .space, trailingTrivia: .space),
+            type: IdentifierTypeSyntax(name: .identifier(type))
+        )
         return VariableDeclSyntax(
             bindingSpecifier: TokenSyntax.keyword(.var, trailingTrivia: .space),
             bindings: PatternBindingListSyntax([
                 PatternBindingSyntax(
                     pattern: IdentifierPatternSyntax(identifier: identifier),
                     typeAnnotation: typeAnnotation,
-                    accessor: accessor
+                    accessorBlock: accessor
                 )
             ])
         )
@@ -325,17 +328,15 @@ public struct Switch: CodeBlock {
             if let d = $0 as? Default { return d.switchCaseSyntax }
             return nil
         }
-      
-        let cases = SwitchCaseListSyntax(casesArr.map{
-            SwitchCaseListSyntax.Element.init($0)
-        })
-        return SwitchExprSyntax(
+        let cases = SwitchCaseListSyntax(casesArr.map { SwitchCaseListSyntax.Element.init($0) })
+        let switchExpr = SwitchExprSyntax(
             switchKeyword: .keyword(.switch, trailingTrivia: .space),
-            expression: expr,
+            subject: expr,
             leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
             cases: cases,
             rightBrace: .rightBraceToken(leadingTrivia: .newline)
         )
+        return CodeBlockItemSyntax(item: .expr(ExprSyntax(switchExpr)))
     }
 }
 
@@ -372,29 +373,41 @@ public struct VariableDecl: CodeBlock {
     public var syntax: SyntaxProtocol {
         let bindingKeyword = TokenSyntax.keyword(kind == .let ? .let : .var, trailingTrivia: .space)
         let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
-        
         let initializer = value.map { value in
-            InitializerClauseSyntax(
-                equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-                value: StringLiteralExprSyntax(
-                    openingQuote: .stringQuoteToken(),
-                    segments: StringLiteralSegmentListSyntax([
-                        .stringSegment(StringSegmentSyntax(content: .stringSegment(value)))
-                    ]),
-                    closingQuote: .stringQuoteToken()
+            if value.hasPrefix("\"") && value.hasSuffix("\"") || value.contains("\\(") {
+                return InitializerClauseSyntax(
+                    equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+                    value: StringLiteralExprSyntax(
+                        openingQuote: .stringQuoteToken(),
+                        segments: StringLiteralSegmentListSyntax([
+                            .stringSegment(StringSegmentSyntax(content: .stringSegment(String(value.dropFirst().dropLast()))))
+                        ]),
+                        closingQuote: .stringQuoteToken()
+                    )
                 )
-            )
+            } else {
+                return InitializerClauseSyntax(
+                    equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+                    value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
+                )
+            }
         }
-        
-        return VariableDeclSyntax(
-            bindingSpecifier: bindingKeyword,
-            bindings: PatternBindingListSyntax([
-                PatternBindingSyntax(
-                    pattern: IdentifierPatternSyntax(identifier: identifier),
-                    typeAnnotation: nil,
-                    initializer: initializer
+        return CodeBlockItemSyntax(
+            item: .decl(
+                DeclSyntax(
+                    VariableDeclSyntax(
+                        bindingSpecifier: bindingKeyword,
+                        bindings: PatternBindingListSyntax([
+                            PatternBindingSyntax(
+                                pattern: IdentifierPatternSyntax(identifier: identifier),
+                                typeAnnotation: nil,
+                                initializer: initializer
+                            )
+                        ])
+                    )
                 )
-            ])
+            ),
+            trailingTrivia: .newline
         )
     }
 }
@@ -410,14 +423,19 @@ public struct PlusAssign: CodeBlock {
     
     public var syntax: SyntaxProtocol {
         let left = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(target)))
-        let right = ExprSyntax(StringLiteralExprSyntax(
-            openingQuote: .stringQuoteToken(),
-            segments: StringLiteralSegmentListSyntax([
-                .stringSegment(StringSegmentSyntax(content: .stringSegment(value)))
-            ]),
-            closingQuote: .stringQuoteToken()
-        ))
-        let assign = ExprSyntax(BinaryOperatorExprSyntax(operatorToken: .binaryOperator("+=", trailingTrivia: .space)))
+        let right: ExprSyntax
+        if value.hasPrefix("\"") && value.hasSuffix("\"") || value.contains("\\(") {
+            right = ExprSyntax(StringLiteralExprSyntax(
+                openingQuote: .stringQuoteToken(),
+                segments: StringLiteralSegmentListSyntax([
+                    .stringSegment(StringSegmentSyntax(content: .stringSegment(String(value.dropFirst().dropLast()))))
+                ]),
+                closingQuote: .stringQuoteToken()
+            ))
+        } else {
+            right = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
+        }
+        let assign = ExprSyntax(BinaryOperatorExprSyntax(operator: .binaryOperator("+=", leadingTrivia: .space, trailingTrivia: .space)))
         return CodeBlockItemSyntax(
             item: .expr(
                 ExprSyntax(
@@ -429,7 +447,78 @@ public struct PlusAssign: CodeBlock {
                         ])
                     )
                 )
+            ),
+            trailingTrivia: .newline
+        )
+    }
+}
+
+public struct Assignment: CodeBlock {
+    private let target: String
+    private let value: String
+    public init(_ target: String, _ value: String) {
+        self.target = target
+        self.value = value
+    }
+    public var syntax: SyntaxProtocol {
+        let left = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(target)))
+        let right = ExprSyntax(StringLiteralExprSyntax(
+            openingQuote: .stringQuoteToken(),
+            segments: StringLiteralSegmentListSyntax([
+                .stringSegment(StringSegmentSyntax(content: .stringSegment(value)))
+            ]),
+            closingQuote: .stringQuoteToken()
+        ))
+        let assign = ExprSyntax(AssignmentExprSyntax(assignToken: .equalToken()))
+        return CodeBlockItemSyntax(
+            item: .expr(
+                ExprSyntax(
+                    SequenceExprSyntax(
+                        elements: ExprListSyntax([
+                            left,
+                            assign,
+                            right
+                        ])
+                    )
+                )
+            ),
+            trailingTrivia: .newline
+        )
+    }
+}
+
+public struct Return: CodeBlock {
+    private let exprs: [CodeBlock]
+    public init(@CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
+        self.exprs = content()
+    }
+    public var syntax: SyntaxProtocol {
+        guard let expr = exprs.first else {
+            fatalError("Return must have at least one expression.")
+        }
+        if let varExp = expr as? VariableExp {
+            return CodeBlockItemSyntax(
+                item: .stmt(
+                    StmtSyntax(
+                        ReturnStmtSyntax(
+                            returnKeyword: .keyword(.return, trailingTrivia: .space),
+                            expression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(varExp.name)))
+                        )
+                    )
+                ),
+                trailingTrivia: .newline
             )
+        }
+        return CodeBlockItemSyntax(
+            item: .stmt(
+                StmtSyntax(
+                    ReturnStmtSyntax(
+                        returnKeyword: .keyword(.return, trailingTrivia: .space),
+                        expression: ExprSyntax(expr.syntax)
+                    )
+                )
+            ),
+            trailingTrivia: .newline
         )
     }
 }
@@ -446,26 +535,52 @@ public struct If: CodeBlock {
     }
     
     public var syntax: SyntaxProtocol {
-        let cond = ConditionElementSyntax(
-          condition: .expression(ExprSyntax(fromProtocol: condition.syntax.as(ExprSyntax.self) ?? DeclReferenceExprSyntax(baseName: .identifier(""))))
-        )
-        let bodyBlock = CodeBlockSyntax(statements: CodeBlockItemListSyntax(body.compactMap { $0.syntax.as(CodeBlockItemSyntax.self) }))
-        let elseBlock = elseBody.map {
-            IfExprSyntax.ElseBody.codeBlock(CodeBlockSyntax(statements: CodeBlockItemListSyntax($0.compactMap { $0.syntax.as(CodeBlockItemSyntax.self) })))
+        let cond: ConditionElementSyntax
+        if let letCond = condition as? Let {
+            cond = ConditionElementSyntax(
+                condition: .optionalBinding(
+                    OptionalBindingConditionSyntax(
+                        bindingSpecifier: .keyword(.let, trailingTrivia: .space),
+                        pattern: IdentifierPatternSyntax(identifier: .identifier(letCond.name)),
+                        initializer: InitializerClauseSyntax(
+                            equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+                            value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(letCond.value)))
+                        )
+                    )
+                )
+            )
+        } else {
+            cond = ConditionElementSyntax(
+                condition: .expression(ExprSyntax(fromProtocol: condition.syntax.as(ExprSyntax.self) ?? DeclReferenceExprSyntax(baseName: .identifier(""))))
+            )
         }
-        return IfExprSyntax(
-            ifKeyword: .keyword(.if, trailingTrivia: .space),
-            conditions: ConditionElementListSyntax([cond]),
-            body: bodyBlock,
-            elseKeyword: elseBlock != nil ? .keyword(.else, trailingTrivia: .space) : nil,
-            elseBody: elseBlock
+        let bodyBlock = CodeBlockSyntax(
+            leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
+            statements: CodeBlockItemListSyntax(body.compactMap { $0.syntax.as(CodeBlockItemSyntax.self) }),
+            rightBrace: .rightBraceToken(leadingTrivia: .newline)
+        )
+        let elseBlock = elseBody.map {
+            IfExprSyntax.ElseBody(CodeBlockSyntax(
+                leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
+                statements: CodeBlockItemListSyntax($0.compactMap { $0.syntax.as(CodeBlockItemSyntax.self) }),
+                rightBrace: .rightBraceToken(leadingTrivia: .newline)
+            ))
+        }
+        return ExprSyntax(
+            IfExprSyntax(
+                ifKeyword: .keyword(.if, trailingTrivia: .space),
+                conditions: ConditionElementListSyntax([cond]),
+                body: bodyBlock,
+                elseKeyword: elseBlock != nil ? .keyword(.else, trailingTrivia: .space) : nil,
+                elseBody: elseBlock
+            )
         )
     }
 }
 
 public struct Let: CodeBlock {
-    private let name: String
-    private let value: String
+    let name: String
+    let value: String
     public init(_ name: String, _ value: String) {
         self.name = name
         self.value = value
@@ -485,28 +600,6 @@ public struct Let: CodeBlock {
                                 )
                             )
                         ])
-                    )
-                )
-            )
-        )
-    }
-}
-
-public struct Return: CodeBlock {
-    private let exprs: [CodeBlock]
-    public init(@CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
-        self.exprs = content()
-    }
-    public var syntax: SyntaxProtocol {
-        guard let expr = exprs.first else {
-            fatalError("Return must have at least one expression.")
-        }
-        return CodeBlockItemSyntax(
-            item: .stmt(
-                StmtSyntax(
-                    ReturnStmtSyntax(
-                        returnKeyword: .keyword(.return, trailingTrivia: .space),
-                        expression: ExprSyntax(expr.syntax)
                     )
                 )
             )
@@ -545,7 +638,13 @@ public struct Init: CodeBlock {
         self.parameters = params()
     }
     public var syntax: SyntaxProtocol {
-        let args = TupleExprElementListSyntax(parameters.map { $0.syntax as! TupleExprElementSyntax })
+        let args = TupleExprElementListSyntax(parameters.enumerated().map { index, param in
+            let element = param.syntax as! TupleExprElementSyntax
+            if index < parameters.count - 1 {
+                return element.with(\.trailingComma, .commaToken(trailingTrivia: .space))
+            }
+            return element
+        })
         return ExprSyntax(FunctionCallExprSyntax(
             calledExpression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(type))),
             leftParen: .leftParenToken(),
@@ -572,7 +671,7 @@ public struct Parameter: CodeBlock {
 }
 
 public struct VariableExp: CodeBlock {
-    private let name: String
+    let name: String
     
     public init(_ name: String) {
         self.name = name
@@ -582,6 +681,7 @@ public struct VariableExp: CodeBlock {
        return TokenSyntax.identifier(self.name)
     }
 }
+
 public struct OldVariableExp: CodeBlock {
     private let name: String
     private let value: String
@@ -601,39 +701,6 @@ public struct OldVariableExp: CodeBlock {
             initializer: InitializerClauseSyntax(
                 equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
                 value: value
-            )
-        )
-    }
-}
-
-public struct Assignment: CodeBlock {
-    private let target: String
-    private let value: String
-    public init(_ target: String, _ value: String) {
-        self.target = target
-        self.value = value
-    }
-    public var syntax: SyntaxProtocol {
-        let left = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(target)))
-        let right = ExprSyntax(StringLiteralExprSyntax(
-            openingQuote: .stringQuoteToken(),
-            segments: StringLiteralSegmentListSyntax([
-                .stringSegment(StringSegmentSyntax(content: .stringSegment(value)))
-            ]),
-            closingQuote: .stringQuoteToken()
-        ))
-        let assign = ExprSyntax(AssignmentExprSyntax(assignToken: .equalToken()))
-        return CodeBlockItemSyntax(
-            item: .expr(
-                ExprSyntax(
-                    SequenceExprSyntax(
-                        elements: ExprListSyntax([
-                            left,
-                            assign,
-                            right
-                        ])
-                    )
-                )
             )
         )
     }

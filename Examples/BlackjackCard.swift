@@ -63,14 +63,12 @@ let structExample = Struct("BlackjackCard") {
     Variable(.let, name: "suit", type: "Suit")
 
     ComputedProperty("description") {
-        VariableDecl(.var, name: "output").equals("\"suit is \(suit.rawValue),\"")
-        PlusAssign("output", "\"value is \(rank.values.first)\"")
-        If{
-            Let("second", "rank.values.second")
-        } then: {
-            PlusAssign("output", "or \(second)")
-        }
-        Return{
+        VariableDecl(.var, name: "output", equals: "suit is \(suit.rawValue),")
+        PlusAssign("output", " value is \(rank.values.first)")
+        If(Let("second", "rank.values.second"), then: {
+            PlusAssign("output", " or \(second)")
+        })
+        Return {
             VariableExp("output")
         }
     }
