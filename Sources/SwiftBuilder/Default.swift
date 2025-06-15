@@ -12,17 +12,7 @@ public struct Default: CodeBlock {
         self.body = content()
     }
     public var switchCaseSyntax: SwitchCaseSyntax {
-        let statements = CodeBlockItemListSyntax(body.compactMap {
-            var item: CodeBlockItemSyntax?
-            if let decl = $0.syntax.as(DeclSyntax.self) {
-                item = CodeBlockItemSyntax(item: .decl(decl))
-            } else if let expr = $0.syntax.as(ExprSyntax.self) {
-                item = CodeBlockItemSyntax(item: .expr(expr))
-            } else if let stmt = $0.syntax.as(StmtSyntax.self) {
-                item = CodeBlockItemSyntax(item: .stmt(stmt))
-            }
-            return item?.with(\.trailingTrivia, .newline)
-        })
+        let statements = CodeBlockItemListSyntax(body.compactMap { $0.syntax.as(CodeBlockItemSyntax.self) })
         let label = SwitchDefaultLabelSyntax(
             defaultKeyword: .keyword(.default, trailingTrivia: .space),
             colon: .colonToken()

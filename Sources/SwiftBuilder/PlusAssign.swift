@@ -30,12 +30,19 @@ public struct PlusAssign: CodeBlock {
             right = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
         }
         let assign = ExprSyntax(BinaryOperatorExprSyntax(operator: .binaryOperator("+=", leadingTrivia: .space, trailingTrivia: .space)))
-        return SequenceExprSyntax(
-            elements: ExprListSyntax([
-                left,
-                assign,
-                right
-            ])
+        return CodeBlockItemSyntax(
+            item: .expr(
+                ExprSyntax(
+                    SequenceExprSyntax(
+                        elements: ExprListSyntax([
+                            left,
+                            assign,
+                            right
+                        ])
+                    )
+                )
+            ),
+            trailingTrivia: .newline
         )
     }
 }

@@ -4,12 +4,10 @@ public struct Struct: CodeBlock {
     private let name: String
     private let members: [CodeBlock]
     private var inheritance: String?
-    private var genericParameter: String?
     
-    public init(_ name: String, generic: String? = nil, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
+    public init(_ name: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
         self.name = name
         self.members = content()
-        self.genericParameter = generic
     }
     
     public func inherits(_ type: String) -> Self {
@@ -20,20 +18,7 @@ public struct Struct: CodeBlock {
     
     public var syntax: SyntaxProtocol {
         let structKeyword = TokenSyntax.keyword(.struct, trailingTrivia: .space)
-        let identifier = TokenSyntax.identifier(name)
-        
-        var genericParameterClause: GenericParameterClauseSyntax?
-        if let generic = genericParameter {
-            let genericParameter = GenericParameterSyntax(
-                name: .identifier(generic),
-                trailingComma: nil
-            )
-            genericParameterClause = GenericParameterClauseSyntax(
-                leftAngle: .leftAngleToken(),
-                parameters: GenericParameterListSyntax([genericParameter]),
-                rightAngle: .rightAngleToken()
-            )
-        }
+        let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
         
         var inheritanceClause: InheritanceClauseSyntax?
         if let inheritance = inheritance {
@@ -53,7 +38,6 @@ public struct Struct: CodeBlock {
         return StructDeclSyntax(
             structKeyword: structKeyword,
             name: identifier,
-            genericParameterClause: genericParameterClause,
             inheritanceClause: inheritanceClause,
             memberBlock: memberBlock
         )

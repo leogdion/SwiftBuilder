@@ -10,14 +10,28 @@ public struct Return: CodeBlock {
             fatalError("Return must have at least one expression.")
         }
         if let varExp = expr as? VariableExp {
-            return ReturnStmtSyntax(
-                returnKeyword: .keyword(.return, trailingTrivia: .space),
-                expression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(varExp.name)))
+            return CodeBlockItemSyntax(
+                item: .stmt(
+                    StmtSyntax(
+                        ReturnStmtSyntax(
+                            returnKeyword: .keyword(.return, trailingTrivia: .space),
+                            expression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(varExp.name)))
+                        )
+                    )
+                ),
+                trailingTrivia: .newline
             )
         }
-        return ReturnStmtSyntax(
-            returnKeyword: .keyword(.return, trailingTrivia: .space),
-            expression: ExprSyntax(expr.syntax)
+        return CodeBlockItemSyntax(
+            item: .stmt(
+                StmtSyntax(
+                    ReturnStmtSyntax(
+                        returnKeyword: .keyword(.return, trailingTrivia: .space),
+                        expression: ExprSyntax(expr.syntax)
+                    )
+                )
+            ),
+            trailingTrivia: .newline
         )
     }
 } 

@@ -1,3 +1,4 @@
+
 import SwiftSyntax
 
 public struct Function: CodeBlock {
@@ -8,14 +9,7 @@ public struct Function: CodeBlock {
     private var isStatic: Bool = false
     private var isMutating: Bool = false
     
-  public init(_ name: String, returns returnType: String? = nil,  @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
-      self.name = name
-      self.parameters = []
-      self.returnType = returnType
-      self.body = content()
-  }
-  
-    public init(_ name: String, returns returnType: String? = nil, @ParameterBuilderResult _ params: () -> [Parameter],  @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
+    public init(_ name: String, @ParameterBuilderResult _ params: () -> [Parameter], returns returnType: String? = nil, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
         self.name = name
         self.parameters = params()
         self.returnType = returnType
@@ -39,30 +33,24 @@ public struct Function: CodeBlock {
         let identifier = TokenSyntax.identifier(name)
         
         // Build parameter list
-        let paramList: FunctionParameterListSyntax
-        if parameters.isEmpty {
-            paramList = FunctionParameterListSyntax([])
-        } else {
-            paramList = FunctionParameterListSyntax(parameters.enumerated().compactMap { index, param in
-                guard !param.name.isEmpty, !param.type.isEmpty else { return nil }
-                var paramSyntax = FunctionParameterSyntax(
-                    firstName: param.isUnnamed ? .wildcardToken(trailingTrivia: .space) : .identifier(param.name),
-                    secondName: param.isUnnamed ? .identifier(param.name) : nil,
-                    colon: .colonToken(leadingTrivia: .space, trailingTrivia: .space),
-                    type: IdentifierTypeSyntax(name: .identifier(param.type)),
-                    defaultValue: param.defaultValue.map {
-                        InitializerClauseSyntax(
-                            equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-                            value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier($0)))
-                        )
-                    }
-                )
-                if index < parameters.count - 1 {
-                    paramSyntax = paramSyntax.with(\.trailingComma, .commaToken(trailingTrivia: .space))
+        let paramList = FunctionParameterListSyntax(parameters.enumerated().map { index, param in
+            var paramSyntax = FunctionParameterSyntax(
+                firstName: .identifier(param.name),
+                secondName: nil,
+                colon: .colonToken(leadingTrivia: .space, trailingTrivia: .space),
+                type: IdentifierTypeSyntax(name: .identifier(param.type)),
+                defaultValue: param.defaultValue.map {
+                    InitializerClauseSyntax(
+                        equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+                        value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier($0)))
+                    )
                 }
-                return paramSyntax
-            })
-        }
+            )
+            if index < parameters.count - 1 {
+                paramSyntax = paramSyntax.with(\.trailingComma, .commaToken(trailingTrivia: .space))
+            }
+            return paramSyntax
+        })
         
         // Build return type if specified
         var returnClause: ReturnClauseSyntax?
@@ -74,19 +62,20 @@ public struct Function: CodeBlock {
         }
         
         // Build function body
+        let statements = CodeBlockItemListSyntax(body.compactMap { item in
+            if let cb = item.syntax as? CodeBlockItemSyntax { return cb.with(\.trailingTrivia, .newline) }
+            if let stmt = item.syntax as? StmtSyntax {
+                return CodeBlockItemSyntax(item: .stmt(stmt), trailingTrivia: .newline)
+            }
+            if let expr = item.syntax as? ExprSyntax {
+                return CodeBlockItemSyntax(item: .expr(expr), trailingTrivia: .newline)
+            }
+            return nil
+        })
+        
         let bodyBlock = CodeBlockSyntax(
             leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
-            statements: CodeBlockItemListSyntax(body.compactMap {
-                var item: CodeBlockItemSyntax?
-                if let decl = $0.syntax.as(DeclSyntax.self) {
-                    item = CodeBlockItemSyntax(item: .decl(decl))
-                } else if let expr = $0.syntax.as(ExprSyntax.self) {
-                    item = CodeBlockItemSyntax(item: .expr(expr))
-                } else if let stmt = $0.syntax.as(StmtSyntax.self) {
-                    item = CodeBlockItemSyntax(item: .stmt(stmt))
-                }
-                return item?.with(\.trailingTrivia, .newline)
-            }),
+            statements: statements,
             rightBrace: .rightBraceToken(leadingTrivia: .newline)
         )
         

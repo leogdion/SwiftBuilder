@@ -30,6 +30,6 @@ public struct Switch: CodeBlock {
             cases: cases,
             rightBrace: .rightBraceToken(leadingTrivia: .newline)
         )
-        return switchExpr
+        return CodeBlockItemSyntax(item: .expr(ExprSyntax(switchExpr)))
     }
 }

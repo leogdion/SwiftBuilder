@@ -3,24 +3,26 @@ import SwiftSyntax
 
 public extension CodeBlock {
     func generateCode() -> String {
-        let statements: CodeBlockItemListSyntax
-        if let list = self.syntax.as(CodeBlockItemListSyntax.self) {
-            statements = list
-        } else {
-            let item: CodeBlockItemSyntax.Item
-            if let decl = self.syntax.as(DeclSyntax.self) {
-                item = .decl(decl)
-            } else if let stmt = self.syntax.as(StmtSyntax.self) {
-                item = .stmt(stmt)
-            } else if let expr = self.syntax.as(ExprSyntax.self) {
-                item = .expr(expr)
-            } else {
-                fatalError("Unsupported syntax type at top level: \(type(of: self.syntax)) generating from \(self)")
-            }
-            statements = CodeBlockItemListSyntax([CodeBlockItemSyntax(item: item, trailingTrivia: .newline)])
+        guard let decl = syntax as? DeclSyntaxProtocol else {
+            fatalError("Only declaration syntax is supported at the top level.")
         }
-        
-        let sourceFile = SourceFileSyntax(statements: statements)
-        return sourceFile.description.trimmingCharacters(in: .whitespacesAndNewlines)
+        let sourceFile = SourceFileSyntax(
+            statements: CodeBlockItemListSyntax([
+                CodeBlockItemSyntax(item: .decl(DeclSyntax(decl)))
+            ])
+        )
+      return sourceFile.description
+    }
+}
+
+public extension Array where Element == CodeBlock {
+    func generateCode() -> String {
+        let decls = compactMap { $0.syntax as? DeclSyntaxProtocol }
+        let sourceFile = SourceFileSyntax(
+            statements: CodeBlockItemListSyntax(decls.map { decl in
+                CodeBlockItemSyntax(item: .decl(DeclSyntax(decl)))
+            })
+        )
+        return sourceFile.description
     }
 } 

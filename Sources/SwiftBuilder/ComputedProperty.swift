@@ -12,19 +12,19 @@ public struct ComputedProperty: CodeBlock {
     }
     
     public var syntax: SyntaxProtocol {
+        let statements = CodeBlockItemListSyntax(self.body.compactMap { item in
+            if let cb = item.syntax as? CodeBlockItemSyntax { return cb.with(\.trailingTrivia, .newline) }
+            if let stmt = item.syntax as? StmtSyntax {
+                return CodeBlockItemSyntax(item: .stmt(stmt), trailingTrivia: .newline)
+            }
+            if let expr = item.syntax as? ExprSyntax {
+                return CodeBlockItemSyntax(item: .expr(expr), trailingTrivia: .newline)
+            }
+            return nil
+        })
         let accessor = AccessorBlockSyntax(
             leftBrace: TokenSyntax.leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
-            accessors: .getter(CodeBlockItemListSyntax(body.compactMap {
-                var item: CodeBlockItemSyntax?
-                if let decl = $0.syntax.as(DeclSyntax.self) {
-                    item = CodeBlockItemSyntax(item: .decl(decl))
-                } else if let expr = $0.syntax.as(ExprSyntax.self) {
-                    item = CodeBlockItemSyntax(item: .expr(expr))
-                } else if let stmt = $0.syntax.as(StmtSyntax.self) {
-                    item = CodeBlockItemSyntax(item: .stmt(stmt))
-                }
-                return item?.with(\.trailingTrivia, .newline)
-            })),
+            accessors: .getter(statements),
             rightBrace: TokenSyntax.rightBraceToken(leadingTrivia: .newline)
         )
         let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)

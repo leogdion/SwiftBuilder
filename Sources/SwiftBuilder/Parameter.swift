@@ -6,15 +6,11 @@ public struct Parameter: CodeBlock {
     let name: String
     let type: String
     let defaultValue: String?
-    let isUnnamed: Bool
-    
-    public init(name: String, type: String, defaultValue: String? = nil, isUnnamed: Bool = false) {
+    public init(name: String, type: String, defaultValue: String? = nil) {
         self.name = name
         self.type = type
         self.defaultValue = defaultValue
-        self.isUnnamed = isUnnamed
     }
-    
     public var syntax: SyntaxProtocol {
         // Not used for function signature, but for call sites (Init, etc.)
         if let defaultValue = defaultValue {

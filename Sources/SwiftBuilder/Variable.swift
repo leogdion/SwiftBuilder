@@ -10,13 +10,11 @@ public struct Variable: CodeBlock {
     private let kind: VariableKind
     private let name: String
     private let type: String
-    private let defaultValue: String?
     
-    public init(_ kind: VariableKind, name: String, type: String, equals defaultValue: String? = nil) {
+    public init(_ kind: VariableKind, name: String, type: String) {
         self.kind = kind
         self.name = name
         self.type = type
-        self.defaultValue = defaultValue
     }
     
     public var syntax: SyntaxProtocol {
@@ -27,20 +25,12 @@ public struct Variable: CodeBlock {
             type: IdentifierTypeSyntax(name: .identifier(type))
         )
         
-        let initializer = defaultValue.map { value in
-            InitializerClauseSyntax(
-                equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-                value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
-            )
-        }
-        
         return VariableDeclSyntax(
             bindingSpecifier: bindingKeyword,
             bindings: PatternBindingListSyntax([
                 PatternBindingSyntax(
                     pattern: IdentifierPatternSyntax(identifier: identifier),
-                    typeAnnotation: typeAnnotation,
-                    initializer: initializer
+                    typeAnnotation: typeAnnotation
                 )
             ])
         )
