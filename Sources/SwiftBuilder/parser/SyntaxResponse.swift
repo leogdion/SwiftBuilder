@@ -1,7 +1,7 @@
 import Foundation
 
-struct SyntaxResponse: Codable {
-  let syntaxHTML: String
-  let syntaxJSON: String
-  let swiftVersion: String
+package struct SyntaxResponse: Codable {
+  //package let syntaxHTML: String
+  package let syntaxJSON: String
+  package let swiftVersion: String
 }
