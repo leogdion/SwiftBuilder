@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:SwiftBuilder}",
+            "name": "Debug SwiftBuilderCLI",
+            "program": "${workspaceFolder:SwiftBuilder}/.build/debug/SwiftBuilderCLI",
+            "preLaunchTask": "swift: Build Debug SwiftBuilderCLI"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:SwiftBuilder}",
+            "name": "Release SwiftBuilderCLI",
+            "program": "${workspaceFolder:SwiftBuilder}/.build/release/SwiftBuilderCLI",
+            "preLaunchTask": "swift: Build Release SwiftBuilderCLI"
+        }
+    ]
+}
