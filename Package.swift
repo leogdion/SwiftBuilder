@@ -20,7 +20,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-syntax.git", from: "602.0.0-prerelease-2025-05-29")
+        .package(url: "https://github.com/apple/swift-syntax.git", from: "601.0.1")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.

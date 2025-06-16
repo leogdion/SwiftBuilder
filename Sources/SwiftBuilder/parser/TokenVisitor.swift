@@ -1,8 +1,8 @@
 import Foundation
-import SwiftSyntax
+@_spi(RawSyntax) import SwiftSyntax
 
 final class TokenVisitor: SyntaxRewriter {
-  //var list = [String]()
+  var list = [String]()
   var tree = [TreeNode]()
 
   private var current: TreeNode!
@@ -14,17 +14,10 @@ final class TokenVisitor: SyntaxRewriter {
   init(locationConverter: SourceLocationConverter, showMissingTokens: Bool) {
     self.locationConverter = locationConverter
     self.showMissingTokens = showMissingTokens
-  }
-
-  func rewrite(_ node: Syntax) -> Syntax {
-    visit(node)
+    super.init(viewMode: showMissingTokens ? .all : .sourceAccurate)
   }
 
   override func visitPre(_ node: Syntax) {
-    if let token = node.as(TokenSyntax.self), token.presence == .missing, !showMissingTokens {
-      return
-    }
-
     let syntaxNodeType = node.syntaxNodeType
 
     let className: String
@@ -37,12 +30,12 @@ final class TokenVisitor: SyntaxRewriter {
     let title: String
     let content: String
     let type: String
-    if let token = node.as(TokenSyntax.self) {
-      title = sourceAccurateText(token)
-      content = "\(token.tokenKind)"
+    if let tokenSyntax = node.as(TokenSyntax.self) {
+      title = tokenSyntax.text
+      content = "\(tokenSyntax.tokenKind)"
       type = "Token"
     } else {
-      title = sourceAccurateText(node)
+      title = "\(node.trimmed)"
       content = "\(syntaxNodeType)"
       type = "Syntax"
     }
@@ -50,31 +43,27 @@ final class TokenVisitor: SyntaxRewriter {
     let sourceRange = node.sourceRange(converter: locationConverter)
     let start = sourceRange.start
     let end = sourceRange.end
-    let startRow = start.line ?? 1
-    let startColumn = start.column ?? 1
-    let endRow = end.line ?? 1
-    let endColumn = end.column ?? 1
 
     let graphemeStartColumn: Int
-    if let prefix = String(locationConverter.sourceLines[startRow - 1].utf8.prefix(startColumn - 1)) {
+    if let prefix = String(locationConverter.sourceLines[start.line - 1].utf8.prefix(start.column - 1)) {
       graphemeStartColumn = prefix.utf16.count + 1
     } else {
-      graphemeStartColumn = startColumn
+      graphemeStartColumn = start.column
     }
     let graphemeEndColumn: Int
-    if let prefix = String(locationConverter.sourceLines[endRow - 1].utf8.prefix(endColumn - 1)) {
+    if let prefix = String(locationConverter.sourceLines[end.line - 1].utf8.prefix(end.column - 1)) {
       graphemeEndColumn = prefix.utf16.count + 1
     } else {
-      graphemeEndColumn = endColumn
+      graphemeEndColumn = end.column
     }
-//
-//    list.append(
-//      "<span class='\(className)' " +
-//      "data-title='\(title.escapeHTML().replaceInvisiblesWithSymbols())' " +
-//      "data-content='\(content.escapeHTML().replaceInvisiblesWithHTML())' " +
-//      "data-type='\(type.escapeHTML())' " +
-//      #"data-range='{"startRow":\#(startRow),"startColumn":\#(startColumn),"endRow":\#(endRow),"endColumn":\#(endColumn)}'>"#
-//    )
+
+    list.append(
+      "<span class='\(className)' " +
+      "data-title='\(title.escapeHTML().replaceInvisiblesWithSymbols())' " +
+      "data-content='\(content.escapeHTML().replaceInvisiblesWithHTML())' " +
+      "data-type='\(type.escapeHTML())' " +
+      #"data-range='{"startRow":\#(start.line),"startColumn":\#(start.column),"endRow":\#(end.line),"endColumn":\#(end.column)}'>"#
+    )
 
     let syntaxType: SyntaxType
     switch node {
@@ -94,11 +83,11 @@ final class TokenVisitor: SyntaxRewriter {
       id: index,
       text: className,
       range: Range(
-        startRow: startRow,
-        startColumn: startColumn,
+        startRow: start.line,
+        startColumn: start.column,
         graphemeStartColumn: graphemeStartColumn,
-        endRow: endRow,
-        endColumn: endColumn,
+        endRow: end.line,
+        endColumn: end.column,
         graphemeEndColumn: graphemeEndColumn
       ),
       type: syntaxType
@@ -107,34 +96,52 @@ final class TokenVisitor: SyntaxRewriter {
     tree.append(treeNode)
     index += 1
 
+    let allChildren = node.children(viewMode: .all)
+
     switch node.syntaxNodeType.structure {
     case .layout(let keyPaths):
       if let syntaxNode = node.as(node.syntaxNodeType) {
-        for (index, keyPath) in keyPaths.enumerated() {
-          let mirror = Mirror(reflecting: syntaxNode)
-          if let label = mirror.children.map({ $0 })[index].label {
-            let key = label
-            switch syntaxNode[keyPath: keyPath] {
-            case let value as TokenSyntax:
+        for keyPath in keyPaths {
+          guard let name = childName(keyPath) else {
+            continue
+          }
+          guard allChildren.contains(where: { (child) in child.keyPathInParent == keyPath }) else {
+            treeNode.structure.append(StructureProperty(name: name, value: StructureValue(text: "nil")))
+            continue
+          }
+
+          let keyPath = keyPath as AnyKeyPath
+          switch syntaxNode[keyPath: keyPath] {
+          case let value as TokenSyntax:
+            if value.presence == .missing {
               treeNode.structure.append(
                 StructureProperty(
-                  name: key,
+                  name: name,
                   value: StructureValue(
                     text: value.text,
                     kind: "\(value.tokenKind)"
                   )
                 )
               )
-            case let value?:
-              if let value = value as? SyntaxProtocol {
-                let type = "\(value.syntaxNodeType)"
-                treeNode.structure.append(StructureProperty(name: key, value: StructureValue(text: "\(type)"), ref: "\(type)"))
-              } else {
-                treeNode.structure.append(StructureProperty(name: key, value: StructureValue(text: "\(value)")))
-              }
-            case .none:
-              treeNode.structure.append(StructureProperty(name: key))
+            } else {
+              treeNode.structure.append(
+                StructureProperty(
+                  name: name,
+                  value: StructureValue(
+                    text: value.text,
+                    kind: "\(value.tokenKind)"
+                  )
+                )
+              )            }
+          case let value?:
+            if let value = value as? SyntaxProtocol {
+              let type = "\(value.syntaxNodeType)"
+              treeNode.structure.append(StructureProperty(name: name, value: StructureValue(text: "\(type)"), ref: "\(type)"))
+            } else {
+              treeNode.structure.append(StructureProperty(name: name, value: StructureValue(text: "\(value)")))
             }
+          case .none:
+            treeNode.structure.append(StructureProperty(name: name))
           }
         }
       }
@@ -154,29 +161,25 @@ final class TokenVisitor: SyntaxRewriter {
   }
 
   override func visit(_ token: TokenSyntax) -> TokenSyntax {
-    if token.presence == .missing && !showMissingTokens {
-      return token
-    }
-
-    let text = sourceAccurateText(token)
-    current.text = text
+    current.text = token
+      .text
       .escapeHTML()
       .replaceInvisiblesWithHTML()
       .replaceHTMLWhitespacesWithSymbols()
     if token.presence == .missing {
-      current.class = token.text.lowercased()
+      current.class = "\(token.presence)"
     }
     current.token = Token(kind: "\(token.tokenKind)", leadingTrivia: "", trailingTrivia: "")
 
     token.leadingTrivia.forEach { (piece) in
       let trivia = processTriviaPiece(piece)
-      //list.append(trivia)
+      list.append(trivia)
       current.token?.leadingTrivia += trivia.replaceHTMLWhitespacesWithSymbols()
     }
     processToken(token)
     token.trailingTrivia.forEach { (piece) in
       let trivia = processTriviaPiece(piece)
-      //list.append(trivia)
+      list.append(trivia)
       current.token?.trailingTrivia += trivia.replaceHTMLWhitespacesWithSymbols()
     }
 
@@ -184,11 +187,7 @@ final class TokenVisitor: SyntaxRewriter {
   }
 
   override func visitPost(_ node: Syntax) {
-    if let token = node.as(TokenSyntax.self), token.presence == .missing, !showMissingTokens {
-      return
-    }
-
-    //list.append("</span>")
+    list.append("</span>")
     if let parent = current.parent {
       current = tree[parent]
     } else {
@@ -208,30 +207,15 @@ final class TokenVisitor: SyntaxRewriter {
     let sourceRange = token.sourceRange(converter: locationConverter)
     let start = sourceRange.start
     let end = sourceRange.end
-    let startRow = start.line ?? 1
-    let startColumn = start.column ?? 1
-    let endRow = end.line ?? 1
-    let endColumn = end.column ?? 1
-    let text: String
-    switch token.presence {
-    case .present:
-      text = sourceAccurateText(token)
-    case .missing:
-      if showMissingTokens {
-        text = sourceAccurateText(token)
-      } else {
-        text = ""
-      }
-    }
-
-//    list.append(
-//      "<span class='token \(kind.escapeHTML()) \(token.presence.rawValue.lowercased())' " +
-//      "data-title='\(token.text.escapeHTML().replaceInvisiblesWithSymbols())' " +
-//      "data-content='\("\(token.tokenKind)".escapeHTML().replaceInvisiblesWithHTML())' " +
-//      "data-type='Token' " +
-//      #"data-range='{"startRow":\#(startRow),"startColumn":\#(startColumn),"endRow":\#(endRow),"endColumn":\#(endColumn)}'>"# +
-//      "\(text.escapeHTML().replaceInvisiblesWithHTML())</span>"
-//    )
+    let text = token.presence == .present || showMissingTokens ? token.text : ""
+    list.append(
+      "<span class='token \(kind.escapeHTML()) \(token.presence)' " +
+      "data-title='\(token.text.escapeHTML().replaceInvisiblesWithSymbols())' " +
+      "data-content='\("\(token.tokenKind)".escapeHTML().replaceInvisiblesWithHTML())' " +
+      "data-type='Token' " +
+      #"data-range='{"startRow":\#(start.line),"startColumn":\#(start.column),"endRow":\#(end.line),"endColumn":\#(end.column)}'>"# +
+      "\(text.escapeHTML().replaceInvisiblesWithHTML())</span>"
+    )
   }
 
   private func processTriviaPiece(_ piece: TriviaPiece) -> String {
@@ -262,34 +246,12 @@ final class TokenVisitor: SyntaxRewriter {
       trivia += wrapWithSpanTag(class: "docBlockComment", text: text)
     case .unexpectedText(let text):
       trivia += wrapWithSpanTag(class: "unexpectedText", text: text)
-//    case .shebang(let text):
-//      trivia += wrapWithSpanTag(class: "shebang", text: text)
-    case .backslashes(_):
-      break;
-    case .pounds(_):
-      break;
+    case .backslashes(let count):
+      trivia += String(repeating: #"\"#, count: count)
+    case .pounds(let count):
+      trivia += String(repeating: "#", count: count)
     }
     return trivia
-  }
-}
-
-private func sourceAccurateText(_ syntax: Syntax) -> String {
-  let text = "\(syntax.debugDescription)"
-  let utf8Length = syntax.contentLength.utf8Length
-  if text.utf8.count == utf8Length {
-    return text
-  } else {
-    return String(decoding: syntax.syntaxTextBytes.prefix(utf8Length), as: UTF8.self)
-  }
-}
-
-private func sourceAccurateText(_ token: TokenSyntax) -> String {
-  let text = token.text
-  let utf8Length = token.contentLength.utf8Length
-  if text.utf8.count == utf8Length {
-    return text
-  } else {
-    return String(decoding: token.syntaxTextBytes.prefix(utf8Length), as: UTF8.self)
   }
 }
 
