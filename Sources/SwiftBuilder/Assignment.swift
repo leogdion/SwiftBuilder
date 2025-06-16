@@ -33,19 +33,12 @@ public struct Assignment: CodeBlock {
             right = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
         }
         let assign = ExprSyntax(AssignmentExprSyntax(equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space)))
-        return CodeBlockItemSyntax(
-            item: .expr(
-                ExprSyntax(
-                    SequenceExprSyntax(
-                        elements: ExprListSyntax([
-                            left,
-                            assign,
-                            right
-                        ])
-                    )
-                )
-            ),
-            trailingTrivia: .newline
+        return SequenceExprSyntax(
+            elements: ExprListSyntax([
+                left,
+                assign,
+                right
+            ])
         )
     }
 }

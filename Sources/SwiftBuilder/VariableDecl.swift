@@ -33,22 +33,15 @@ public struct VariableDecl: CodeBlock {
                 )
             }
         }
-        return CodeBlockItemSyntax(
-            item: .decl(
-                DeclSyntax(
-                    VariableDeclSyntax(
-                        bindingSpecifier: bindingKeyword,
-                        bindings: PatternBindingListSyntax([
-                            PatternBindingSyntax(
-                                pattern: IdentifierPatternSyntax(identifier: identifier),
-                                typeAnnotation: nil,
-                                initializer: initializer
-                            )
-                        ])
-                    )
+        return VariableDeclSyntax(
+            bindingSpecifier: bindingKeyword,
+            bindings: PatternBindingListSyntax([
+                PatternBindingSyntax(
+                    pattern: IdentifierPatternSyntax(identifier: identifier),
+                    typeAnnotation: nil,
+                    initializer: initializer
                 )
-            ),
-            trailingTrivia: .newline
+            ])
         )
     }
 } 
