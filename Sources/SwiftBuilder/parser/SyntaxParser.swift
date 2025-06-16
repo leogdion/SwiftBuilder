@@ -15,17 +15,16 @@ package struct SyntaxParser {
     }
 
     let visitor = TokenVisitor(
-      locationConverter: SourceLocationConverter(file: "", tree: sourceFile),
+      locationConverter: SourceLocationConverter(fileName: "", tree: sourceFile),
       showMissingTokens: options.contains("showmissing")
     )
     _ = visitor.rewrite(syntax)
 
-    //let html = "\(visitor.list.joined())"
 
     let tree = visitor.tree
     let encoder = JSONEncoder()
     let json = String(decoding: try encoder.encode(tree), as: UTF8.self)
 
-    return SyntaxResponse( syntaxJSON: json, swiftVersion: version)
+    return SyntaxResponse(syntaxJSON: json, swiftVersion: version)
   }
 }
