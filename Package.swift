@@ -14,6 +14,10 @@ let package = Package(
             name: "SwiftBuilder",
             targets: ["SwiftBuilder"]
         ),
+        .executable(
+            name: "SwiftBuilderCLI",
+            targets: ["SwiftBuilderCLI"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-syntax.git", from: "602.0.0-prerelease-2025-05-29")
@@ -28,6 +32,10 @@ let package = Package(
                 .product(name: "SwiftOperators", package: "swift-syntax"),
                 .product(name: "SwiftParser", package: "swift-syntax")
             ]
+        ),
+        .executableTarget(
+            name: "SwiftBuilderCLI",
+            dependencies: ["SwiftBuilder"]
         ),
         .testTarget(
             name: "SwiftBuilderTests",

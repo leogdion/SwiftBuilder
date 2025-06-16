@@ -2,7 +2,7 @@ import Foundation
 import SwiftSyntax
 
 final class TokenVisitor: SyntaxRewriter {
-  var list = [String]()
+  //var list = [String]()
   var tree = [TreeNode]()
 
   private var current: TreeNode!
@@ -67,14 +67,14 @@ final class TokenVisitor: SyntaxRewriter {
     } else {
       graphemeEndColumn = endColumn
     }
-
-    list.append(
-      "<span class='\(className)' " +
-      "data-title='\(title.escapeHTML().replaceInvisiblesWithSymbols())' " +
-      "data-content='\(content.escapeHTML().replaceInvisiblesWithHTML())' " +
-      "data-type='\(type.escapeHTML())' " +
-      #"data-range='{"startRow":\#(startRow),"startColumn":\#(startColumn),"endRow":\#(endRow),"endColumn":\#(endColumn)}'>"#
-    )
+//
+//    list.append(
+//      "<span class='\(className)' " +
+//      "data-title='\(title.escapeHTML().replaceInvisiblesWithSymbols())' " +
+//      "data-content='\(content.escapeHTML().replaceInvisiblesWithHTML())' " +
+//      "data-type='\(type.escapeHTML())' " +
+//      #"data-range='{"startRow":\#(startRow),"startColumn":\#(startColumn),"endRow":\#(endRow),"endColumn":\#(endColumn)}'>"#
+//    )
 
     let syntaxType: SyntaxType
     switch node {
@@ -170,13 +170,13 @@ final class TokenVisitor: SyntaxRewriter {
 
     token.leadingTrivia.forEach { (piece) in
       let trivia = processTriviaPiece(piece)
-      list.append(trivia)
+      //list.append(trivia)
       current.token?.leadingTrivia += trivia.replaceHTMLWhitespacesWithSymbols()
     }
     processToken(token)
     token.trailingTrivia.forEach { (piece) in
       let trivia = processTriviaPiece(piece)
-      list.append(trivia)
+      //list.append(trivia)
       current.token?.trailingTrivia += trivia.replaceHTMLWhitespacesWithSymbols()
     }
 
@@ -188,7 +188,7 @@ final class TokenVisitor: SyntaxRewriter {
       return
     }
 
-    list.append("</span>")
+    //list.append("</span>")
     if let parent = current.parent {
       current = tree[parent]
     } else {
@@ -224,14 +224,14 @@ final class TokenVisitor: SyntaxRewriter {
       }
     }
 
-    list.append(
-      "<span class='token \(kind.escapeHTML()) \(token.presence.rawValue.lowercased())' " +
-      "data-title='\(token.text.escapeHTML().replaceInvisiblesWithSymbols())' " +
-      "data-content='\("\(token.tokenKind)".escapeHTML().replaceInvisiblesWithHTML())' " +
-      "data-type='Token' " +
-      #"data-range='{"startRow":\#(startRow),"startColumn":\#(startColumn),"endRow":\#(endRow),"endColumn":\#(endColumn)}'>"# +
-      "\(text.escapeHTML().replaceInvisiblesWithHTML())</span>"
-    )
+//    list.append(
+//      "<span class='token \(kind.escapeHTML()) \(token.presence.rawValue.lowercased())' " +
+//      "data-title='\(token.text.escapeHTML().replaceInvisiblesWithSymbols())' " +
+//      "data-content='\("\(token.tokenKind)".escapeHTML().replaceInvisiblesWithHTML())' " +
+//      "data-type='Token' " +
+//      #"data-range='{"startRow":\#(startRow),"startColumn":\#(startColumn),"endRow":\#(endRow),"endColumn":\#(endColumn)}'>"# +
+//      "\(text.escapeHTML().replaceInvisiblesWithHTML())</span>"
+//    )
   }
 
   private func processTriviaPiece(_ piece: TriviaPiece) -> String {
@@ -274,7 +274,7 @@ final class TokenVisitor: SyntaxRewriter {
 }
 
 private func sourceAccurateText(_ syntax: Syntax) -> String {
-  let text = "\(syntax.withoutTrivia())"
+  let text = "\(syntax.debugDescription)"
   let utf8Length = syntax.contentLength.utf8Length
   if text.utf8.count == utf8Length {
     return text
