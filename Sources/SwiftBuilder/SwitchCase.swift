@@ -25,7 +25,17 @@ public struct SwitchCase: CodeBlock {
             }
             return item
         })
-        let statements = CodeBlockItemListSyntax(body.compactMap { $0.syntax.as(CodeBlockItemSyntax.self) })
+        let statements = CodeBlockItemListSyntax(body.compactMap {
+            var item: CodeBlockItemSyntax?
+            if let decl = $0.syntax.as(DeclSyntax.self) {
+                item = CodeBlockItemSyntax(item: .decl(decl))
+            } else if let expr = $0.syntax.as(ExprSyntax.self) {
+                item = CodeBlockItemSyntax(item: .expr(expr))
+            } else if let stmt = $0.syntax.as(StmtSyntax.self) {
+                item = CodeBlockItemSyntax(item: .stmt(stmt))
+            }
+            return item?.with(\.trailingTrivia, .newline)
+        })
         let label = SwitchCaseLabelSyntax(
             caseKeyword: .keyword(.case, trailingTrivia: .space),
             caseItems: caseItems,
