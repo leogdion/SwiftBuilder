@@ -1,6 +1,6 @@
 //
 //  VariableExp.swift
-//  SwiftBuilder
+//  SyntaxKit
 //
 //  Created by Leo Dion on 6/15/25.
 //

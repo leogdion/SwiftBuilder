@@ -1,7 +1,7 @@
 import XCTest
-@testable import SwiftBuilder
+@testable import SyntaxKit
 
-final class SwiftBuilderTestsC: XCTestCase {
+final class SyntaxKitTestsC: XCTestCase {
     func testBasicFunction() throws {
         let function = Function("calculateSum", returns: "Int") {
             Parameter(name: "a", type: "Int")

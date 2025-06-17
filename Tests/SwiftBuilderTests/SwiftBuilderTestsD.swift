@@ -1,7 +1,7 @@
 import XCTest
-@testable import SwiftBuilder
+@testable import SyntaxKit
 
-final class SwiftBuilderTestsD: XCTestCase {
+final class SyntaxKitTestsD: XCTestCase {
     func normalize(_ code: String) -> String {
         return code
             .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression) // Remove comments
