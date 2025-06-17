@@ -29,11 +29,17 @@
 
 import SwiftSyntax
 
+/// A literal value.
 public enum Literal: CodeBlock {
+  /// A string literal.
   case string(String)
+  /// A floating-point literal.
   case float(Double)
+  /// An integer literal.
   case integer(Int)
+  /// A `nil` literal.
   case `nil`
+  /// A boolean literal.
   case boolean(Bool)
 
   public var syntax: SyntaxProtocol {

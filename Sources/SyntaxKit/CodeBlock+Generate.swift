@@ -31,6 +31,8 @@ import Foundation
 import SwiftSyntax
 
 extension CodeBlock {
+  /// Generates the Swift code for the ``CodeBlock``.
+  /// - Returns: The generated Swift code as a string.
   public func generateCode() -> String {
     let statements: CodeBlockItemListSyntax
     if let list = self.syntax.as(CodeBlockItemListSyntax.self) {

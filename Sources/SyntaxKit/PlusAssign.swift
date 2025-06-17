@@ -29,10 +29,15 @@
 
 import SwiftSyntax
 
+/// A `+=` expression.
 public struct PlusAssign: CodeBlock {
   private let target: String
   private let value: String
 
+  /// Creates a `+=` expression.
+  /// - Parameters:
+  ///   - target: The variable to assign to.
+  ///   - value: The value to add and assign.
   public init(_ target: String, _ value: String) {
     self.target = target
     self.value = value

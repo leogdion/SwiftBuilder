@@ -29,24 +29,30 @@
 
 import Foundation
 
+/// A result builder for creating arrays of ``Parameter``s.
 @resultBuilder
 public struct ParameterBuilderResult {
+  /// Builds a block of ``Parameter``s.
   public static func buildBlock(_ components: Parameter...) -> [Parameter] {
     components
   }
 
+  /// Builds an optional ``Parameter``.
   public static func buildOptional(_ component: Parameter?) -> [Parameter] {
     component.map { [$0] } ?? []
   }
 
+  /// Builds a ``Parameter`` from an `if` statement.
   public static func buildEither(first: Parameter) -> [Parameter] {
     [first]
   }
 
+  /// Builds a ``Parameter`` from an `else` statement.
   public static func buildEither(second: Parameter) -> [Parameter] {
     [second]
   }
 
+  /// Builds an array of ``Parameter``s from a `for` loop.
   public static func buildArray(_ components: [Parameter]) -> [Parameter] {
     components
   }

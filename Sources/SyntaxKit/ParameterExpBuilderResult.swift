@@ -29,24 +29,30 @@
 
 import Foundation
 
+/// A result builder for creating arrays of ``ParameterExp``s.
 @resultBuilder
 public struct ParameterExpBuilderResult {
+  /// Builds a block of ``ParameterExp``s.
   public static func buildBlock(_ components: ParameterExp...) -> [ParameterExp] {
     components
   }
 
+  /// Builds an optional ``ParameterExp``.
   public static func buildOptional(_ component: ParameterExp?) -> [ParameterExp] {
     component.map { [$0] } ?? []
   }
 
+  /// Builds a ``ParameterExp`` from an `if` statement.
   public static func buildEither(first: ParameterExp) -> [ParameterExp] {
     [first]
   }
 
+  /// Builds a ``ParameterExp`` from an `else` statement.
   public static func buildEither(second: ParameterExp) -> [ParameterExp] {
     [second]
   }
 
+  /// Builds an array of ``ParameterExp``s from a `for` loop.
   public static func buildArray(_ components: [ParameterExp]) -> [ParameterExp] {
     components
   }

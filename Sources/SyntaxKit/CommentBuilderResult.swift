@@ -27,15 +27,20 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// A result builder for creating arrays of ``Line``s for comments.
 @resultBuilder
 public enum CommentBuilderResult {
+  /// Builds a block of ``Line``s.
   public static func buildBlock(_ components: Line...) -> [Line] { components }
 }
 
 // MARK: - Public DSL surface
 
 extension CodeBlock {
-  /// Attach comments to the current `CodeBlock`.
+  /// Attaches comments to the current ``CodeBlock``.
+  ///
+  /// The provided lines are injected as leading trivia to the declaration produced by this ``CodeBlock``.
+  ///
   /// Usage:
   /// ```swift
   /// Struct("MyStruct") { ... }
@@ -44,7 +49,8 @@ extension CodeBlock {
   ///       Line(.doc, "This is a documentation comment")
   ///   }
   /// ```
-  /// The provided lines are injected as leading trivia to the declaration produced by this `CodeBlock`.
+  /// - Parameter content: A ``CommentBuilderResult`` that provides the comment lines.
+  /// - Returns: A new ``CodeBlock`` with the comments attached.
   public func comment(@CommentBuilderResult _ content: () -> [Line]) -> CodeBlock {
     CommentedCodeBlock(base: self, lines: content())
   }

@@ -29,10 +29,15 @@
 
 import SwiftSyntax
 
+/// A parameter for a function call.
 public struct ParameterExp: CodeBlock {
   let name: String
   let value: String
 
+  /// Creates a parameter for a function call.
+  /// - Parameters:
+  ///   - name: The name of the parameter.
+  ///   - value: The value of the parameter.
   public init(name: String, value: String) {
     self.name = name
     self.value = value

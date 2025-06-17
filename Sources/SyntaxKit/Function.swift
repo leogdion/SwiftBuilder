@@ -29,6 +29,7 @@
 
 import SwiftSyntax
 
+/// A Swift `func` declaration.
 public struct Function: CodeBlock {
   private let name: String
   private let parameters: [Parameter]
@@ -37,6 +38,11 @@ public struct Function: CodeBlock {
   private var isStatic: Bool = false
   private var isMutating: Bool = false
 
+  /// Creates a `func` declaration.
+  /// - Parameters:
+  ///   - name: The name of the function.
+  ///   - returnType: The return type of the function, if any.
+  ///   - content: A ``CodeBlockBuilder`` that provides the body of the function.
   public init(
     _ name: String, returns returnType: String? = nil,
     @CodeBlockBuilderResult _ content: () -> [CodeBlock]
@@ -47,6 +53,12 @@ public struct Function: CodeBlock {
     self.body = content()
   }
 
+  /// Creates a `func` declaration.
+  /// - Parameters:
+  ///   - name: The name of the function.
+  ///   - returnType: The return type of the function, if any.
+  ///   - params: A ``ParameterBuilder`` that provides the parameters of the function.
+  ///   - content: A ``CodeBlockBuilder`` that provides the body of the function.
   public init(
     _ name: String, returns returnType: String? = nil,
     @ParameterBuilderResult _ params: () -> [Parameter],
@@ -58,12 +70,16 @@ public struct Function: CodeBlock {
     self.body = content()
   }
 
+  /// Marks the function as `static`.
+  /// - Returns: A copy of the function marked as `static`.
   public func `static`() -> Self {
     var copy = self
     copy.isStatic = true
     return copy
   }
 
+  /// Marks the function as `mutating`.
+  /// - Returns: A copy of the function marked as `mutating`.
   public func mutating() -> Self {
     var copy = self
     copy.isMutating = true

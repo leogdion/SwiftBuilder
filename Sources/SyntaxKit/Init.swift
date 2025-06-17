@@ -29,9 +29,15 @@
 
 import SwiftSyntax
 
+/// An initializer expression.
 public struct Init: CodeBlock {
   private let type: String
   private let parameters: [Parameter]
+
+  /// Creates an initializer expression.
+  /// - Parameters:
+  ///   - type: The type to initialize.
+  ///   - params: A ``ParameterBuilder`` that provides the parameters for the initializer.
   public init(_ type: String, @ParameterBuilderResult _ params: () -> [Parameter]) {
     self.type = type
     self.parameters = params()
