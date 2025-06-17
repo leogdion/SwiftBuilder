@@ -4,7 +4,6 @@ SyntaxKit is a Swift package that allows developers to build Swift code using re
 
 [![](https://img.shields.io/badge/docc-read_documentation-blue)](https://swiftpackageindex.com/brightdigit/SyntaxKit/documentation)
 [![SwiftPM](https://img.shields.io/badge/SPM-Linux%20%7C%20iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-success?logo=swift)](https://swift.org)
-[![Twitter](https://img.shields.io/badge/twitter-@brightdigit-blue.svg?style=flat)](http://twitter.com/brightdigit)
 ![GitHub](https://img.shields.io/github/license/brightdigit/SyntaxKit)
 ![GitHub issues](https://img.shields.io/github/issues/brightdigit/SyntaxKit)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/brightdigit/SyntaxKit/SyntaxKit.yml?label=actions&logo=github&?branch=main)
@@ -14,10 +13,8 @@ SyntaxKit is a Swift package that allows developers to build Swift code using re
 
 [![Codecov](https://img.shields.io/codecov/c/github/brightdigit/SyntaxKit)](https://codecov.io/gh/brightdigit/SyntaxKit)
 [![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/brightdigit/SyntaxKit)](https://www.codefactor.io/repository/github/brightdigit/SyntaxKit)
-[![codebeat badge](https://codebeat.co/badges/54695d4b-98c8-4f0f-855e-215500163094)](https://codebeat.co/projects/github-com-brightdigit-SyntaxKit-main)
-[![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/brightdigit/SyntaxKit)](https://codeclimate.com/github/brightdigit/SyntaxKit)
-[![Code Climate technical debt](https://img.shields.io/codeclimate/tech-debt/brightdigit/SyntaxKit?label=debt)](https://codeclimate.com/github/brightdigit/SyntaxKit)
-[![Code Climate issues](https://img.shields.io/codeclimate/issues/brightdigit/SyntaxKit)](https://codeclimate.com/github/brightdigit/SyntaxKit)
+[![codebeat badge](https://codebeat.co/badges/ad53f31b-de7a-4579-89db-d94eb57dfcaa)](https://codebeat.co/projects/github-com-brightdigit-SyntaxKit-main)
+[![Maintainability](https://qlty.sh/badges/55637213-d307-477e-a710-f9dba332d955/maintainability.svg)](https://qlty.sh/gh/brightdigit/projects/SyntaxKit)
 
 ## Installation
 
@@ -25,7 +22,7 @@ Add SyntaxKit to your project using Swift Package Manager:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/yourusername/SyntaxKit.git", from: "1.0.0")
+    .package(url: "https://github.com/yourusername/SyntaxKit.git", from: "0.0.1")
 ]
 ```
 
@@ -73,9 +70,9 @@ struct BlackjackCard {
 
 ## Requirements
 
-- Swift 5.9+
+- Swift 6.1+
 - macOS 13.0+
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - [see the LICENSE file for details.](LICENSE)
