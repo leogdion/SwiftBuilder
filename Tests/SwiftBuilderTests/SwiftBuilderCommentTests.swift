@@ -1,7 +1,7 @@
 import XCTest
-@testable import SwiftBuilder
+@testable import SyntaxKit
 
-final class SwiftBuilderCommentTests: XCTestCase {
+final class SyntaxKitCommentTests: XCTestCase {
     func testCommentInjection() {
       let syntax = Group {
           Struct("Card") {

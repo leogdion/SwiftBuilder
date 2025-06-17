@@ -1,7 +1,7 @@
 import XCTest
-@testable import SwiftBuilder
+@testable import SyntaxKit
 
-final class SwiftBuilderLiteralTests: XCTestCase {
+final class SyntaxKitLiteralTests: XCTestCase {
     func testGroupWithLiterals() {
         let group = Group {
             Return {

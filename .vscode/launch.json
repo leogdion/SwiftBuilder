@@ -4,19 +4,19 @@
             "type": "swift",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:SwiftBuilder}",
-            "name": "Debug SwiftBuilderCLI",
-            "program": "${workspaceFolder:SwiftBuilder}/.build/debug/SwiftBuilderCLI",
-            "preLaunchTask": "swift: Build Debug SwiftBuilderCLI"
+            "cwd": "${workspaceFolder:SyntaxKit}",
+            "name": "Debug skit",
+            "program": "${workspaceFolder:SyntaxKit}/.build/debug/skit",
+            "preLaunchTask": "swift: Build Debug skit"
         },
         {
             "type": "swift",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:SwiftBuilder}",
-            "name": "Release SwiftBuilderCLI",
-            "program": "${workspaceFolder:SwiftBuilder}/.build/release/SwiftBuilderCLI",
-            "preLaunchTask": "swift: Build Release SwiftBuilderCLI"
+            "cwd": "${workspaceFolder:SyntaxKit}",
+            "name": "Release skit",
+            "program": "${workspaceFolder:SyntaxKit}/.build/release/skit",
+            "preLaunchTask": "swift: Build Release skit"
         }
     ]
 }

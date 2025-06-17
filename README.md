@@ -1,23 +1,23 @@
-# SwiftBuilder
+# SyntaxKit
 
-SwiftBuilder is a Swift package that allows developers to build Swift code using result builders. It provides a declarative way to generate Swift code structures using SwiftSyntax.
+SyntaxKit is a Swift package that allows developers to build Swift code using result builders. It provides a declarative way to generate Swift code structures using SwiftSyntax.
 
 ## Installation
 
-Add SwiftBuilder to your project using Swift Package Manager:
+Add SyntaxKit to your project using Swift Package Manager:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/yourusername/SwiftBuilder.git", from: "1.0.0")
+    .package(url: "https://github.com/yourusername/SyntaxKit.git", from: "1.0.0")
 ]
 ```
 
 ## Usage
 
-SwiftBuilder provides a set of result builders that allow you to create Swift code structures in a declarative way. Here's an example:
+SyntaxKit provides a set of result builders that allow you to create Swift code structures in a declarative way. Here's an example:
 
 ```swift
-import SwiftBuilder
+import SyntaxKit
 
 let code = Struct("BlackjackCard") {
     Enum("Suit") {
