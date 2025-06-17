@@ -1,10 +1,10 @@
-import XCTest
+import Testing
 
 @testable import SyntaxKit
 
-final class CommentTests: XCTestCase {
+struct CommentTests {
   // swiftlint:disable:next function_body_length
-  func testCommentInjection() {
+  @Test func testCommentInjection() {
     // swiftlint:disable:next closure_body_length
     let syntax = Group {
       Struct("Card") {
@@ -100,14 +100,13 @@ final class CommentTests: XCTestCase {
     }
 
     let generated = syntax.generateCode().trimmingCharacters(in: .whitespacesAndNewlines)
-    print("Generated:\n", generated)
 
-    XCTAssertFalse(generated.isEmpty)
+    #expect(!generated.isEmpty)
     //
-    //        XCTAssertTrue(generated.contains("MARK: - Models"), "MARK line should be present in generated code")
-    //        XCTAssertTrue(generated.contains("Foo struct docs"), "Doc comment line should be present in generated code")
+    //        #expect(generated.contains("MARK: - Models"), "MARK line should be present in generated code")
+    //        #expect(generated.contains("Foo struct docs"), "Doc comment line should be present in generated code")
     //        // Ensure the struct declaration itself is still correct
-    //        XCTAssertTrue(generated.contains("struct Foo"))
-    //        XCTAssertTrue(generated.contains("bar"), "Variable declaration should be present")
+    //        #expect(generated.contains("struct Foo"))
+    //        #expect(generated.contains("bar"), "Variable declaration should be present")
   }
 }

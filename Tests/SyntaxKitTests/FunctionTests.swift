@@ -1,9 +1,9 @@
-import XCTest
+import Testing
 
 @testable import SyntaxKit
 
-final class FunctionTests: XCTestCase {
-  func testBasicFunction() throws {
+struct FunctionTests {
+  @Test func testBasicFunction() throws {
     let function = Function("calculateSum", returns: "Int") {
       Parameter(name: "a", type: "Int")
       Parameter(name: "b", type: "Int")
@@ -20,25 +20,14 @@ final class FunctionTests: XCTestCase {
       """
 
     // Normalize whitespace, remove comments and modifiers, and normalize colon spacing
-    let normalizedGenerated = function.syntax.description
-      .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)  // Remove comments
-      .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)  // Remove public modifier
-      .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)  // Normalize colon spacing
-      .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)  // Normalize whitespace
-      .trimmingCharacters(in: .whitespacesAndNewlines)
+    let normalizedGenerated = function.syntax.description.normalize()
 
-    let normalizedExpected =
-      expected
-      .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)  // Remove comments
-      .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)  // Remove public modifier
-      .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)  // Normalize colon spacing
-      .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)  // Normalize whitespace
-      .trimmingCharacters(in: .whitespacesAndNewlines)
+    let normalizedExpected = expected.normalize()
 
-    XCTAssertEqual(normalizedGenerated, normalizedExpected)
+    #expect(normalizedGenerated == normalizedExpected)
   }
 
-  func testStaticFunction() throws {
+  @Test func testStaticFunction() throws {
     let function = Function(
       "createInstance", returns: "MyType",
       {
@@ -59,25 +48,14 @@ final class FunctionTests: XCTestCase {
       """
 
     // Normalize whitespace, remove comments and modifiers, and normalize colon spacing
-    let normalizedGenerated = function.syntax.description
-      .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)  // Remove comments
-      .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)  // Remove public modifier
-      .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)  // Normalize colon spacing
-      .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)  // Normalize whitespace
-      .trimmingCharacters(in: .whitespacesAndNewlines)
+    let normalizedGenerated = function.syntax.description.normalize()
 
-    let normalizedExpected =
-      expected
-      .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)  // Remove comments
-      .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)  // Remove public modifier
-      .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)  // Normalize colon spacing
-      .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)  // Normalize whitespace
-      .trimmingCharacters(in: .whitespacesAndNewlines)
+    let normalizedExpected = expected.normalize()
 
-    XCTAssertEqual(normalizedGenerated, normalizedExpected)
+    #expect(normalizedGenerated == normalizedExpected)
   }
 
-  func testMutatingFunction() throws {
+  @Test func testMutatingFunction() throws {
     let function = Function(
       "updateValue",
       {
@@ -94,21 +72,10 @@ final class FunctionTests: XCTestCase {
       """
 
     // Normalize whitespace, remove comments and modifiers, and normalize colon spacing
-    let normalizedGenerated = function.syntax.description
-      .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)  // Remove comments
-      .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)  // Remove public modifier
-      .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)  // Normalize colon spacing
-      .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)  // Normalize whitespace
-      .trimmingCharacters(in: .whitespacesAndNewlines)
+    let normalizedGenerated = function.syntax.description.normalize()
 
-    let normalizedExpected =
-      expected
-      .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)  // Remove comments
-      .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)  // Remove public modifier
-      .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)  // Normalize colon spacing
-      .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)  // Normalize whitespace
-      .trimmingCharacters(in: .whitespacesAndNewlines)
+    let normalizedExpected = expected.normalize()
 
-    XCTAssertEqual(normalizedGenerated, normalizedExpected)
+    #expect(normalizedGenerated == normalizedExpected)
   }
 }

@@ -1,9 +1,9 @@
-import XCTest
+import Testing
 
 @testable import SyntaxKit
 
-final class BlackjackTests: XCTestCase {
-  func testBlackjackCardExample() throws {
+struct BlackjackTests {
+  @Test func testBlackjackCardExample() throws {
     let syntax = Struct("BlackjackCard") {
       Enum("Suit") {
         EnumCase("spades").equals("♠")
@@ -63,34 +63,15 @@ final class BlackjackTests: XCTestCase {
       """
 
     // Normalize whitespace, remove comments and modifiers, and normalize colon spacing
-    let normalizedGenerated = syntax.syntax.description
-      .replacingOccurrences(of: "//.*$", with: "", options: String.CompareOptions.regularExpression)
-      .replacingOccurrences(
-        of: "public\\s+", with: "", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(
-        of: "\\s*:\\s*", with: ": ", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(of: "\\s+", with: " ", options: String.CompareOptions.regularExpression)
-      .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+    let normalizedGenerated = syntax.syntax.description.normalize()
 
-    let normalizedExpected =
-      expected
-      .replacingOccurrences(of: "//.*$", with: "", options: String.CompareOptions.regularExpression)
-      .replacingOccurrences(
-        of: "public\\s+", with: "", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(
-        of: "\\s*:\\s*", with: ": ", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(of: "\\s+", with: " ", options: String.CompareOptions.regularExpression)
-      .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+    let normalizedExpected = expected.normalize()
 
-    XCTAssertEqual(normalizedGenerated, normalizedExpected)
+    #expect(normalizedGenerated == normalizedExpected)
   }
 
   // swiftlint:disable:next function_body_length
-  func testFullBlackjackCardExample() throws {
+  @Test func testFullBlackjackCardExample() throws {
     // swiftlint:disable:next closure_body_length
     let syntax = Struct("BlackjackCard") {
       Enum("Suit") {
@@ -159,7 +140,8 @@ final class BlackjackTests: XCTestCase {
           Let("second", "rank.values.second"),
           then: {
             PlusAssign("output", "\" or \\(second)\"")
-          })
+          }
+        )
         Return {
           VariableExp("output")
         }
@@ -221,29 +203,10 @@ final class BlackjackTests: XCTestCase {
       """
 
     // Normalize whitespace, remove comments and modifiers, and normalize colon spacing
-    let normalizedGenerated = syntax.syntax.description
-      .replacingOccurrences(of: "//.*$", with: "", options: String.CompareOptions.regularExpression)
-      .replacingOccurrences(
-        of: "public\\s+", with: "", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(
-        of: "\\s*:\\s*", with: ": ", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(of: "\\s+", with: " ", options: String.CompareOptions.regularExpression)
-      .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+    let normalizedGenerated = syntax.syntax.description.normalize()
 
-    let normalizedExpected =
-      expected
-      .replacingOccurrences(of: "//.*$", with: "", options: String.CompareOptions.regularExpression)
-      .replacingOccurrences(
-        of: "public\\s+", with: "", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(
-        of: "\\s*:\\s*", with: ": ", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(of: "\\s+", with: " ", options: String.CompareOptions.regularExpression)
-      .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+    let normalizedExpected = expected.normalize()
 
-    XCTAssertEqual(normalizedGenerated, normalizedExpected)
+    #expect(normalizedGenerated == normalizedExpected)
   }
 }
