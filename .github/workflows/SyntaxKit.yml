@@ -1,10 +1,10 @@
-name: SwiftBuilder
+name: SyntaxKit
 on:
   push:
     branches-ignore:
       - '*WIP'
 env:
-  PACKAGE_NAME: SwiftBuilder      
+  PACKAGE_NAME: SyntaxKit      
 jobs:
   build-ubuntu:
     name: Build on Ubuntu
@@ -33,7 +33,7 @@ jobs:
   build-macos:
     name: Build on macOS
     env:
-      PACKAGE_NAME: SwiftBuilder
+      PACKAGE_NAME: SyntaxKit
     runs-on: ${{ matrix.runs-on }}
     if: "!contains(github.event.head_commit.message, 'ci skip')"
     strategy:
