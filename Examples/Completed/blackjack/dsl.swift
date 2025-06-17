@@ -33,24 +33,24 @@ let structExample = Struct("BlackjackCard") {
                 SwitchCase(".ace") {
                     Return{
                         Init("Values") {
-                            Parameter(name: "first", value: "1")   
-                            Parameter(name: "second", value: "11")   
+                            Parameter(name: "first", value: "1")
+                            Parameter(name: "second", value: "11")
                         }
                     }
                 }
                 SwitchCase(".jack", ".queen", ".king") {
                     Return{
                         Init("Values") {
-                            Parameter(name: "first", value: "10")   
-                            Parameter(name: "second", value: "nil")   
+                            Parameter(name: "first", value: "10")
+                            Parameter(name: "second", value: "nil")
                         }
                     }
                 }
                 Default {
                     Return{
                         Init("Values") {
-                            Parameter(name: "first", value: "self.rawValue")   
-                            Parameter(name: "second", value: "nil")   
+                            Parameter(name: "first", value: "self.rawValue")
+                            Parameter(name: "second", value: "nil")
                         }
                     }
                 }
@@ -75,4 +75,4 @@ let structExample = Struct("BlackjackCard") {
 }
 
 // Generate and print the code
-print(structExample.generateCode()) 
+print(structExample.generateCode())

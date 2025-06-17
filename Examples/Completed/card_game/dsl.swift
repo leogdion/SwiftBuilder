@@ -56,7 +56,7 @@ let structExample = Group {
                         Literal("\"K\"")
                     }
                 }
-                SwitchCase(".ace") {    
+                SwitchCase(".ace") {
                     Return{
                         Literal("\"A\"")
                     }
@@ -90,9 +90,7 @@ let structExample = Group {
     .comment{
         Line(.doc, "Represents the possible suits of a playing card")
     }
-
 }
 
-
 // Generate and print the code
-print(structExample.generateCode()) 
+print(structExample.generateCode())
