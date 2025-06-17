@@ -32,7 +32,7 @@ import SwiftOperators
 import SwiftParser
 import SwiftSyntax
 
-package struct SyntaxParser {
+package enum SyntaxParser {
   package static func parse(code: String, options: [String] = []) throws -> SyntaxResponse {
     let sourceFile = Parser.parse(source: code)
 
@@ -53,6 +53,6 @@ package struct SyntaxParser {
     let encoder = JSONEncoder()
     let json = String(decoding: try encoder.encode(tree), as: UTF8.self)
 
-    return SyntaxResponse(syntaxJSON: json, swiftVersion: version)
+    return SyntaxResponse(syntaxJSON: json)
   }
 }
