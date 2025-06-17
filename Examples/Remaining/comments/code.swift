@@ -29,27 +29,27 @@ class Calculator {
     ///   - b: The second number
     /// - Returns: The sum of the two numbers
     func add(_ a: Int, _ b: Int) -> Int {
-        return a + b
+        a + b
     }
-    
+
     /// Subtracts the second number from the first
     /// - Parameters:
     ///   - a: The number to subtract from
     ///   - b: The number to subtract
     /// - Returns: The difference between the two numbers
     func subtract(_ a: Int, _ b: Int) -> Int {
-        return a - b
+        a - b
     }
-    
+
     /// Multiplies two numbers
     /// - Parameters:
     ///   - a: The first number
     ///   - b: The second number
     /// - Returns: The product of the two numbers
     func multiply(_ a: Int, _ b: Int) -> Int {
-        return a * b
+        a * b
     }
-    
+
     /// Divides the first number by the second
     /// - Parameters:
     ///   - a: The dividend
@@ -103,18 +103,18 @@ let calculator = Calculator()
 do {
     let sum = calculator.add(10, 5)
     print("Sum: \(sum)")  // Prints: Sum: 15
-    
+
     let difference = calculator.subtract(10, 5)
     print("Difference: \(difference)")  // Prints: Difference: 5
-    
+
     let product = calculator.multiply(10, 5)
     print("Product: \(product)")  // Prints: Product: 50
-    
+
     let quotient = try calculator.divide(10, 5)
     print("Quotient: \(quotient)")  // Prints: Quotient: 2.0
-    
+
     // This will throw an error
     let error = try calculator.divide(10, 0)
 } catch CalculatorError.divisionByZero {
     print("Error: Division by zero is not allowed")
-} 
+}

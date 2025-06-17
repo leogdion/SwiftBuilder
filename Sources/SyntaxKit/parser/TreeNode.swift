@@ -1,3 +1,32 @@
+//
+//  TreeNode.swift
+//  SyntaxKit
+//
+//  Created by Leo Dion.
+//  Copyright © 2025 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the “Software”), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
 import Foundation
 
 final class TreeNode: Codable {
@@ -5,7 +34,9 @@ final class TreeNode: Codable {
   var parent: Int?
 
   var text: String
-  var range = Range(startRow: 0, startColumn: 0, graphemeStartColumn: 0, endRow: 0, endColumn: 0, graphemeEndColumn: 0)
+  var range = Range(
+    startRow: 0, startColumn: 0, graphemeStartColumn: 0, endRow: 0, endColumn: 0,
+    graphemeEndColumn: 0)
   var structure = [StructureProperty]()
   var type: SyntaxType
   var token: Token?
@@ -21,13 +52,8 @@ final class TreeNode: Codable {
 
 extension TreeNode: Equatable {
   static func == (lhs: TreeNode, rhs: TreeNode) -> Bool {
-    lhs.id == rhs.id &&
-    lhs.parent == rhs.parent &&
-    lhs.text == rhs.text &&
-    lhs.range == rhs.range &&
-    lhs.structure == rhs.structure &&
-    lhs.type == rhs.type &&
-    lhs.token == rhs.token
+    lhs.id == rhs.id && lhs.parent == rhs.parent && lhs.text == rhs.text && lhs.range == rhs.range
+      && lhs.structure == rhs.structure && lhs.type == rhs.type && lhs.token == rhs.token
   }
 }
 
@@ -147,25 +173,8 @@ extension Token: CustomStringConvertible {
   }
 }
 
-private extension String {
-  func escapeHTML() -> String {
-    var string = self
-    let specialCharacters = [
-      ("&", "&amp;"),
-      ("<", "&lt;"),
-      (">", "&gt;"),
-      ("\"", "&quot;"),
-      ("'", "&apos;"),
-    ];
-    for (unescaped, escaped) in specialCharacters {
-      string = string.replacingOccurrences(of: unescaped, with: escaped, options: .literal, range: nil)
-    }
-    return string
-      .replacingOccurrences(of: " ", with: "&nbsp;")
-      .replacingOccurrences(of: "\n", with: "<br>")
-  }
-
-  func replaceHTMLWhitespacesToSymbols() -> String {
+extension String {
+  fileprivate func replaceHTMLWhitespacesToSymbols() -> String {
     self
       .replacingOccurrences(of: "&nbsp;", with: "<span class='whitespace'>␣</span>")
       .replacingOccurrences(of: "<br>", with: "<span class='newline'>↲</span>")

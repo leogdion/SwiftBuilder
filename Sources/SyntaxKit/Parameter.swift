@@ -1,34 +1,63 @@
+//
+//  Parameter.swift
+//  SyntaxKit
+//
+//  Created by Leo Dion.
+//  Copyright © 2025 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the “Software”), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
 import Foundation
-import SwiftSyntax
 import SwiftParser
+import SwiftSyntax
 
 public struct Parameter: CodeBlock {
-    let name: String
-    let type: String
-    let defaultValue: String?
-    let isUnnamed: Bool
-    
-    public init(name: String, type: String, defaultValue: String? = nil, isUnnamed: Bool = false) {
-        self.name = name
-        self.type = type
-        self.defaultValue = defaultValue
-        self.isUnnamed = isUnnamed
+  let name: String
+  let type: String
+  let defaultValue: String?
+  let isUnnamed: Bool
+
+  public init(name: String, type: String, defaultValue: String? = nil, isUnnamed: Bool = false) {
+    self.name = name
+    self.type = type
+    self.defaultValue = defaultValue
+    self.isUnnamed = isUnnamed
+  }
+
+  public var syntax: SyntaxProtocol {
+    // Not used for function signature, but for call sites (Init, etc.)
+    if let defaultValue = defaultValue {
+      return LabeledExprSyntax(
+        label: .identifier(name),
+        colon: .colonToken(),
+        expression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(defaultValue)))
+      )
+    } else {
+      return LabeledExprSyntax(
+        label: .identifier(name),
+        colon: .colonToken(),
+        expression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(name)))
+      )
     }
-    
-    public var syntax: SyntaxProtocol {
-        // Not used for function signature, but for call sites (Init, etc.)
-        if let defaultValue = defaultValue {
-            return LabeledExprSyntax(
-                label: .identifier(name),
-                colon: .colonToken(),
-                expression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(defaultValue)))
-            )
-        } else {
-            return LabeledExprSyntax(
-                label: .identifier(name),
-                colon: .colonToken(),
-                expression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(name)))
-            )
-        }
-    }
-} 
+  }
+}

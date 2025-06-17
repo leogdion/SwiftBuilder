@@ -13,7 +13,7 @@ extension Vehicle {
     func start() {
         print("Starting \(brand) vehicle...")
     }
-    
+
     func stop() {
         print("Stopping \(brand) vehicle...")
     }
@@ -29,7 +29,7 @@ protocol Electric {
 struct Car: Vehicle {
     let numberOfWheels: Int = 4
     let brand: String
-    
+
     func start() {
         print("Starting \(brand) car engine...")
     }
@@ -39,7 +39,7 @@ struct ElectricCar: Vehicle, Electric {
     let numberOfWheels: Int = 4
     let brand: String
     var batteryLevel: Double
-    
+
     func charge() {
         print("Charging \(brand) electric car...")
         batteryLevel = 100.0
@@ -70,4 +70,4 @@ print("Testing regular car:")
 demonstrateVehicle(toyota)
 
 print("\nTesting electric car:")
-demonstrateElectricVehicle(tesla) 
+demonstrateElectricVehicle(tesla)
