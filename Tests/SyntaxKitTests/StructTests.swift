@@ -3,15 +3,6 @@ import Testing
 @testable import SyntaxKit
 
 struct StructTests {
-  func normalize(_ code: String) -> String {
-    code
-      .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)  // Remove comments
-      .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)  // Remove public modifier
-      .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)  // Normalize colon spacing
-      .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)  // Normalize whitespace
-      .trimmingCharacters(in: .whitespacesAndNewlines)
-  }
-
   @Test func testGenericStruct() {
     let stackStruct = Struct("Stack", generic: "Element") {
       Variable(.var, name: "items", type: "[Element]", equals: "[]")
@@ -67,8 +58,8 @@ struct StructTests {
       }
       """
 
-    let normalizedGenerated = normalize(stackStruct.generateCode())
-    let normalizedExpected = normalize(expectedCode)
+    let normalizedGenerated = stackStruct.generateCode().normalize()
+    let normalizedExpected = expectedCode.normalize()
     #expect(normalizedGenerated == normalizedExpected)
   }
 
@@ -83,8 +74,8 @@ struct StructTests {
       }
       """
 
-    let normalizedGenerated = normalize(containerStruct.generateCode())
-    let normalizedExpected = normalize(expectedCode)
+    let normalizedGenerated = containerStruct.generateCode().normalize()
+    let normalizedExpected = expectedCode.normalize()
     #expect(normalizedGenerated == normalizedExpected)
   }
 
@@ -101,8 +92,8 @@ struct StructTests {
       }
       """
 
-    let normalizedGenerated = normalize(simpleStruct.generateCode())
-    let normalizedExpected = normalize(expectedCode)
+    let normalizedGenerated = simpleStruct.generateCode().normalize()
+    let normalizedExpected = expectedCode.normalize()
     #expect(normalizedGenerated == normalizedExpected)
   }
 }
