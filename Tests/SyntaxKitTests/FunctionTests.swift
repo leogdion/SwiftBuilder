@@ -1,9 +1,9 @@
-import XCTest
+import Testing
 
 @testable import SyntaxKit
 
-final class FunctionTests: XCTestCase {
-  func testBasicFunction() throws {
+struct FunctionTests {
+  @Test func testBasicFunction() throws {
     let function = Function("calculateSum", returns: "Int") {
       Parameter(name: "a", type: "Int")
       Parameter(name: "b", type: "Int")
@@ -35,10 +35,10 @@ final class FunctionTests: XCTestCase {
       .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)  // Normalize whitespace
       .trimmingCharacters(in: .whitespacesAndNewlines)
 
-    XCTAssertEqual(normalizedGenerated, normalizedExpected)
+    #expect(normalizedGenerated == normalizedExpected)
   }
 
-  func testStaticFunction() throws {
+  @Test func testStaticFunction() throws {
     let function = Function(
       "createInstance", returns: "MyType",
       {
@@ -74,10 +74,10 @@ final class FunctionTests: XCTestCase {
       .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)  // Normalize whitespace
       .trimmingCharacters(in: .whitespacesAndNewlines)
 
-    XCTAssertEqual(normalizedGenerated, normalizedExpected)
+    #expect(normalizedGenerated == normalizedExpected)
   }
 
-  func testMutatingFunction() throws {
+  @Test func testMutatingFunction() throws {
     let function = Function(
       "updateValue",
       {
@@ -109,6 +109,6 @@ final class FunctionTests: XCTestCase {
       .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)  // Normalize whitespace
       .trimmingCharacters(in: .whitespacesAndNewlines)
 
-    XCTAssertEqual(normalizedGenerated, normalizedExpected)
+    #expect(normalizedGenerated == normalizedExpected)
   }
 }

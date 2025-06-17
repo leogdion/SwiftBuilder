@@ -1,40 +1,40 @@
-import XCTest
+import Testing
 
 @testable import SyntaxKit
 
-final class BlackjackTests: XCTestCase {
-  func testBlackjackCardExample() throws {
-    let syntax = Struct("BlackjackCard") {
-      Enum("Suit") {
-        EnumCase("spades").equals("♠")
-        EnumCase("hearts").equals("♡")
-        EnumCase("diamonds").equals("♢")
-        EnumCase("clubs").equals("♣")
-      }
-      .inherits("Character")
+struct BlackjackTests {
+    @Test func testBlackjackCardExample() throws {
+        let syntax = Struct("BlackjackCard") {
+            Enum("Suit") {
+                EnumCase("spades").equals("♠")
+                EnumCase("hearts").equals("♡")
+                EnumCase("diamonds").equals("♢")
+                EnumCase("clubs").equals("♣")
+            }
+            .inherits("Character")
 
-      Enum("Rank") {
-        EnumCase("two").equals(2)
-        EnumCase("three")
-        EnumCase("four")
-        EnumCase("five")
-        EnumCase("six")
-        EnumCase("seven")
-        EnumCase("eight")
-        EnumCase("nine")
-        EnumCase("ten")
-        EnumCase("jack")
-        EnumCase("queen")
-        EnumCase("king")
-        EnumCase("ace")
-      }
-      .inherits("Int")
+            Enum("Rank") {
+                EnumCase("two").equals(2)
+                EnumCase("three")
+                EnumCase("four")
+                EnumCase("five")
+                EnumCase("six")
+                EnumCase("seven")
+                EnumCase("eight")
+                EnumCase("nine")
+                EnumCase("ten")
+                EnumCase("jack")
+                EnumCase("queen")
+                EnumCase("king")
+                EnumCase("ace")
+            }
+            .inherits("Int")
 
-      Variable(.let, name: "rank", type: "Rank")
-      Variable(.let, name: "suit", type: "Suit")
-    }
+            Variable(.let, name: "rank", type: "Rank")
+            Variable(.let, name: "suit", type: "Suit")
+        }
 
-    let expected = """
+        let expected = """
       struct BlackjackCard {
           enum Suit: Character {
               case spades = "♠"
@@ -62,111 +62,104 @@ final class BlackjackTests: XCTestCase {
       }
       """
 
-    // Normalize whitespace, remove comments and modifiers, and normalize colon spacing
-    let normalizedGenerated = syntax.syntax.description
-      .replacingOccurrences(of: "//.*$", with: "", options: String.CompareOptions.regularExpression)
-      .replacingOccurrences(
-        of: "public\\s+", with: "", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(
-        of: "\\s*:\\s*", with: ": ", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(of: "\\s+", with: " ", options: String.CompareOptions.regularExpression)
-      .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        // Normalize whitespace, remove comments and modifiers, and normalize colon spacing
+        let normalizedGenerated = syntax.syntax.description
+            .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)
+            .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)
+            .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)
+            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
 
-    let normalizedExpected =
-      expected
-      .replacingOccurrences(of: "//.*$", with: "", options: String.CompareOptions.regularExpression)
-      .replacingOccurrences(
-        of: "public\\s+", with: "", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(
-        of: "\\s*:\\s*", with: ": ", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(of: "\\s+", with: " ", options: String.CompareOptions.regularExpression)
-      .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        let normalizedExpected =
+            expected
+            .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)
+            .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)
+            .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)
+            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
 
-    XCTAssertEqual(normalizedGenerated, normalizedExpected)
-  }
-
-  // swiftlint:disable:next function_body_length
-  func testFullBlackjackCardExample() throws {
-    // swiftlint:disable:next closure_body_length
-    let syntax = Struct("BlackjackCard") {
-      Enum("Suit") {
-        EnumCase("spades").equals("♠")
-        EnumCase("hearts").equals("♡")
-        EnumCase("diamonds").equals("♢")
-        EnumCase("clubs").equals("♣")
-      }
-      .inherits("Character")
-
-      Enum("Rank") {
-        EnumCase("two").equals(2)
-        EnumCase("three")
-        EnumCase("four")
-        EnumCase("five")
-        EnumCase("six")
-        EnumCase("seven")
-        EnumCase("eight")
-        EnumCase("nine")
-        EnumCase("ten")
-        EnumCase("jack")
-        EnumCase("queen")
-        EnumCase("king")
-        EnumCase("ace")
-        Struct("Values") {
-          Variable(.let, name: "first", type: "Int")
-          Variable(.let, name: "second", type: "Int?")
-        }
-        ComputedProperty("values", type: "Values") {
-          Switch("self") {
-            SwitchCase(".ace") {
-              Return {
-                Init("Values") {
-                  Parameter(name: "first", type: "", defaultValue: "1")
-                  Parameter(name: "second", type: "", defaultValue: "11")
-                }
-              }
-            }
-            SwitchCase(".jack", ".queen", ".king") {
-              Return {
-                Init("Values") {
-                  Parameter(name: "first", type: "", defaultValue: "10")
-                  Parameter(name: "second", type: "", defaultValue: "nil")
-                }
-              }
-            }
-            Default {
-              Return {
-                Init("Values") {
-                  Parameter(name: "first", type: "", defaultValue: "self.rawValue")
-                  Parameter(name: "second", type: "", defaultValue: "nil")
-                }
-              }
-            }
-          }
-        }
-      }
-      .inherits("Int")
-
-      Variable(.let, name: "rank", type: "Rank")
-      Variable(.let, name: "suit", type: "Suit")
-      ComputedProperty("description", type: "String") {
-        VariableDecl(.var, name: "output", equals: "\"suit is \\(suit.rawValue),\"")
-        PlusAssign("output", "\" value is \\(rank.values.first)\"")
-        If(
-          Let("second", "rank.values.second"),
-          then: {
-            PlusAssign("output", "\" or \\(second)\"")
-          })
-        Return {
-          VariableExp("output")
-        }
-      }
+        #expect(normalizedGenerated == normalizedExpected)
     }
 
-    let expected = """
+    // swiftlint:disable:next function_body_length
+    @Test func testFullBlackjackCardExample() throws {
+        // swiftlint:disable:next closure_body_length
+        let syntax = Struct("BlackjackCard") {
+            Enum("Suit") {
+                EnumCase("spades").equals("♠")
+                EnumCase("hearts").equals("♡")
+                EnumCase("diamonds").equals("♢")
+                EnumCase("clubs").equals("♣")
+            }
+            .inherits("Character")
+
+            Enum("Rank") {
+                EnumCase("two").equals(2)
+                EnumCase("three")
+                EnumCase("four")
+                EnumCase("five")
+                EnumCase("six")
+                EnumCase("seven")
+                EnumCase("eight")
+                EnumCase("nine")
+                EnumCase("ten")
+                EnumCase("jack")
+                EnumCase("queen")
+                EnumCase("king")
+                EnumCase("ace")
+                Struct("Values") {
+                    Variable(.let, name: "first", type: "Int")
+                    Variable(.let, name: "second", type: "Int?")
+                }
+                ComputedProperty("values", type: "Values") {
+                    Switch("self") {
+                        SwitchCase(".ace") {
+                            Return {
+                                Init("Values") {
+                                    Parameter(name: "first", type: "", defaultValue: "1")
+                                    Parameter(name: "second", type: "", defaultValue: "11")
+                                }
+                            }
+                        }
+                        SwitchCase(".jack", ".queen", ".king") {
+                            Return {
+                                Init("Values") {
+                                    Parameter(name: "first", type: "", defaultValue: "10")
+                                    Parameter(name: "second", type: "", defaultValue: "nil")
+                                }
+                            }
+                        }
+                        Default {
+                            Return {
+                                Init("Values") {
+                                    Parameter(name: "first", type: "", defaultValue: "self.rawValue")
+                                    Parameter(name: "second", type: "", defaultValue: "nil")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .inherits("Int")
+
+            Variable(.let, name: "rank", type: "Rank")
+            Variable(.let, name: "suit", type: "Suit")
+            ComputedProperty("description", type: "String") {
+                VariableDecl(.var, name: "output", equals: "\"suit is \\(suit.rawValue),\"")
+                PlusAssign("output", "\" value is \\(rank.values.first)\"")
+                If(
+                    Let("second", "rank.values.second"),
+                    then: {
+                        PlusAssign("output", "\" or \\(second)\"")
+                    }
+                )
+                Return {
+                    VariableExp("output")
+                }
+            }
+        }
+
+        let expected = """
       struct BlackjackCard {
         enum Suit: Character {
           case spades = \"♠\"
@@ -220,30 +213,30 @@ final class BlackjackTests: XCTestCase {
       }
       """
 
-    // Normalize whitespace, remove comments and modifiers, and normalize colon spacing
-    let normalizedGenerated = syntax.syntax.description
-      .replacingOccurrences(of: "//.*$", with: "", options: String.CompareOptions.regularExpression)
-      .replacingOccurrences(
-        of: "public\\s+", with: "", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(
-        of: "\\s*:\\s*", with: ": ", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(of: "\\s+", with: " ", options: String.CompareOptions.regularExpression)
-      .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        // Normalize whitespace, remove comments and modifiers, and normalize colon spacing
+        let normalizedGenerated = syntax.syntax.description
+            .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)
+            .replacingOccurrences(
+                of: "public\\s+", with: "", options: .regularExpression
+            )
+            .replacingOccurrences(
+                of: "\\s*:\\s*", with: ": ", options: .regularExpression
+            )
+            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
 
-    let normalizedExpected =
-      expected
-      .replacingOccurrences(of: "//.*$", with: "", options: String.CompareOptions.regularExpression)
-      .replacingOccurrences(
-        of: "public\\s+", with: "", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(
-        of: "\\s*:\\s*", with: ": ", options: String.CompareOptions.regularExpression
-      )
-      .replacingOccurrences(of: "\\s+", with: " ", options: String.CompareOptions.regularExpression)
-      .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        let normalizedExpected =
+            expected
+            .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)
+            .replacingOccurrences(
+                of: "public\\s+", with: "", options: .regularExpression
+            )
+            .replacingOccurrences(
+                of: "\\s*:\\s*", with: ": ", options: .regularExpression
+            )
+            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
 
-    XCTAssertEqual(normalizedGenerated, normalizedExpected)
-  }
+        #expect(normalizedGenerated == normalizedExpected)
+    }
 }
