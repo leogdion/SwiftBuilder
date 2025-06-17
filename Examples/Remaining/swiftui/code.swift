@@ -11,19 +11,19 @@ struct TodoItem: Identifiable {
 class TodoListViewModel: ObservableObject {
     @Published var items: [TodoItem] = []
     @Published var newItemTitle: String = ""
-    
+
     func addItem() {
         guard !newItemTitle.isEmpty else { return }
         items.append(TodoItem(title: newItemTitle, isCompleted: false))
         newItemTitle = ""
     }
-    
+
     func toggleItem(_ item: TodoItem) {
         if let index = items.firstIndex(where: { $0.id == item.id }) {
             items[index].isCompleted.toggle()
         }
     }
-    
+
     func deleteItem(_ item: TodoItem) {
         items.removeAll { $0.id == item.id }
     }
@@ -32,7 +32,7 @@ class TodoListViewModel: ObservableObject {
 // MARK: - Views
 struct TodoListView: View {
     @StateObject private var viewModel = TodoListViewModel()
-    
+
     var body: some View {
         NavigationView {
             VStack {
@@ -40,14 +40,14 @@ struct TodoListView: View {
                 HStack {
                     TextField("New todo item", text: $viewModel.newItemTitle)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                    
+
                     Button(action: viewModel.addItem) {
                         Image(systemName: "plus.circle.fill")
                             .foregroundColor(.blue)
                     }
                 }
                 .padding()
-                
+
                 // List of items
                 List {
                     ForEach(viewModel.items) { item in
@@ -70,14 +70,14 @@ struct TodoListView: View {
 struct TodoItemRow: View {
     let item: TodoItem
     let onToggle: () -> Void
-    
+
     var body: some View {
         HStack {
             Button(action: onToggle) {
                 Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(item.isCompleted ? .green : .gray)
             }
-            
+
             Text(item.title)
                 .strikethrough(item.isCompleted)
                 .foregroundColor(item.isCompleted ? .gray : .primary)
@@ -100,4 +100,4 @@ struct TodoApp: App {
             TodoListView()
         }
     }
-} 
+}

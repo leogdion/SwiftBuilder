@@ -28,7 +28,7 @@ enum Rank: Int, CaseIterable {
     case queen
     case king
     case ace
-    
+
     /// Returns a string representation of the rank
     var description: String {
         switch self {

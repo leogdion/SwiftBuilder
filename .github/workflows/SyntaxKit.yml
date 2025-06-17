@@ -99,33 +99,33 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ matrix.type && format('{0}{1}', matrix.type, matrix.osVersion) || 'spm' }}
 
-  # lint:
-  #   name: Linting
-  #   if: "!contains(github.event.head_commit.message, 'ci skip')"  
-  #   runs-on: ubuntu-latest
-  #   needs: [build-ubuntu, build-macos]
-  #   env:
-  #     MINT_PATH: .mint/lib
-  #     MINT_LINK_PATH: .mint/bin
-  #   steps:
-  #     - uses: actions/checkout@v4    
-  #     - name: Cache mint
-  #       id: cache-mint
-  #       uses: actions/cache@v4  
-  #       env:
-  #         cache-name: cache
-  #       with:
-  #         path: |
-  #           .mint
-  #           Mint         
-  #         key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-mint-  
-  #     - name: Install mint
-  #       if: steps.cache-mint.outputs.cache-hit != 'true'
-  #       run: |
-  #         git clone https://github.com/yonaskolb/Mint.git
-  #         cd Mint
-  #         swift run mint install yonaskolb/mint
-  #     - name: Lint
-  #       run: ./Scripts/lint.sh
+  lint:
+    name: Linting
+    if: "!contains(github.event.head_commit.message, 'ci skip')"  
+    runs-on: ubuntu-latest
+    needs: [build-ubuntu, build-macos]
+    env:
+      MINT_PATH: .mint/lib
+      MINT_LINK_PATH: .mint/bin
+    steps:
+      - uses: actions/checkout@v4    
+      - name: Cache mint
+        id: cache-mint
+        uses: actions/cache@v4  
+        env:
+          cache-name: cache
+        with:
+          path: |
+            .mint
+            Mint         
+          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
+          restore-keys: |
+            ${{ runner.os }}-mint-  
+      - name: Install mint
+        if: steps.cache-mint.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/yonaskolb/Mint.git
+          cd Mint
+          swift run mint install yonaskolb/mint
+      - name: Lint
+        run: ./Scripts/lint.sh
