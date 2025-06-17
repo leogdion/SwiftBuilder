@@ -1,18 +1,9 @@
-import XCTest
+import Testing
 
 @testable import SyntaxKit
 
-final class StructTests: XCTestCase {
-  func normalize(_ code: String) -> String {
-    code
-      .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)  // Remove comments
-      .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)  // Remove public modifier
-      .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)  // Normalize colon spacing
-      .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)  // Normalize whitespace
-      .trimmingCharacters(in: .whitespacesAndNewlines)
-  }
-
-  func testGenericStruct() {
+struct StructTests {
+  @Test func testGenericStruct() {
     let stackStruct = Struct("Stack", generic: "Element") {
       Variable(.var, name: "items", type: "[Element]", equals: "[]")
 
@@ -67,12 +58,12 @@ final class StructTests: XCTestCase {
       }
       """
 
-    let normalizedGenerated = normalize(stackStruct.generateCode())
-    let normalizedExpected = normalize(expectedCode)
-    XCTAssertEqual(normalizedGenerated, normalizedExpected)
+    let normalizedGenerated = stackStruct.generateCode().normalize()
+    let normalizedExpected = expectedCode.normalize()
+    #expect(normalizedGenerated == normalizedExpected)
   }
 
-  func testGenericStructWithInheritance() {
+  @Test func testGenericStructWithInheritance() {
     let containerStruct = Struct("Container", generic: "T") {
       Variable(.var, name: "value", type: "T")
     }.inherits("Equatable")
@@ -83,12 +74,12 @@ final class StructTests: XCTestCase {
       }
       """
 
-    let normalizedGenerated = normalize(containerStruct.generateCode())
-    let normalizedExpected = normalize(expectedCode)
-    XCTAssertEqual(normalizedGenerated, normalizedExpected)
+    let normalizedGenerated = containerStruct.generateCode().normalize()
+    let normalizedExpected = expectedCode.normalize()
+    #expect(normalizedGenerated == normalizedExpected)
   }
 
-  func testNonGenericStruct() {
+  @Test func testNonGenericStruct() {
     let simpleStruct = Struct("Point") {
       Variable(.var, name: "x", type: "Double")
       Variable(.var, name: "y", type: "Double")
@@ -101,8 +92,8 @@ final class StructTests: XCTestCase {
       }
       """
 
-    let normalizedGenerated = normalize(simpleStruct.generateCode())
-    let normalizedExpected = normalize(expectedCode)
-    XCTAssertEqual(normalizedGenerated, normalizedExpected)
+    let normalizedGenerated = simpleStruct.generateCode().normalize()
+    let normalizedExpected = expectedCode.normalize()
+    #expect(normalizedGenerated == normalizedExpected)
   }
 }
