@@ -1,10 +1,10 @@
 # ``SyntaxKit``
 
-SyntaxKit is a Swift package that allows developers to build Swift code using result builders. It provides a declarative way to generate Swift code structures using SwiftSyntax.
+SyntaxKit provides a declarative way to generate Swift code structures using SwiftSyntax.
 
 ## Overview
 
-SyntaxKit provides a set of result builders that allow you to create Swift code structures in a declarative way. Here's an example:
+SyntaxKit allows developers to build Swift code using result builders which enable the creation of Swift code structures in a declarative way. Here's an example:
 
 ```swift
 import SyntaxKit
@@ -36,37 +36,6 @@ struct BlackjackCard {
     }
 }
 ```
-
-## Topics
-
-### Declarations
-
-- ``Struct``
-- ``Enum``
-- ``EnumCase``
-- ``Function``
-- ``Init``
-- ``ComputedProperty``
-- ``VariableDecl``
-- ``Let``
-- ``Variable``
-
-### Expressions & Statements
-- ``Assignment``
-- ``PlusAssign``
-- ``Return``
-- ``VariableExp``
-
-### Control Flow
-- ``If``
-- ``Switch``
-- ``SwitchCase``
-- ``Default``
-
-### Building Blocks
-- ``CodeBlock``
-- ``Parameter``
-- ``Literal``
 
 ## Full Example
 
@@ -215,3 +184,35 @@ struct BlackjackCard {
   }
 }
 ```
+
+## Topics
+
+### Declarations
+
+- ``Struct``
+- ``Enum``
+- ``EnumCase``
+- ``Function``
+- ``Init``
+- ``ComputedProperty``
+- ``VariableDecl``
+- ``Let``
+- ``Variable``
+
+### Expressions & Statements
+- ``Assignment``
+- ``PlusAssign``
+- ``Return``
+- ``VariableExp``
+
+### Control Flow
+- ``If``
+- ``Switch``
+- ``SwitchCase``
+- ``Default``
+
+### Building Blocks
+- ``CodeBlock``
+- ``Parameter``
+- ``Literal``
+
