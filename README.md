@@ -41,7 +41,9 @@ let code = Struct("BlackjackCard") {
         Case("clubs").equals("♣")
     }
     .inherits("Character")
-    .comment("nested Suit enumeration")
+    .comment{
+      Line("nested Suit enumeration")
+    }
 }
 
 let generatedCode = code.generateCode()
