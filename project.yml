@@ -4,6 +4,8 @@ settings:
 packages:
   SyntaxKit:
     path: .
+  SKSampleMacro:
+    path: Macros/SKSampleMacro
 aggregateTargets:
   Lint:
     buildScripts:
