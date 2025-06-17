@@ -69,12 +69,7 @@ struct FrameworkCompatibilityTests {
         }
         
         let generated = syntax.syntax.description
-        let normalized = generated
-            .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)
-            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalized = generated.normalize()
         
         // Validate all components are present
         #expect(normalized.contains("struct BlackjackCard"))
@@ -98,8 +93,7 @@ struct FrameworkCompatibilityTests {
         
         let generated = function.syntax.description
         let normalized = generated
-            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .normalize()
         
         #expect(normalized.contains("func calculateValue(multiplier: Int, base: Int = 10) -> Int"))
         #expect(normalized.contains("return multiplier * base"))
@@ -122,7 +116,7 @@ struct FrameworkCompatibilityTests {
         
         #expect(!generated.isEmpty)
         #expect(generated.contains("struct DocumentedStruct"))
-        #expect(generated.contains("let value: String"))
+        #expect(generated.normalize().contains("let value: String".normalize()))
     }
     
     // MARK: - Migration Regression Tests
@@ -134,11 +128,11 @@ struct FrameworkCompatibilityTests {
             Variable(.var, name: "y", type: "Double", equals: "0.0")
         }
         
-        let generated = simpleStruct.generateCode()
+        let generated = simpleStruct.generateCode().normalize()
         
         #expect(generated.contains("struct Point"))
-        #expect(generated.contains("var x: Double = 0.0"))
-        #expect(generated.contains("var y: Double = 0.0"))
+        #expect(generated.contains("var x: Double = 0.0".normalize()))
+        #expect(generated.contains("var y: Double = 0.0".normalize()))
     }
     
     @Test func testLiteralGeneration() {

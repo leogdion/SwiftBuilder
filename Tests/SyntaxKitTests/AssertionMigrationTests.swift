@@ -61,19 +61,9 @@ struct AssertionMigrationTests {
         """
         
         // Test the complete normalization pipeline that was used in XCTest
-        let normalizedGenerated = blackjackCard.syntax.description
-            .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)
-            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedGenerated = blackjackCard.syntax.description.normalize()
         
-        let normalizedExpected = expected
-            .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)
-            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedExpected = expected.normalize()
         
         // This replaces: XCTAssertEqual(normalizedGenerated, normalizedExpected)
         #expect(normalizedGenerated == normalizedExpected)

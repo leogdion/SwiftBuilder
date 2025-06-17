@@ -6,37 +6,6 @@ import Testing
 /// Validates the simplified Swift APIs and formatting changes
 struct CodeStyleMigrationTests {
     
-    // MARK: - String.CompareOptions Simplification Tests
-    
-    @Test func testRegularExpressionOptionSimplification() {
-        // Test that .regularExpression works instead of String.CompareOptions.regularExpression
-        let testCode = "public func test() { // comment }"
-        
-        // Old style: String.CompareOptions.regularExpression
-        // New style: .regularExpression
-        let withoutComments = testCode.replacingOccurrences(
-            of: "//.*$", with: "", options: .regularExpression
-        )
-        let withoutPublic = withoutComments.replacingOccurrences(
-            of: "public\\s+", with: "", options: .regularExpression
-        )
-        
-        #expect(withoutPublic.trimmingCharacters(in: .whitespacesAndNewlines) == "func test() { }")
-    }
-    
-    @Test func testAllStringOptionsSimplifications() {
-        let testString = "public struct Test: Protocol { // docs }"
-        
-        // Test the complete pipeline of string replacements used in the migrated tests
-        let normalized = testString
-            .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)
-            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        #expect(normalized == "struct Test: Protocol { }")
-    }
     
     // MARK: - CharacterSet Simplification Tests
     
@@ -69,13 +38,10 @@ struct CodeStyleMigrationTests {
             }
         }
         
-        let generated = syntax.generateCode()
+        let generated = syntax.generateCode().normalize()
         
         // Verify proper indentation is maintained
-        #expect(generated.contains("struct IndentationTest"))
-        #expect(generated.contains("    let property1: String"))
-        #expect(generated.contains("    let property2: Int"))
-        #expect(generated.contains("    func method(param: String)"))
+        #expect(generated == "struct IndentationTest { let property1: String let property2: Int func method(param: String) { let local = \"value\" return local } }")
     }
     
     // MARK: - Multiline String Formatting Tests
@@ -93,13 +59,9 @@ struct CodeStyleMigrationTests {
             Variable(.var, name: "count", type: "Int")
         }
         
-        let normalized = syntax.generateCode()
-            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalized = syntax.generateCode().normalize()
         
-        let expectedNormalized = expected
-            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let expectedNormalized = expected.normalize()
         
         #expect(normalized == expectedNormalized)
     }

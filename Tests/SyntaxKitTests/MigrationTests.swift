@@ -70,19 +70,9 @@ struct MigrationTests {
           """
         
         // Use the same normalization approach as existing tests
-        let normalizedGenerated = blackjackCard.syntax.description
-            .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)
-            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedGenerated = blackjackCard.syntax.description.normalize()
         
-        let normalizedExpected = expected
-            .replacingOccurrences(of: "//.*$", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "public\\s+", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "\\s*:\\s*", with: ": ", options: .regularExpression)
-            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedExpected = expected.normalize()
         
         #expect(normalizedGenerated == normalizedExpected)
     }
@@ -119,13 +109,13 @@ struct MigrationTests {
             }
         }
         
-        let generated = syntax.syntax.description
+        let generated = syntax.syntax.description.normalize()
         
         // Verify generated code contains expected elements
-        #expect(generated.contains("struct TestCard"))
-        #expect(generated.contains("let rank: String"))
-        #expect(generated.contains("let suit: String"))
-        #expect(generated.contains("func description() -> String"))
+        #expect(generated.contains("struct TestCard".normalize()))
+        #expect(generated.contains("let rank: String".normalize()))
+        #expect(generated.contains("let suit: String".normalize()))
+        #expect(generated.contains("func description() -> String".normalize()))
     }
     
     @Test func testMigrationBackwardCompatibility() {
