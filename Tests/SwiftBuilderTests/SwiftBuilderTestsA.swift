@@ -1,7 +1,7 @@
 import XCTest
-@testable import SwiftBuilder
+@testable import SyntaxKit
 
-final class SwiftBuilderTestsA: XCTestCase {
+final class SyntaxKitTestsA: XCTestCase {
     func testBlackjackCardExample() throws {
         let blackjackCard = Struct("BlackjackCard") {
             Enum("Suit") {

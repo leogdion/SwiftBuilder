@@ -1,11 +1,11 @@
 import Foundation
-import SwiftBuilder
+import SyntaxKit
 
 // Read Swift code from stdin
 let code = String(data: FileHandle.standardInput.readDataToEndOfFile(), encoding: .utf8) ?? ""
 
 do {
-    // Parse the code using SwiftBuilder
+    // Parse the code using SyntaxKit
     let response = try SyntaxParser.parse(code: code, options: ["fold"])
     
     // Output the JSON to stdout

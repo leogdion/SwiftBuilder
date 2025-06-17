@@ -1,4 +1,4 @@
-import SwiftBuilder
+import SyntaxKit
 
 // Example of generating a BlackjackCard struct with a nested Suit enum
 let structExample = Group {
