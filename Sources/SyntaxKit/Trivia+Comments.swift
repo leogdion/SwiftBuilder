@@ -30,7 +30,9 @@
 import SwiftSyntax
 
 extension Trivia {
-  /// Extract comment strings (line comments, doc comments, block comments) from the trivia collection.
+  /// Extracts comment strings from the trivia collection.
+  ///
+  /// This includes line comments, documentation comments, and block comments.
   public var comments: [String] {
     compactMap { piece in
       switch piece {
@@ -45,7 +47,7 @@ extension Trivia {
     }
   }
 
-  /// Indicates whether the trivia contains any comments.
+  /// A Boolean value that indicates whether the trivia contains any comments.
   public var hasComments: Bool {
     !comments.isEmpty
   }

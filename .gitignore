@@ -137,3 +137,4 @@ vendor/ruby
 public
 .mint
 *.lcov
+.docc-build

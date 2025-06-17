@@ -29,11 +29,17 @@
 
 import SwiftSyntax
 
+/// A Swift `var` declaration with a computed value.
 public struct ComputedProperty: CodeBlock {
   private let name: String
   private let type: String
   private let body: [CodeBlock]
 
+  /// Creates a computed property declaration.
+  /// - Parameters:
+  ///   - name: The name of the property.
+  ///   - type: The type of the property.
+  ///   - content: A ``CodeBlockBuilder`` that provides the body of the getter.
   public init(_ name: String, type: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
     self.name = name
     self.type = type

@@ -29,12 +29,18 @@
 
 import SwiftSyntax
 
+/// A Swift `struct` declaration.
 public struct Struct: CodeBlock {
   private let name: String
   private let members: [CodeBlock]
   private var inheritance: String?
   private var genericParameter: String?
 
+  /// Creates a `struct` declaration.
+  /// - Parameters:
+  ///   - name: The name of the struct.
+  ///   - generic: A generic parameter for the struct, if any.
+  ///   - content: A ``CodeBlockBuilder`` that provides the members of the struct.
   public init(
     _ name: String, generic: String? = nil, @CodeBlockBuilderResult _ content: () -> [CodeBlock]
   ) {
@@ -43,6 +49,9 @@ public struct Struct: CodeBlock {
     self.genericParameter = generic
   }
 
+  /// Sets the inheritance for the struct.
+  /// - Parameter type: The type to inherit from.
+  /// - Returns: A copy of the struct with the inheritance set.
   public func inherits(_ type: String) -> Self {
     var copy = self
     copy.inheritance = type

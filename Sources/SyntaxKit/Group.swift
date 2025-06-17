@@ -29,9 +29,12 @@
 
 import SwiftSyntax
 
+/// A group of code blocks.
 public struct Group: CodeBlock {
   let members: [CodeBlock]
 
+  /// Creates a group of code blocks.
+  /// - Parameter content: A ``CodeBlockBuilder`` that provides the members of the group.
   public init(@CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
     self.members = content()
   }

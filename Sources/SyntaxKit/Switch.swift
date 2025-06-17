@@ -29,10 +29,15 @@
 
 import SwiftSyntax
 
+/// A `switch` statement.
 public struct Switch: CodeBlock {
   private let expression: String
   private let cases: [CodeBlock]
 
+  /// Creates a `switch` statement.
+  /// - Parameters:
+  ///   - expression: The expression to switch on.
+  ///   - content: A ``CodeBlockBuilder`` that provides the cases for the switch.
   public init(_ expression: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
     self.expression = expression
     self.cases = content()

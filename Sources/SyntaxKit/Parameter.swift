@@ -31,12 +31,19 @@ import Foundation
 import SwiftParser
 import SwiftSyntax
 
+/// A parameter for a function or initializer.
 public struct Parameter: CodeBlock {
   let name: String
   let type: String
   let defaultValue: String?
   let isUnnamed: Bool
 
+  /// Creates a parameter for a function or initializer.
+  /// - Parameters:
+  ///   - name: The name of the parameter.
+  ///   - type: The type of the parameter.
+  ///   - defaultValue: The default value of the parameter, if any.
+  ///   - isUnnamed: A Boolean value that indicates whether the parameter is unnamed.
   public init(name: String, type: String, defaultValue: String? = nil, isUnnamed: Bool = false) {
     self.name = name
     self.type = type

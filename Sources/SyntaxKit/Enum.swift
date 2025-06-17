@@ -29,16 +29,24 @@
 
 import SwiftSyntax
 
+/// A Swift `enum` declaration.
 public struct Enum: CodeBlock {
   private let name: String
   private let members: [CodeBlock]
   private var inheritance: String?
 
+  /// Creates an `enum` declaration.
+  /// - Parameters:
+  ///   - name: The name of the enum.
+  ///   - content: A ``CodeBlockBuilder`` that provides the members of the enum.
   public init(_ name: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
     self.name = name
     self.members = content()
   }
 
+  /// Sets the inheritance for the enum.
+  /// - Parameter type: The type to inherit from.
+  /// - Returns: A copy of the enum with the inheritance set.
   public func inherits(_ type: String) -> Self {
     var copy = self
     copy.inheritance = type
@@ -76,15 +84,21 @@ public struct Enum: CodeBlock {
   }
 }
 
+/// A Swift `case` declaration inside an `enum`.
 public struct EnumCase: CodeBlock {
   private let name: String
   private var value: String?
   private var intValue: Int?
 
+  /// Creates a `case` declaration.
+  /// - Parameter name: The name of the case.
   public init(_ name: String) {
     self.name = name
   }
 
+  /// Sets the raw value of the case to a string.
+  /// - Parameter value: The string value.
+  /// - Returns: A copy of the case with the raw value set.
   public func equals(_ value: String) -> Self {
     var copy = self
     copy.value = value
@@ -92,6 +106,9 @@ public struct EnumCase: CodeBlock {
     return copy
   }
 
+  /// Sets the raw value of the case to an integer.
+  /// - Parameter value: The integer value.
+  /// - Returns: A copy of the case with the raw value set.
   public func equals(_ value: Int) -> Self {
     var copy = self
     copy.value = nil

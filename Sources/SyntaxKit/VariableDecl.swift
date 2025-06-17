@@ -29,11 +29,17 @@
 
 import SwiftSyntax
 
+/// A Swift `let` or `var` declaration.
 public struct VariableDecl: CodeBlock {
   private let kind: VariableKind
   private let name: String
   private let value: String?
 
+  /// Creates a `let` or `var` declaration.
+  /// - Parameters:
+  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
+  ///   - name: The name of the variable.
+  ///   - value: The initial value of the variable, if any.
   public init(_ kind: VariableKind, name: String, equals value: String? = nil) {
     self.kind = kind
     self.name = name

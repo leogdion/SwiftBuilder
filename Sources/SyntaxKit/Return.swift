@@ -29,8 +29,12 @@
 
 import SwiftSyntax
 
+/// A `return` statement.
 public struct Return: CodeBlock {
   private let exprs: [CodeBlock]
+
+  /// Creates a `return` statement.
+  /// - Parameter content: A ``CodeBlockBuilder`` that provides the expression to return.
   public init(@CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
     self.exprs = content()
   }

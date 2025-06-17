@@ -29,9 +29,15 @@
 
 import SwiftSyntax
 
+/// An assignment expression.
 public struct Assignment: CodeBlock {
   private let target: String
   private let value: String
+
+  /// Creates an assignment expression.
+  /// - Parameters:
+  ///   - target: The variable to assign to.
+  ///   - value: The value to assign.
   public init(_ target: String, _ value: String) {
     self.target = target
     self.value = value
