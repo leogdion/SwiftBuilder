@@ -75,6 +75,8 @@ $PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "Bright
 run_command $MINT_RUN swiftlint lint $SWIFTLINT_OPTIONS
 run_command $MINT_RUN swift-format lint --recursive --parallel $SWIFTFORMAT_OPTIONS Sources Tests
 
-#$MINT_RUN periphery scan $PERIPHERY_OPTIONS --disable-update-check
+if [ -z "$CI" ]; then
+    run_command $MINT_RUN periphery scan $PERIPHERY_OPTIONS --disable-update-check
+fi
 
 popd

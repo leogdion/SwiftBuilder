@@ -97,10 +97,8 @@ final class TokenVisitor: SyntaxRewriter {
       range: Range(
         startRow: start.line,
         startColumn: start.column,
-        graphemeStartColumn: graphemeStartColumn,
         endRow: end.line,
-        endColumn: end.column,
-        graphemeEndColumn: graphemeEndColumn
+        endColumn: end.column
       ),
       type: syntaxType
     )
@@ -185,9 +183,7 @@ final class TokenVisitor: SyntaxRewriter {
       .escapeHTML()
       .replaceInvisiblesWithHTML()
       .replaceHTMLWhitespacesWithSymbols()
-    if token.presence == .missing {
-      current.class = "\(token.presence)"
-    }
+
     current.token = Token(kind: "\(token.tokenKind)", leadingTrivia: "", trailingTrivia: "")
 
     token.leadingTrivia.forEach { piece in
