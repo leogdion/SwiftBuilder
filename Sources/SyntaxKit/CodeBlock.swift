@@ -46,7 +46,7 @@ public protocol CodeBlockBuilder {
 
 /// A result builder for creating arrays of ``CodeBlock``s.
 @resultBuilder
-public struct CodeBlockBuilderResult {
+public enum CodeBlockBuilderResult {
   /// Builds a block of ``CodeBlock``s.
   public static func buildBlock(_ components: CodeBlock...) -> [CodeBlock] {
     components

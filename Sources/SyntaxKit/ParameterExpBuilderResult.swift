@@ -31,7 +31,7 @@ import Foundation
 
 /// A result builder for creating arrays of ``ParameterExp``s.
 @resultBuilder
-public struct ParameterExpBuilderResult {
+public enum ParameterExpBuilderResult {
   /// Builds a block of ``ParameterExp``s.
   public static func buildBlock(_ components: ParameterExp...) -> [ParameterExp] {
     components
