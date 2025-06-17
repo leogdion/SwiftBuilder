@@ -43,26 +43,39 @@ jobs:
           # SPM Build Matrix
           - runs-on: macos-15
             xcode: "/Applications/Xcode_16.4.app"
-          
+
+          # macOS Build Matrix
+          - type: macos
+            runs-on: macos-15
+            xcode: "/Applications/Xcode_16.4.app"
+                      
           # iOS Build Matrix
           - type: ios
             runs-on: macos-15
             xcode: "/Applications/Xcode_16.4.app"
             deviceName: "iPhone 16 Pro"
-            osVersion: "18.4"
+            osVersion: "18.5"
   
           # watchOS Build Matrix
           - type: watchos
             runs-on: macos-15
             xcode: "/Applications/Xcode_16.4.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
-            osVersion: "11.4"
+            osVersion: "11.5"
 
+          # tvOS Build Matrix
+          - type: tvos
+            runs-on: macos-15
+            xcode: "/Applications/Xcode_16.4.app"
+            deviceName: "Apple TV"
+            osVersion: "18.5"
+
+          # visionOS Build Matrix              
           - type: visionos
             runs-on: macos-15
             xcode: "/Applications/Xcode_16.4.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "2.4"
+            osVersion: "2.5"
   
     steps:
       - uses: actions/checkout@v4
