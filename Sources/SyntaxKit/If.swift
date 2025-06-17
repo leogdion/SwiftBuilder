@@ -29,11 +29,17 @@
 
 import SwiftSyntax
 
+/// An `if` statement.
 public struct If: CodeBlock {
   private let condition: CodeBlock
   private let body: [CodeBlock]
   private let elseBody: [CodeBlock]?
 
+  /// Creates an `if` statement.
+  /// - Parameters:
+  ///   - condition: The condition to evaluate. This can be a ``Let`` for optional binding.
+  ///   - then: A ``CodeBlockBuilder`` that provides the body of the `if` block.
+  ///   - elseBody: A ``CodeBlockBuilder`` that provides the body of the `else` block, if any.
   public init(
     _ condition: CodeBlock, @CodeBlockBuilderResult then: () -> [CodeBlock],
     else elseBody: (() -> [CodeBlock])? = nil

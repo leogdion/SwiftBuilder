@@ -29,21 +29,35 @@
 
 import SwiftSyntax
 
+/// An expression that refers to a variable.
 public struct VariableExp: CodeBlock {
   let name: String
 
+  /// Creates a variable expression.
+  /// - Parameter name: The name of the variable.
   public init(_ name: String) {
     self.name = name
   }
 
+  /// Accesses a property on the variable.
+  /// - Parameter propertyName: The name of the property to access.
+  /// - Returns: A ``PropertyAccessExp`` that represents the property access.
   public func property(_ propertyName: String) -> CodeBlock {
     PropertyAccessExp(baseName: name, propertyName: propertyName)
   }
 
+  /// Calls a method on the variable.
+  /// - Parameter methodName: The name of the method to call.
+  /// - Returns: A ``FunctionCallExp`` that represents the method call.
   public func call(_ methodName: String) -> CodeBlock {
     FunctionCallExp(baseName: name, methodName: methodName)
   }
 
+  /// Calls a method on the variable with parameters.
+  /// - Parameters:
+  ///  - methodName: The name of the method to call.
+  ///  - params: A ``ParameterExpBuilder`` that provides the parameters for the method call.
+  /// - Returns: A ``FunctionCallExp`` that represents the method call.
   public func call(_ methodName: String, @ParameterExpBuilderResult _ params: () -> [ParameterExp])
     -> CodeBlock
   {
@@ -55,10 +69,15 @@ public struct VariableExp: CodeBlock {
   }
 }
 
+/// An expression that accesses a property on a base expression.
 public struct PropertyAccessExp: CodeBlock {
   let baseName: String
   let propertyName: String
 
+  /// Creates a property access expression.
+  /// - Parameters:
+  ///  - baseName: The name of the base variable.
+  ///  - propertyName: The name of the property to access.
   public init(baseName: String, propertyName: String) {
     self.baseName = baseName
     self.propertyName = propertyName
@@ -76,17 +95,27 @@ public struct PropertyAccessExp: CodeBlock {
   }
 }
 
+/// An expression that calls a function.
 public struct FunctionCallExp: CodeBlock {
   let baseName: String
   let methodName: String
   let parameters: [ParameterExp]
 
+  /// Creates a function call expression.
+  /// - Parameters:
+  ///   - baseName: The name of the base variable.
+  ///   - methodName: The name of the method to call.
   public init(baseName: String, methodName: String) {
     self.baseName = baseName
     self.methodName = methodName
     self.parameters = []
   }
 
+  /// Creates a function call expression with parameters.
+  /// - Parameters:
+  ///  - baseName: The name of the base variable.
+  ///  - methodName: The name of the method to call.
+  ///  - parameters: The parameters for the method call.
   public init(baseName: String, methodName: String, parameters: [ParameterExp]) {
     self.baseName = baseName
     self.methodName = methodName

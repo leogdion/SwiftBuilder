@@ -29,9 +29,15 @@
 
 import SwiftSyntax
 
+/// A Swift `let` declaration for use in an `if` statement.
 public struct Let: CodeBlock {
   let name: String
   let value: String
+
+  /// Creates a `let` declaration for an `if` statement.
+  /// - Parameters:
+  ///   - name: The name of the constant.
+  ///   - value: The value to assign to the constant.
   public init(_ name: String, _ value: String) {
     self.name = name
     self.value = value

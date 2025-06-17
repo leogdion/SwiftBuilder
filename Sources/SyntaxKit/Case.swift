@@ -29,10 +29,15 @@
 
 import SwiftSyntax
 
+/// A `case` in a `switch` statement with tuple-style patterns.
 public struct Case: CodeBlock {
   private let patterns: [String]
   private let body: [CodeBlock]
 
+  /// Creates a `case` for a `switch` statement.
+  /// - Parameters:
+  ///   - patterns: The patterns to match for the case.
+  ///   - content: A ``CodeBlockBuilder`` that provides the body of the case.
   public init(_ patterns: String..., @CodeBlockBuilderResult content: () -> [CodeBlock]) {
     self.patterns = patterns
     self.body = content()

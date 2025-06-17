@@ -29,8 +29,9 @@
 
 import SwiftSyntax
 
-/// Represents a single comment line that can be attached to a syntax node when using `.comment { ... }` in the DSL.
+/// Represents a single comment line that can be attached to a syntax node.
 public struct Line {
+  /// The kind of comment line.
   public enum Kind {
     /// Regular line comment that starts with `//`.
     case line
@@ -38,10 +39,13 @@ public struct Line {
     case doc
   }
 
+  /// The kind of comment.
   public let kind: Kind
+  /// The text of the comment.
   public let text: String?
 
-  /// Convenience initializer for a regular line comment without specifying the kind explicitly.
+  /// Creates a regular line comment.
+  /// - Parameter text: The text of the comment.
   public init(_ text: String) {
     self.kind = .line
     self.text = text
@@ -55,6 +59,9 @@ public struct Line {
   /// Line(.doc, "Represents a model")    // documentation comment
   /// Line(.doc)                           // empty `///` line
   /// ```
+  /// - Parameters:
+  ///   - kind: The kind of comment. Defaults to `.line`.
+  ///   - text: The text of the comment. Defaults to `nil`.
   public init(_ kind: Kind = .line, _ text: String? = nil) {
     self.kind = kind
     self.text = text

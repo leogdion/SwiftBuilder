@@ -29,7 +29,10 @@
 
 import Foundation
 
+/// The kind of a variable declaration.
 public enum VariableKind {
+  /// A `let` declaration.
   case `let`
+  /// A `var` declaration.
   case `var`
 }
