@@ -1,6 +1,6 @@
 # SyntaxKit
 
-SyntaxKit is a Swift package that allows developers to build Swift code using result builders. It provides a declarative way to generate Swift code structures using SwiftSyntax.
+SyntaxKit is a Swift package that allows developers to build Swift code using result builders.
 
 [![](https://img.shields.io/badge/docc-read_documentation-blue)](https://swiftpackageindex.com/brightdigit/SyntaxKit/documentation)
 [![SwiftPM](https://img.shields.io/badge/SPM-Linux%20%7C%20iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-success?logo=swift)](https://swift.org)
@@ -15,6 +15,8 @@ SyntaxKit is a Swift package that allows developers to build Swift code using re
 [![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/brightdigit/SyntaxKit)](https://www.codefactor.io/repository/github/brightdigit/SyntaxKit)
 [![codebeat badge](https://codebeat.co/badges/ad53f31b-de7a-4579-89db-d94eb57dfcaa)](https://codebeat.co/projects/github-com-brightdigit-SyntaxKit-main)
 [![Maintainability](https://qlty.sh/badges/55637213-d307-477e-a710-f9dba332d955/maintainability.svg)](https://qlty.sh/gh/brightdigit/projects/SyntaxKit)
+
+SyntaxKit provides a declarative way to generate Swift code structures using SwiftSyntax.
 
 ## Installation
 
