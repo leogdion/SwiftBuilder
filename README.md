@@ -24,7 +24,7 @@ Add SyntaxKit to your project using Swift Package Manager:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/yourusername/SyntaxKit.git", from: "0.0.1")
+    .package(url: "https://github.com/brightdigit/SyntaxKit.git", from: "0.0.1")
 ]
 ```
 
