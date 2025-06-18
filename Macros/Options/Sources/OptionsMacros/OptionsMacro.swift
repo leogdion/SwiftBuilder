@@ -35,24 +35,14 @@ import SyntaxKit
 public struct OptionsMacro: ExtensionMacro, PeerMacro {
   public static func expansion(of node: SwiftSyntax.AttributeSyntax, attachedTo declaration: some SwiftSyntax.DeclGroupSyntax, providingExtensionsOf type: some SwiftSyntax.TypeSyntaxProtocol, conformingTo protocols: [SwiftSyntax.TypeSyntax], in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
     
-      guard let enumDecl = declaration.as(EnumDeclSyntax.self) else {
-        throw InvalidDeclError.kind(declaration.kind)
-      }
-    let typeName = enumDecl.name
-
-    guard let extensionDeclSyntax : ExtensionDeclSyntax = .init(TypeAlias("\(typeName.trimmed)Set", equals: "EnumSet<\(typeName)>").expr) else {
+    guard let enumDecl = declaration.as(EnumDeclSyntax.self) else {
       throw InvalidDeclError.kind(declaration.kind)
     }
-    return [
-      extensionDeclSyntax
-    ]
-//    let aliasName: TokenSyntax = "\(typeName.trimmed)Set"
-//
-//    let initializerName: TokenSyntax = "EnumSet<\(typeName)>"
-//
-//    return [
-//      .init(TypeAliasDeclSyntax(name: aliasName, for: initializerName))
-//    ]
+
+    let extensionDecl = try ExtensionDeclSyntax(
+      enumDecl: enumDecl, conformingTo: protocols
+    )
+    return [extensionDecl]
   }
   
   public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingPeersOf declaration: some SwiftSyntax.DeclSyntaxProtocol, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
@@ -60,11 +50,14 @@ public struct OptionsMacro: ExtensionMacro, PeerMacro {
       throw InvalidDeclError.kind(declaration.kind)
     }
     
-    fatalError()
-//    let extensionDecl = try ExtensionDeclSyntax(
-//      enumDecl: enumDecl, conformingTo: protocols
-//    )
-//    return [extensionDecl]
+  let typeName = enumDecl.name
+
+  guard let declSyntax : DeclSyntax = .init(TypeAlias("\(typeName.trimmed)Set", equals: "EnumSet<\(typeName)>").expr) else {
+    throw InvalidDeclError.kind(declaration.kind)
+  }
+  return [
+    declSyntax
+  ]
   }
   
 }
