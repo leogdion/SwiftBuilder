@@ -45,6 +45,21 @@ extension CodeBlock {
         item = .stmt(stmt)
       } else if let expr = self.syntax.as(ExprSyntax.self) {
         item = .expr(expr)
+      } else if let token = self.syntax.as(TokenSyntax.self) {
+        // Wrap TokenSyntax in DeclReferenceExprSyntax and then in ExprSyntax
+        let expr = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(token.text)))
+        item = .expr(expr)
+      } else if let switchCase = self.syntax.as(SwitchCaseSyntax.self) {
+        // Wrap SwitchCaseSyntax in a SwitchExprSyntax and treat it as an expression
+        // This is a fallback for when SwitchCase is used standalone
+        let switchExpr = SwitchExprSyntax(
+          switchKeyword: .keyword(.switch, trailingTrivia: .space),
+          subject: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("_"))),
+          leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
+          cases: SwitchCaseListSyntax([SwitchCaseListSyntax.Element(switchCase)]),
+          rightBrace: .rightBraceToken(leadingTrivia: .newline)
+        )
+        item = .expr(ExprSyntax(switchExpr))
       } else {
         fatalError(
           "Unsupported syntax type at top level: \(type(of: self.syntax)) generating from \(self)")

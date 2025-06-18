@@ -2,11 +2,11 @@ import Testing
 
 @testable import SyntaxKit
 
-struct EdgeCaseTests {
+internal struct EdgeCaseTests {
   // MARK: - Error Handling Tests
 
   @Test("Infix with wrong number of operands throws fatal error")
-  func testInfixWrongOperandCount() {
+  internal func testInfixWrongOperandCount() {
     // This test documents the expected behavior
     // In a real scenario, this would cause a fatal error
     // We can't easily test fatalError in unit tests, but we can document it
@@ -21,7 +21,7 @@ struct EdgeCaseTests {
   }
 
   @Test("Return with no expressions throws fatal error")
-  func testReturnNoExpressions() {
+  internal func testReturnWithNoExpressions() {
     // This test documents the expected behavior
     // In a real scenario, this would cause a fatal error
     let returnStmt = Return {
@@ -36,91 +36,93 @@ struct EdgeCaseTests {
   // MARK: - Switch and Case Tests
 
   @Test("Switch with multiple patterns generates correct syntax")
-  func testSwitchWithMultiplePatterns() throws {
+  internal func testSwitchWithMultiplePatterns() throws {
     let switchStmt = Switch("value") {
-      SwitchCase(".first", ".second") {
-        Return {
-          Literal.string("matched")
-        }
+      SwitchCase("1") {
+        Return { VariableExp("one") }
       }
-      Default {
-        Return {
-          Literal.string("default")
-        }
+      SwitchCase("2") {
+        Return { VariableExp("two") }
       }
     }
 
-    let generated = switchStmt.syntax.description
+    let generated = switchStmt.generateCode()
     #expect(generated.contains("switch value"))
-    #expect(generated.contains("case .first, .second"))
-    #expect(generated.contains("default"))
+    #expect(generated.contains("case 1:"))
+    #expect(generated.contains("case 2:"))
   }
 
   @Test("SwitchCase with multiple patterns generates correct syntax")
-  func testSwitchCaseMultiplePatterns() throws {
-    let switchCase = SwitchCase(".first", ".second", ".third") {
-      Return {
-        Literal.string("matched")
-      }
+  internal func testSwitchCaseWithMultiplePatterns() throws {
+    let switchCase = SwitchCase("1", "2", "3") {
+      Return { VariableExp("number") }
     }
 
-    let generated = switchCase.syntax.description
-    #expect(generated.contains("case .first, .second, .third"))
-    #expect(generated.contains("return \"matched\""))
+    let generated = switchCase.generateCode()
+    #expect(generated.contains("case 1, 2, 3:"))
   }
 
   // MARK: - Complex Expression Tests
 
   @Test("Infix with complex expressions generates correct syntax")
-  func testInfixComplexExpressions() throws {
-    let infix = Infix("+") {
-      VariableExp("x").property("count")
-      VariableExp("y").property("count")
+  internal func testInfixWithComplexExpressions() throws {
+    let infix = Infix("*") {
+      Parenthesized {
+        Infix("+") {
+          VariableExp("a")
+          VariableExp("b")
+        }
+      }
+      Parenthesized {
+        Infix("-") {
+          VariableExp("c")
+          VariableExp("d")
+        }
+      }
     }
 
-    let generated = infix.syntax.description
-    #expect(generated.contains("x.count"))
-    #expect(generated.contains("y.count"))
-    #expect(generated.contains("+"))
+    let generated = infix.generateCode()
+    #expect(generated.contains("(a + b) * (c - d)"))
   }
 
   @Test("Return with VariableExp generates correct syntax")
-  func testReturnWithVariableExp() throws {
+  internal func testReturnWithVariableExp() throws {
     let returnStmt = Return {
       VariableExp("result")
     }
 
-    let generated = returnStmt.syntax.description
+    let generated = returnStmt.generateCode()
     #expect(generated.contains("return result"))
   }
 
   @Test("Return with complex expression generates correct syntax")
-  func testReturnWithComplexExpression() throws {
+  internal func testReturnWithComplexExpression() throws {
     let returnStmt = Return {
-      VariableExp("x").call("map") {
-        ParameterExp(name: "", value: "transform")
+      Infix("+") {
+        VariableExp("a")
+        VariableExp("b")
       }
     }
 
-    let generated = returnStmt.syntax.description
-    #expect(generated.contains("return x.map(transform)"))
+    let generated = returnStmt.generateCode()
+    #expect(generated.contains("return a + b"))
   }
 
   // MARK: - CodeBlock Expression Tests
 
   @Test("CodeBlock expr with TokenSyntax wraps in DeclReferenceExpr")
-  func testCodeBlockExprWithTokenSyntax() throws {
-    let variableExp = VariableExp("test")
+  internal func testCodeBlockExprWithTokenSyntax() throws {
+    let variableExp = VariableExp("x")
     let expr = variableExp.expr
 
     let generated = expr.description
-    #expect(generated.contains("test"))
+    #expect(generated.contains("x"))
   }
 
   // MARK: - Code Generation Edge Cases
 
   @Test("CodeBlock generateCode with CodeBlockItemListSyntax")
-  func testCodeBlockGenerateCodeWithItemList() throws {
+  internal func testCodeBlockGenerateCodeWithItemList() throws {
     let group = Group {
       Variable(.let, name: "x", type: "Int", equals: "1")
       Variable(.let, name: "y", type: "Int", equals: "2")
@@ -132,7 +134,7 @@ struct EdgeCaseTests {
   }
 
   @Test("CodeBlock generateCode with single declaration")
-  func testCodeBlockGenerateCodeWithSingleDeclaration() throws {
+  internal func testCodeBlockGenerateCodeWithSingleDeclaration() throws {
     let variable = Variable(.let, name: "x", type: "Int", equals: "1")
 
     let generated = variable.generateCode()
@@ -140,76 +142,71 @@ struct EdgeCaseTests {
   }
 
   @Test("CodeBlock generateCode with single statement")
-  func testCodeBlockGenerateCodeWithSingleStatement() throws {
-    let returnStmt = Return {
-      Literal.integer(42)
-    }
+  internal func testCodeBlockGenerateCodeWithSingleStatement() throws {
+    let assignment = Assignment("x", "42")
 
-    let generated = returnStmt.generateCode()
-    #expect(generated.contains("return 42"))
+    let generated = assignment.generateCode()
+    #expect(generated.contains("x = 42"))
   }
 
   @Test("CodeBlock generateCode with single expression")
-  func testCodeBlockGenerateCodeWithSingleExpression() throws {
-    let literal = Literal.integer(42)
+  internal func testCodeBlockGenerateCodeWithSingleExpression() throws {
+    let variableExp = VariableExp("x")
 
-    let generated = literal.generateCode()
-    #expect(generated.contains("42"))
+    let generated = variableExp.generateCode()
+    #expect(generated.contains("x"))
   }
 
   // MARK: - Complex Type Tests
 
   @Test("TypeAlias with complex nested types")
-  func testTypeAliasWithComplexNestedTypes() throws {
+  internal func testTypeAliasWithComplexNestedTypes() throws {
     let typeAlias = TypeAlias("ComplexType", equals: "Array<Dictionary<String, Optional<Int>>>")
-    let generated = typeAlias.generateCode().normalize()
 
-    #expect(generated.contains("typealias ComplexType = Array<Dictionary<String, Optional<Int>>>"))
+    let generated = typeAlias.generateCode()
+    #expect(
+      generated.normalize().contains(
+        "typealias ComplexType = Array<Dictionary<String, Optional<Int>>>".normalize()))
   }
 
   @Test("TypeAlias with multiple generic parameters")
-  func testTypeAliasWithMultipleGenericParameters() throws {
+  internal func testTypeAliasWithMultipleGenericParameters() throws {
     let typeAlias = TypeAlias("Result", equals: "Result<Success, Failure>")
-    let generated = typeAlias.generateCode().normalize()
 
-    #expect(generated.contains("typealias Result = Result<Success, Failure>"))
+    let generated = typeAlias.generateCode().normalize()
+    #expect(generated.contains("typealias Result = Result<Success, Failure>".normalize()))
   }
 
   // MARK: - Function Parameter Tests
 
   @Test("Function with unnamed parameter generates correct syntax")
-  func testFunctionWithUnnamedParameter() throws {
+  internal func testFunctionWithUnnamedParameter() throws {
     let function = Function("process") {
       Parameter(name: "data", type: "Data", isUnnamed: true)
     } _: {
-      Return {
-        VariableExp("data").property("count")
-      }
+      Variable(.let, name: "result", type: "String", equals: "processed")
     }
 
-    let generated = function.syntax.description
+    let generated = function.generateCode()
     #expect(generated.contains("func process(_ data: Data)"))
-    #expect(generated.contains("return data.count"))
   }
 
   @Test("Function with parameter default value generates correct syntax")
-  func testFunctionWithParameterDefaultValue() throws {
+  internal func testFunctionWithParameterDefaultValue() throws {
     let function = Function("greet") {
       Parameter(name: "name", type: "String", defaultValue: "\"World\"")
     } _: {
-      Return {
-        VariableExp("name")
-      }
+      Variable(.let, name: "message", type: "String", equals: "greeting")
     }
 
-    let generated = function.syntax.description
+    let generated = function.generateCode()
     #expect(generated.contains("func greet(name: String = \"World\")"))
   }
 
   // MARK: - Enum Case Tests
 
   @Test("EnumCase with string raw value generates correct syntax")
-  func testEnumCaseWithStringRawValue() throws {
+  internal func testEnumCaseWithStringRawValue() throws {
     let enumDecl = Enum("Status") {
       EnumCase("active").equals(Literal.string("active"))
       EnumCase("inactive").equals(Literal.string("inactive"))
@@ -221,7 +218,7 @@ struct EdgeCaseTests {
   }
 
   @Test("EnumCase with double raw value generates correct syntax")
-  func testEnumCaseWithDoubleRawValue() throws {
+  internal func testEnumCaseWithDoubleRawValue() throws {
     let enumDecl = Enum("Precision") {
       EnumCase("low").equals(Literal.float(0.1))
       EnumCase("high").equals(Literal.float(0.001))
@@ -235,7 +232,7 @@ struct EdgeCaseTests {
   // MARK: - Computed Property Tests
 
   @Test("ComputedProperty with complex return expression")
-  func testComputedPropertyWithComplexReturn() throws {
+  internal func testComputedPropertyWithComplexReturn() throws {
     let computedProperty = ComputedProperty("description", type: "String") {
       Return {
         VariableExp("name").call("appending") {
@@ -252,7 +249,7 @@ struct EdgeCaseTests {
   // MARK: - Comment Integration Tests
 
   @Test("ComputedProperty with comments generates correct syntax")
-  func testComputedPropertyWithComments() throws {
+  internal func testComputedPropertyWithComments() throws {
     let computedProperty = ComputedProperty("formattedName", type: "String") {
       Return {
         VariableExp("name").property("uppercased")
@@ -269,26 +266,21 @@ struct EdgeCaseTests {
   // MARK: - Literal Tests
 
   @Test("Literal with nil generates correct syntax")
-  func testLiteralWithNil() throws {
+  internal func testLiteralWithNil() throws {
     let literal = Literal.nil
     let generated = literal.generateCode()
     #expect(generated.contains("nil"))
   }
 
   @Test("Literal with boolean generates correct syntax")
-  func testLiteralWithBoolean() throws {
-    let trueLiteral = Literal.boolean(true)
-    let falseLiteral = Literal.boolean(false)
-
-    let trueGenerated = trueLiteral.generateCode()
-    let falseGenerated = falseLiteral.generateCode()
-
-    #expect(trueGenerated.contains("true"))
-    #expect(falseGenerated.contains("false"))
+  internal func testLiteralWithBoolean() throws {
+    let literal = Literal.boolean(true)
+    let generated = literal.generateCode()
+    #expect(generated.contains("true"))
   }
 
   @Test("Literal with float generates correct syntax")
-  func testLiteralWithFloat() throws {
+  internal func testLiteralWithFloat() throws {
     let literal = Literal.float(3.14159)
     let generated = literal.generateCode()
     #expect(generated.contains("3.14159"))

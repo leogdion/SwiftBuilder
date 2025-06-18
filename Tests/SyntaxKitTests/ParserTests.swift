@@ -2,11 +2,11 @@ import Testing
 
 @testable import SyntaxKit
 
-struct ParserTests {
+internal struct ParserTests {
   // MARK: - Syntax Parser Tests
 
   @Test("SyntaxParser parses valid Swift code")
-  func testSyntaxParserValidCode() throws {
+  internal func testSyntaxParserValidCode() throws {
     let code = """
       struct Test {
           let value: String
@@ -21,7 +21,7 @@ struct ParserTests {
   }
 
   @Test("SyntaxParser handles empty code")
-  func testSyntaxParserEmptyCode() throws {
+  internal func testSyntaxParserEmptyCode() throws {
     let code = ""
 
     let response = try SyntaxParser.parse(code: code, options: [])
@@ -30,18 +30,18 @@ struct ParserTests {
   }
 
   @Test("SyntaxParser handles invalid Swift code")
-  func testSyntaxParserInvalidCode() throws {
+  internal func testSyntaxParserInvalidCode() throws {
     let code = "struct {"
     let response = try SyntaxParser.parse(code: code, options: [])
     #expect(!response.syntaxJSON.isEmpty)
   }
 
   @Test("SyntaxParser with different options")
-  func testSyntaxParserWithOptions() throws {
+  internal func testSyntaxParserWithDifferentOptions() throws {
     let code = "let x = 42"
 
-    let response1 = try SyntaxParser.parse(code: code, options: ["fold"])
-    let response2 = try SyntaxParser.parse(code: code, options: ["unfold"])
+    let response1 = try SyntaxParser.parse(code: code, options: [])
+    let response2 = try SyntaxParser.parse(code: code, options: ["fold"])
 
     #expect(!response1.syntaxJSON.isEmpty)
     #expect(!response2.syntaxJSON.isEmpty)
@@ -52,7 +52,7 @@ struct ParserTests {
   // MARK: - Token Visitor Tests
 
   @Test("TokenVisitor processes tokens correctly")
-  func testTokenVisitorProcessing() throws {
+  internal func testTokenVisitorProcessesTokensCorrectly() throws {
     let code = "let x = 42"
 
     // This tests the token visitor functionality
@@ -69,7 +69,7 @@ struct ParserTests {
   // MARK: - Error Handling Tests
 
   @Test("SyntaxParser handles malformed JSON options")
-  func testSyntaxParserMalformedOptions() throws {
+  internal func testSyntaxParserHandlesMalformedJSONOptions() throws {
     let code = "let x = 42"
 
     // Test with invalid options
@@ -85,7 +85,7 @@ struct ParserTests {
   // MARK: - Complex Code Tests
 
   @Test("SyntaxParser handles complex Swift code")
-  func testSyntaxParserComplexCode() throws {
+  internal func testSyntaxParserComplexCode() throws {
     let code = """
       @objc class MyClass: NSObject {
           @Published var property: String = "default"
@@ -113,7 +113,7 @@ struct ParserTests {
   }
 
   @Test("SyntaxParser handles comments")
-  func testSyntaxParserWithComments() throws {
+  internal func testSyntaxParserHandlesComments() throws {
     let code = """
       // This is a comment
       struct Test {
@@ -130,7 +130,7 @@ struct ParserTests {
   }
 
   @Test("SyntaxParser handles multiline strings")
-  func testSyntaxParserMultilineStrings() throws {
+  internal func testSyntaxParserHandlesMultilineStrings() throws {
     let code = """
       let multiline = \"\"\"
       This is a
@@ -147,7 +147,7 @@ struct ParserTests {
   // MARK: - Performance Tests
 
   @Test("SyntaxParser handles large code files")
-  func testSyntaxParserLargeCode() throws {
+  internal func testSyntaxParserLargeCodeFiles() throws {
     // Generate a large Swift file
     var largeCode = ""
     for index in 1...100 {
@@ -172,7 +172,7 @@ struct ParserTests {
   // MARK: - Edge Cases
 
   @Test("SyntaxParser handles unicode characters")
-  func testSyntaxParserUnicode() throws {
+  internal func testSyntaxParserHandlesUnicodeCharacters() throws {
     let code = """
       let emoji = "🚀"
       let unicode = "café"
@@ -188,7 +188,7 @@ struct ParserTests {
   }
 
   @Test("SyntaxParser handles special characters in identifiers")
-  func testSyntaxParserSpecialCharacters() throws {
+  internal func testSyntaxParserHandlesSpecialCharactersInIdentifiers() throws {
     let code = """
       let `class` = "reserved"
       let `var` = "keyword"
