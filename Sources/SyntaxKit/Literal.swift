@@ -29,6 +29,15 @@
 
 import SwiftSyntax
 
+/// A protocol for types that can be represented as literal values in Swift code.
+public protocol LiteralValue {
+  /// The Swift type name for this literal value.
+  var typeName: String { get }
+
+  /// Renders this value as a Swift literal string.
+  var literalString: String { get }
+}
+
 /// A literal value.
 public enum Literal: CodeBlock {
   /// A string literal.
@@ -62,5 +71,45 @@ public enum Literal: CodeBlock {
     case .boolean(let value):
       return BooleanLiteralExprSyntax(literal: value ? .keyword(.true) : .keyword(.false))
     }
+  }
+}
+
+// MARK: - LiteralValue Implementations
+
+extension Array: LiteralValue where Element == String {
+  public var typeName: String { "[String]" }
+
+  public var literalString: String {
+    let elements = self.map { element in
+      // Escape quotes and newlines
+      let escaped =
+        element
+        .replacingOccurrences(of: "\\", with: "\\\\")
+        .replacingOccurrences(of: "\"", with: "\\\"")
+        .replacingOccurrences(of: "\n", with: "\\n")
+        .replacingOccurrences(of: "\r", with: "\\r")
+        .replacingOccurrences(of: "\t", with: "\\t")
+      return "\"\(escaped)\""
+    }.joined(separator: ", ")
+    return "[\(elements)]"
+  }
+}
+
+extension Dictionary: LiteralValue where Key == Int, Value == String {
+  public var typeName: String { "[Int: String]" }
+
+  public var literalString: String {
+    let elements = self.map { key, value in
+      // Escape quotes and newlines
+      let escaped =
+        value
+        .replacingOccurrences(of: "\\", with: "\\\\")
+        .replacingOccurrences(of: "\"", with: "\\\"")
+        .replacingOccurrences(of: "\n", with: "\\n")
+        .replacingOccurrences(of: "\r", with: "\\r")
+        .replacingOccurrences(of: "\t", with: "\\t")
+      return "\(key): \"\(escaped)\""
+    }.joined(separator: ", ")
+    return "[\(elements)]"
   }
 }
