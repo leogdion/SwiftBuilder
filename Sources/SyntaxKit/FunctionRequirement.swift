@@ -144,4 +144,4 @@ public struct FunctionRequirement: CodeBlock {
       body: nil
     )
   }
-} 
+}

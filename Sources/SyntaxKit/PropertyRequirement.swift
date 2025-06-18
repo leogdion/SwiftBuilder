@@ -77,7 +77,7 @@ public struct PropertyRequirement: CodeBlock {
           ),
           AccessorDeclSyntax(
             accessorSpecifier: .keyword(.set, trailingTrivia: .space)
-          )
+          ),
         ])
       }
     }()
@@ -99,4 +99,4 @@ public struct PropertyRequirement: CodeBlock {
       ])
     )
   }
-} 
+}

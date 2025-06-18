@@ -101,4 +101,4 @@ public struct Protocol: CodeBlock {
       memberBlock: memberBlock
     )
   }
-} 
+}

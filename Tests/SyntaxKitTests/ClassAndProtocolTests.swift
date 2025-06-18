@@ -44,4 +44,4 @@ struct ClassAndProtocolTests {
     let normalizedExpected = expected.normalize()
     #expect(normalizedGenerated == normalizedExpected)
   }
-} 
+}

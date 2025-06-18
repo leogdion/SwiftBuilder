@@ -198,6 +198,14 @@ struct BlackjackCard {
 - ``VariableDecl``
 - ``Let``
 - ``Variable``
+- ``Extension``
+- ``Class``
+- ``Protocol``
+- ``Tuple``
+- ``TypeAlias``
+- ``Infix``
+- ``PropertyRequirement``
+- ``FunctionRequirement``
 
 ### Expressions & Statements
 - ``Assignment``

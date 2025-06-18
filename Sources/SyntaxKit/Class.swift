@@ -147,4 +147,4 @@ public struct Class: CodeBlock {
       memberBlock: memberBlock
     )
   }
-} 
+}
