@@ -29,6 +29,7 @@
 
 import SwiftSyntax
 
+#if !canImport(SyntaxKit)
 extension DeclModifierSyntax {
   internal var isNeededAccessLevelModifier: Bool {
     switch name.tokenKind {
@@ -37,3 +38,4 @@ extension DeclModifierSyntax {
     }
   }
 }
+#endif

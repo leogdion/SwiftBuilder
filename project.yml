@@ -6,6 +6,8 @@ packages:
     path: .
   SKSampleMacro:
     path: Macros/SKSampleMacro
+  Options:
+    path: Macros/Options
 aggregateTargets:
   Lint:
     buildScripts:

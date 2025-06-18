@@ -1,9 +1,9 @@
 //
-//  DictionaryExprSyntax.swift
-//  SimulatorServices
+//  TypeAlias.swift
+//  SyntaxKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2024 BrightDigit.
+//  Copyright © 2025 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -29,16 +29,37 @@
 
 import SwiftSyntax
 
+/// A Swift `typealias` declaration.
+public struct TypeAlias: CodeBlock {
+  private let name: String
+  private let existingType: String
 
-#if !canImport(SyntaxKit)
-extension DictionaryExprSyntax {
-  internal init(keyValues: KeyValues) {
-    let dictionaryElements = keyValues.dictionary.map(DictionaryElementSyntax.init(pair:))
+  /// Creates a `typealias` declaration.
+  /// - Parameters:
+  ///   - name: The new name that will alias the existing type.
+  ///   - type: The existing type that is being aliased.
+  public init(_ name: String, equals type: String) {
+    self.name = name
+    self.existingType = type
+  }
 
-    let list = DictionaryElementListSyntax {
-      .init(dictionaryElements)
-    }
-    self.init(content: .elements(list))
+  public var syntax: SyntaxProtocol {
+    // `typealias` keyword token
+    let keyword = TokenSyntax.keyword(.typealias, trailingTrivia: .space)
+
+    // Alias identifier
+    let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
+
+    // Initializer clause – `= ExistingType`
+    let initializer = TypeInitializerClauseSyntax(
+      equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+      value: IdentifierTypeSyntax(name: .identifier(existingType))
+    )
+
+    return TypeAliasDeclSyntax(
+      typealiasKeyword: keyword,
+      name: identifier,
+      initializer: initializer
+    )
   }
 }
-#endif

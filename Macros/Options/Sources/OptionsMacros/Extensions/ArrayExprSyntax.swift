@@ -29,6 +29,8 @@
 
 import SwiftSyntax
 
+
+#if !canImport(SyntaxKit)
 extension ArrayExprSyntax {
   internal init<T>(
     from items: some Collection<T>,
@@ -41,3 +43,4 @@ extension ArrayExprSyntax {
     self.init(elements: arrayElement)
   }
 }
+#endif

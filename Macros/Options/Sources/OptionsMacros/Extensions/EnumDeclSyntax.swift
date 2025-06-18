@@ -29,6 +29,8 @@
 
 import SwiftSyntax
 
+
+#if !canImport(SyntaxKit)
 extension EnumDeclSyntax {
   internal var caseElements: [EnumCaseElementSyntax] {
     memberBlock.members.flatMap { member in
@@ -40,3 +42,4 @@ extension EnumDeclSyntax {
     }
   }
 }
+#endif

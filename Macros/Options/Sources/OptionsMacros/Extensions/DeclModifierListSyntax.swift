@@ -29,6 +29,8 @@
 
 import SwiftSyntax
 
+
+#if !canImport(SyntaxKit)
 extension DeclModifierListSyntax {
   internal init(keywordModifier: Keyword?) {
     if let keywordModifier {
@@ -40,3 +42,4 @@ extension DeclModifierListSyntax {
     }
   }
 }
+#endif

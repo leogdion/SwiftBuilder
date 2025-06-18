@@ -29,6 +29,8 @@
 
 import SwiftSyntax
 
+
+#if !canImport(SyntaxKit)
 extension DictionaryElementSyntax {
   internal init(pair: (key: Int, value: String)) {
     self.init(key: pair.key, value: pair.value)
@@ -45,3 +47,4 @@ extension DictionaryElementSyntax {
     )
   }
 }
+#endif

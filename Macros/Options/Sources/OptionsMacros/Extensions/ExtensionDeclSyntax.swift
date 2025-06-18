@@ -29,6 +29,7 @@
 
 import SwiftSyntax
 
+#if !canImport(SyntaxKit)
 extension ExtensionDeclSyntax {
   internal init(
     enumDecl: EnumDeclSyntax,
@@ -55,3 +56,4 @@ extension ExtensionDeclSyntax {
     )
   }
 }
+#endif

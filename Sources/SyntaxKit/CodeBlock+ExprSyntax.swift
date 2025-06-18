@@ -27,4 +27,4 @@ extension CodeBlock {
 
     fatalError("CodeBlock of type \(type(of: self.syntax)) cannot be represented as ExprSyntax")
   }
-} 
+}

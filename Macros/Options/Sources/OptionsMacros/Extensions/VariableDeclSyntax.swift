@@ -29,6 +29,8 @@
 
 import SwiftSyntax
 
+
+#if !canImport(SyntaxKit)
 extension VariableDeclSyntax {
   internal init(
     keywordModifier: Keyword?,
@@ -79,3 +81,4 @@ extension VariableDeclSyntax {
     )
   }
 }
+#endif

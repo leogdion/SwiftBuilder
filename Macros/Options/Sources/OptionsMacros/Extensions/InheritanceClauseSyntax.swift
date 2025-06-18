@@ -29,6 +29,8 @@
 
 import SwiftSyntax
 
+
+#if !canImport(SyntaxKit)
 extension InheritanceClauseSyntax {
   internal init(protocols: [SwiftSyntax.TypeSyntax]) {
     self.init(
@@ -42,3 +44,4 @@ extension InheritanceClauseSyntax {
     )
   }
 }
+#endif

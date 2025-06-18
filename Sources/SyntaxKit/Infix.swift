@@ -67,4 +67,4 @@ public struct Infix: CodeBlock {
       ])
     )
   }
-} 
+}

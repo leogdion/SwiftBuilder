@@ -29,6 +29,8 @@
 
 import SwiftSyntax
 
+
+#if !canImport(SyntaxKit)
 extension TypeAliasDeclSyntax {
   internal init(name: TokenSyntax, for initializerTypeName: TokenSyntax) {
     self.init(
@@ -37,3 +39,4 @@ extension TypeAliasDeclSyntax {
     )
   }
 }
+#endif
