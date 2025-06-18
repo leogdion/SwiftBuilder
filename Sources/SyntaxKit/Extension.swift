@@ -34,22 +34,34 @@ public struct Extension: CodeBlock {
   private let extendedType: String
   private let members: [CodeBlock]
   private var inheritance: [String] = []
+  private var attributes: [AttributeInfo] = []
 
-  /// Creates an `extension` declaration.
+  /// Creates an extension declaration.
   /// - Parameters:
-  ///   - extendedType: The name of the type being extended.
+  ///   - extendedType: The type being extended.
   ///   - content: A ``CodeBlockBuilder`` that provides the members of the extension.
   public init(_ extendedType: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
     self.extendedType = extendedType
     self.members = content()
   }
 
-  /// Sets the inheritance for the extension.
-  /// - Parameter types: The types to inherit from.
+  /// Sets one or more inherited protocols.
+  /// - Parameter types: The list of protocols this extension conforms to.
   /// - Returns: A copy of the extension with the inheritance set.
   public func inherits(_ types: String...) -> Self {
     var copy = self
     copy.inheritance = types
+    return copy
+  }
+
+  /// Adds an attribute to the extension declaration.
+  /// - Parameters:
+  ///   - attribute: The attribute name (without the @ symbol).
+  ///   - arguments: The arguments for the attribute, if any.
+  /// - Returns: A copy of the extension with the attribute added.
+  public func attribute(_ attribute: String, arguments: [String] = []) -> Self {
+    var copy = self
+    copy.attributes.append(AttributeInfo(name: attribute, arguments: arguments))
     return copy
   }
 
@@ -87,10 +99,56 @@ public struct Extension: CodeBlock {
     )
 
     return ExtensionDeclSyntax(
+      attributes: buildAttributeList(from: attributes),
       extensionKeyword: extensionKeyword,
       extendedType: IdentifierTypeSyntax(name: identifier),
       inheritanceClause: inheritanceClause,
       memberBlock: memberBlock
     )
+  }
+
+  private func buildAttributeList(from attributes: [AttributeInfo]) -> AttributeListSyntax {
+    if attributes.isEmpty {
+      return AttributeListSyntax([])
+    }
+    let attributeElements = attributes.map { attribute in
+      let arguments = attribute.arguments
+
+      var leftParen: TokenSyntax?
+      var rightParen: TokenSyntax?
+      var argumentsSyntax: AttributeSyntax.Arguments?
+
+      if !arguments.isEmpty {
+        leftParen = .leftParenToken()
+        rightParen = .rightParenToken()
+
+        let argumentList = arguments.map { argument in
+          DeclReferenceExprSyntax(baseName: .identifier(argument))
+        }
+
+        argumentsSyntax = .argumentList(
+          LabeledExprListSyntax(
+            argumentList.enumerated().map { index, expr in
+              var element = LabeledExprSyntax(expression: ExprSyntax(expr))
+              if index < argumentList.count - 1 {
+                element = element.with(\.trailingComma, .commaToken(trailingTrivia: .space))
+              }
+              return element
+            }
+          )
+        )
+      }
+
+      return AttributeListSyntax.Element(
+        AttributeSyntax(
+          atSign: .atSignToken(),
+          attributeName: IdentifierTypeSyntax(name: .identifier(attribute.name)),
+          leftParen: leftParen,
+          arguments: argumentsSyntax,
+          rightParen: rightParen
+        )
+      )
+    }
+    return AttributeListSyntax(attributeElements)
   }
 }

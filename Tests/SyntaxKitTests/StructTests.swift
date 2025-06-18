@@ -4,7 +4,7 @@ import Testing
 
 struct StructTests {
   @Test func testGenericStruct() {
-    let stackStruct = Struct("Stack", generic: "Element") {
+    let stackStruct = Struct("Stack") {
       Variable(.var, name: "items", type: "[Element]", equals: "[]")
 
       Function("push") {
@@ -30,7 +30,7 @@ struct StructTests {
       ComputedProperty("count", type: "Int") {
         Return { VariableExp("items").property("count") }
       }
-    }
+    }.generic("Element")
 
     let expectedCode = """
       struct Stack<Element> {
@@ -64,9 +64,9 @@ struct StructTests {
   }
 
   @Test func testGenericStructWithInheritance() {
-    let containerStruct = Struct("Container", generic: "T") {
+    let containerStruct = Struct("Container") {
       Variable(.var, name: "value", type: "T")
-    }.inherits("Equatable")
+    }.generic("T").inherits("Equatable")
 
     let expectedCode = """
       struct Container<T>: Equatable {

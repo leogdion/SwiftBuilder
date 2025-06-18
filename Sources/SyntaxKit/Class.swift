@@ -36,28 +36,32 @@ public struct Class: CodeBlock {
   private var inheritance: [String] = []
   private var genericParameters: [String] = []
   private var isFinal: Bool = false
+  private var attributes: [AttributeInfo] = []
 
   /// Creates a `class` declaration.
   /// - Parameters:
   ///   - name: The name of the class.
-  ///   - generics: A list of generic parameters for the class.
   ///   - content: A ``CodeBlockBuilder`` that provides the members of the class.
-  public init(
-    _ name: String,
-    generics: [String] = [],
-    @CodeBlockBuilderResult _ content: () -> [CodeBlock]
-  ) {
+  public init(_ name: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
     self.name = name
     self.members = content()
-    self.genericParameters = generics
   }
 
-  /// Sets one or more inherited types (superclass first followed by any protocols).
-  /// - Parameter types: The list of types to inherit from.
-  /// - Returns: A copy of the class with the inheritance set.
-  public func inherits(_ types: String...) -> Self {
+  /// Sets the generic parameters for the class.
+  /// - Parameter generics: The list of generic parameter names.
+  /// - Returns: A copy of the class with the generic parameters set.
+  public func generic(_ generics: String...) -> Self {
     var copy = self
-    copy.inheritance = types
+    copy.genericParameters = generics
+    return copy
+  }
+
+  /// Sets the inheritance for the class.
+  /// - Parameter type: The type to inherit from.
+  /// - Returns: A copy of the class with the inheritance set.
+  public func inherits(_ type: String) -> Self {
+    var copy = self
+    copy.inheritance = [type]
     return copy
   }
 
@@ -69,9 +73,23 @@ public struct Class: CodeBlock {
     return copy
   }
 
+  /// Adds an attribute to the class declaration.
+  /// - Parameters:
+  ///   - attribute: The attribute name (without the @ symbol).
+  ///   - arguments: The arguments for the attribute, if any.
+  /// - Returns: A copy of the class with the attribute added.
+  public func attribute(_ attribute: String, arguments: [String] = []) -> Self {
+    var copy = self
+    copy.attributes.append(AttributeInfo(name: attribute, arguments: arguments))
+    return copy
+  }
+
   public var syntax: SyntaxProtocol {
     let classKeyword = TokenSyntax.keyword(.class, trailingTrivia: .space)
     let identifier = TokenSyntax.identifier(name)
+
+    // Build attributes
+    let attributeList = buildAttributeList(from: attributes)
 
     // Generic parameter clause
     var genericParameterClause: GenericParameterClauseSyntax?
@@ -139,6 +157,7 @@ public struct Class: CodeBlock {
     }
 
     return ClassDeclSyntax(
+      attributes: attributeList,
       modifiers: modifiers,
       classKeyword: classKeyword,
       name: identifier,
@@ -146,5 +165,52 @@ public struct Class: CodeBlock {
       inheritanceClause: inheritanceClause,
       memberBlock: memberBlock
     )
+  }
+
+  private func buildAttributeList(from attributes: [AttributeInfo]) -> AttributeListSyntax {
+    if attributes.isEmpty {
+      return AttributeListSyntax([])
+    }
+
+    let attributeElements = attributes.map { attribute in
+      let arguments = attribute.arguments
+
+      var leftParen: TokenSyntax?
+      var rightParen: TokenSyntax?
+      var argumentsSyntax: AttributeSyntax.Arguments?
+
+      if !arguments.isEmpty {
+        leftParen = .leftParenToken()
+        rightParen = .rightParenToken()
+
+        let argumentList = arguments.map { argument in
+          DeclReferenceExprSyntax(baseName: .identifier(argument))
+        }
+
+        argumentsSyntax = .argumentList(
+          LabeledExprListSyntax(
+            argumentList.enumerated().map { index, expr in
+              var element = LabeledExprSyntax(expression: ExprSyntax(expr))
+              if index < argumentList.count - 1 {
+                element = element.with(\.trailingComma, .commaToken(trailingTrivia: .space))
+              }
+              return element
+            }
+          )
+        )
+      }
+
+      return AttributeListSyntax.Element(
+        AttributeSyntax(
+          atSign: .atSignToken(),
+          attributeName: IdentifierTypeSyntax(name: .identifier(attribute.name)),
+          leftParen: leftParen,
+          arguments: argumentsSyntax,
+          rightParen: rightParen
+        )
+      )
+    }
+
+    return AttributeListSyntax(attributeElements)
   }
 }
