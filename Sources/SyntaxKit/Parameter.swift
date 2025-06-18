@@ -37,7 +37,7 @@ public struct Parameter: CodeBlock {
   let type: String
   let defaultValue: String?
   let isUnnamed: Bool
-  private var attributes: [AttributeInfo] = []
+  internal var attributes: [AttributeInfo] = []
 
   /// Creates a parameter for a function or initializer.
   /// - Parameters:

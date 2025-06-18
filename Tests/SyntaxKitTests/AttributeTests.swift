@@ -164,4 +164,36 @@ import Testing
     #expect(generated.contains("17.0"))
     #expect(generated.contains("var bar"))
   }
+
+  @Test("Parameter with attribute generates correct syntax")
+  func testParameterWithAttribute() throws {
+    let function = Function("process") {
+      Parameter(name: "data", type: "Data")
+        .attribute("escaping")
+    } _: {
+      Variable(.let, name: "result", type: "String", equals: "processed")
+    }
+
+    let generated = function.syntax.description
+    #expect(generated.contains("@escaping"))
+    #expect(generated.contains("data: Data"))
+    #expect(generated.contains("func process"))
+  }
+
+  @Test("Parameter with attribute arguments generates correct syntax")
+  func testParameterWithAttributeArguments() throws {
+    let function = Function("validate") {
+      Parameter(name: "input", type: "String")
+        .attribute("available", arguments: ["iOS", "17.0"])
+    } _: {
+      Variable(.let, name: "result", type: "Bool", equals: "true")
+    }
+
+    let generated = function.syntax.description
+    #expect(generated.contains("@available"))
+    #expect(generated.contains("iOS"))
+    #expect(generated.contains("17.0"))
+    #expect(generated.contains("input: String"))
+    #expect(generated.contains("func validate"))
+  }
 }

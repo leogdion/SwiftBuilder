@@ -110,11 +110,20 @@ public struct Function: CodeBlock {
       paramList = FunctionParameterListSyntax(
         parameters.enumerated().compactMap { index, param in
           guard !param.name.isEmpty, !param.type.isEmpty else { return nil }
+
+          // Build parameter attributes
+          let paramAttributes = buildAttributeList(from: param.attributes)
+
+          // Determine spacing for firstName based on whether attributes are present
+          let firstNameLeadingTrivia: Trivia = paramAttributes.isEmpty ? [] : .space
+
           var paramSyntax = FunctionParameterSyntax(
+            attributes: paramAttributes,
             firstName: param.isUnnamed
-              ? .wildcardToken(trailingTrivia: .space) : .identifier(param.name),
+              ? .wildcardToken(leadingTrivia: firstNameLeadingTrivia)
+              : .identifier(param.name, leadingTrivia: firstNameLeadingTrivia),
             secondName: param.isUnnamed ? .identifier(param.name) : nil,
-            colon: .colonToken(leadingTrivia: .space, trailingTrivia: .space),
+            colon: .colonToken(trailingTrivia: .space),
             type: IdentifierTypeSyntax(name: .identifier(param.type)),
             defaultValue: param.defaultValue.map {
               InitializerClauseSyntax(
