@@ -39,10 +39,46 @@ public struct OptionsMacro: ExtensionMacro, PeerMacro {
       throw InvalidDeclError.kind(declaration.kind)
     }
 
-    let extensionDecl = try ExtensionDeclSyntax(
-      enumDecl: enumDecl, conformingTo: protocols
+    // Build `typealias <EnumName>Set = EnumSet<EnumName>`
+    let typeName = enumDecl.name
+    let aliasName = "\(typeName.trimmed)Set"
+    let aliasDecl = TypeAlias(aliasName, equals: "EnumSet<\(typeName)>").syntax
+
+    let memberItem = MemberBlockItemSyntax(
+      decl: DeclSyntax(aliasDecl.as(TypeAliasDeclSyntax.self)! ),
+      trailingTrivia: .newline
     )
-    return [extensionDecl]
+
+    // Build member block
+    let memberBlock = MemberBlockSyntax(
+      leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
+      members: MemberBlockItemListSyntax([memberItem]),
+      rightBrace: .rightBraceToken(leadingTrivia: .newline)
+    )
+
+    // Build inheritance clause from `protocols` argument
+    let inheritanceClause: InheritanceClauseSyntax? = protocols.isEmpty ? nil : InheritanceClauseSyntax(
+      colon: .colonToken(),
+      inheritedTypes: InheritedTypeListSyntax(
+        protocols.enumerated().map { idx, proto in
+          var inherited = InheritedTypeSyntax(type: proto)
+          if idx < protocols.count - 1 {
+            inherited = inherited.with(\.trailingComma, .commaToken(trailingTrivia: .space))
+          }
+          return inherited
+        }
+      )
+    )
+
+    // Assemble extension
+    let extDecl = ExtensionDeclSyntax(
+      modifiers: DeclModifierListSyntax([]),
+      extendedType: IdentifierTypeSyntax(name: typeName),
+      inheritanceClause: inheritanceClause,
+      memberBlock: memberBlock
+    )
+
+    return [extDecl]
   }
   
   public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingPeersOf declaration: some SwiftSyntax.DeclSyntaxProtocol, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
@@ -50,7 +86,7 @@ public struct OptionsMacro: ExtensionMacro, PeerMacro {
       throw InvalidDeclError.kind(declaration.kind)
     }
     
-  let typeName = enumDecl.name
+    let typeName = enumDecl.name
 
   guard let declSyntax : DeclSyntax = .init(TypeAlias("\(typeName.trimmed)Set", equals: "EnumSet<\(typeName)>").expr) else {
     throw InvalidDeclError.kind(declaration.kind)

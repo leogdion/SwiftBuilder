@@ -7,16 +7,6 @@
 import CompilerPluginSupport
 import PackageDescription
 
-let swiftSettings = [
-  SwiftSetting.enableUpcomingFeature("BareSlashRegexLiterals"),
-  SwiftSetting.enableUpcomingFeature("ConciseMagicFile"),
-  SwiftSetting.enableUpcomingFeature("ExistentialAny"),
-  SwiftSetting.enableUpcomingFeature("ForwardTrailingClosures"),
-  SwiftSetting.enableUpcomingFeature("ImplicitOpenExistentials"),
-  SwiftSetting.enableUpcomingFeature("StrictConcurrency"),
-  SwiftSetting.enableUpcomingFeature("DisableOutwardActorInference"),
-  SwiftSetting.enableExperimentalFeature("StrictConcurrency")
-]
 
 let package = Package(
   name: "Options",
@@ -42,8 +32,7 @@ let package = Package(
   targets: [
     .target(
       name: "Options",
-      dependencies: ["OptionsMacros"],
-      swiftSettings: swiftSettings
+      dependencies: ["OptionsMacros"]
     ),
     .macro(
       name: "OptionsMacros",
@@ -51,8 +40,7 @@ let package = Package(
         .product(name: "SyntaxKit", package: "SyntaxKit"),
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
-      ],
-      swiftSettings: swiftSettings
+      ]
     ),
     .testTarget(
       name: "OptionsTests",
