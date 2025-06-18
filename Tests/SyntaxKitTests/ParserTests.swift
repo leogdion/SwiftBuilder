@@ -150,12 +150,12 @@ struct ParserTests {
   func testSyntaxParserLargeCode() throws {
     // Generate a large Swift file
     var largeCode = ""
-    for i in 1...100 {
+    for index in 1...100 {
       largeCode += """
-        struct Struct\(i) {
-            let property\(i): String
-            func method\(i)() -> String {
-                return "value\(i)"
+        struct Struct\(index) {
+            let property\(index): String
+            func method\(index)() -> String {
+                return "value\(index)"
             }
         }
 
