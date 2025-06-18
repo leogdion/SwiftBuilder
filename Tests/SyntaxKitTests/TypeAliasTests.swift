@@ -32,65 +32,64 @@ import Testing
 @testable import SyntaxKit
 
 struct TypeAliasTests {
-  
   // MARK: - Basic TypeAlias Tests
-  
+
   @Test func testBasicTypeAlias() {
     let typeAlias = TypeAlias("MappedType", equals: "String")
     let generated = typeAlias.generateCode().normalize()
-    
+
     #expect(generated.contains("typealias MappedType = String"))
   }
-  
+
   @Test func testTypeAliasWithComplexType() {
     let typeAlias = TypeAlias("ResultType", equals: "Result<String, Error>")
     let generated = typeAlias.generateCode().normalize()
-    
+
     #expect(generated.contains("typealias ResultType = Result<String, Error>"))
   }
-  
+
   @Test func testTypeAliasWithGenericType() {
     let typeAlias = TypeAlias("ArrayType", equals: "Array<Int>")
     let generated = typeAlias.generateCode().normalize()
-    
+
     #expect(generated.contains("typealias ArrayType = Array<Int>"))
   }
-  
+
   @Test func testTypeAliasWithOptionalType() {
     let typeAlias = TypeAlias("OptionalString", equals: "String?")
     let generated = typeAlias.generateCode().normalize()
-    
+
     #expect(generated.contains("typealias OptionalString = String?"))
   }
-  
+
   // MARK: - TypeAlias in Context Tests
-  
+
   @Test func testTypeAliasInExtension() {
     let extensionDecl = Extension("MyEnum") {
       TypeAlias("MappedType", equals: "String")
       Variable(.let, name: "test", type: "MappedType", equals: "value")
     }
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
+
     #expect(generated.contains("extension MyEnum"))
     #expect(generated.contains("typealias MappedType = String"))
     #expect(generated.contains("let test: MappedType = value"))
   }
-  
+
   @Test func testTypeAliasInStruct() {
     let structDecl = Struct("Container") {
       TypeAlias("ElementType", equals: "String")
       Variable(.let, name: "element", type: "ElementType")
     }
-    
+
     let generated = structDecl.generateCode().normalize()
-    
+
     #expect(generated.contains("struct Container"))
     #expect(generated.contains("typealias ElementType = String"))
     #expect(generated.contains("let element: ElementType"))
   }
-  
+
   @Test func testTypeAliasInEnum() {
     let enumDecl = Enum("Result") {
       TypeAlias("SuccessType", equals: "String")
@@ -98,80 +97,80 @@ struct TypeAliasTests {
       EnumCase("success")
       EnumCase("failure")
     }
-    
+
     let generated = enumDecl.generateCode().normalize()
-    
+
     #expect(generated.contains("enum Result"))
     #expect(generated.contains("typealias SuccessType = String"))
     #expect(generated.contains("typealias FailureType = Error"))
     #expect(generated.contains("case success"))
     #expect(generated.contains("case failure"))
   }
-  
+
   // MARK: - Edge Cases
-  
+
   @Test func testTypeAliasWithSpecialCharacters() {
     let typeAlias = TypeAlias("GenericType<T>", equals: "Array<T>")
     let generated = typeAlias.generateCode().normalize()
-    
+
     #expect(generated.contains("typealias GenericType<T> = Array<T>"))
   }
-  
+
   @Test func testTypeAliasWithProtocolComposition() {
     let typeAlias = TypeAlias("ProtocolType", equals: "Protocol1 & Protocol2")
     let generated = typeAlias.generateCode().normalize()
-    
+
     #expect(generated.contains("typealias ProtocolType = Protocol1 & Protocol2"))
   }
-  
+
   @Test func testTypeAliasWithFunctionType() {
     let typeAlias = TypeAlias("Handler", equals: "(String) -> Void")
     let generated = typeAlias.generateCode().normalize()
-    
+
     #expect(generated.contains("typealias Handler = (String) -> Void"))
   }
-  
+
   @Test func testTypeAliasWithTupleType() {
     let typeAlias = TypeAlias("Coordinate", equals: "(x: Double, y: Double)")
     let generated = typeAlias.generateCode().normalize()
-    
+
     #expect(generated.contains("typealias Coordinate = (x: Double, y: Double)"))
   }
-  
+
   @Test func testTypeAliasWithClosureType() {
     let typeAlias = TypeAlias("Callback", equals: "@escaping (Result<String, Error>) -> Void")
     let generated = typeAlias.generateCode().normalize()
-    
+
     #expect(generated.contains("typealias Callback = @escaping (Result<String, Error>) -> Void"))
   }
-  
+
   // MARK: - Integration Tests
-  
+
   @Test func testTypeAliasWithStaticVariable() {
     let extensionDecl = Extension("MyEnum") {
       TypeAlias("MappedType", equals: "String")
       Variable(.let, name: "mappedValues", equals: ["a", "b", "c"]).static()
     }.inherits("MappedValueRepresentable")
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
+
     #expect(generated.contains("extension MyEnum: MappedValueRepresentable"))
     #expect(generated.contains("typealias MappedType = String"))
     #expect(generated.contains("static let mappedValues: [String] = [\"a\", \"b\", \"c\"]"))
   }
-  
+
   @Test func testTypeAliasWithDictionaryVariable() {
     let extensionDecl = Extension("MyEnum") {
       TypeAlias("MappedType", equals: "String")
       Variable(.let, name: "mappedValues", equals: [1: "a", 2: "b"]).static()
     }.inherits("MappedValueRepresentable")
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
+
     #expect(generated.contains("extension MyEnum: MappedValueRepresentable"))
     #expect(generated.contains("typealias MappedType = String"))
     #expect(generated.contains("static let mappedValues: [Int: String]"))
     #expect(generated.contains("1: \"a\""))
     #expect(generated.contains("2: \"b\""))
   }
-} 
+}

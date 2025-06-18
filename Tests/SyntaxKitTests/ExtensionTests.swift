@@ -32,91 +32,92 @@ import Testing
 @testable import SyntaxKit
 
 struct ExtensionTests {
-  
   // MARK: - Basic Extension Tests
-  
+
   @Test func testBasicExtension() {
     let extensionDecl = Extension("String") {
       Variable(.let, name: "test", type: "Int", equals: "42")
     }
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
+
     #expect(generated.contains("extension String"))
     #expect(generated.contains("let test: Int = 42"))
   }
-  
+
   @Test func testExtensionWithMultipleMembers() {
     let extensionDecl = Extension("Array") {
       Variable(.let, name: "isEmpty", type: "Bool", equals: "true")
       Variable(.let, name: "count", type: "Int", equals: "0")
     }
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
+
     #expect(generated.contains("extension Array"))
     #expect(generated.contains("let isEmpty: Bool = true"))
     #expect(generated.contains("let count: Int = 0"))
   }
-  
+
   // MARK: - Extension with Inheritance Tests
-  
+
   @Test func testExtensionWithSingleInheritance() {
     let extensionDecl = Extension("MyEnum") {
       TypeAlias("MappedType", equals: "String")
     }.inherits("MappedValueRepresentable")
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
+
     #expect(generated.contains("extension MyEnum: MappedValueRepresentable"))
     #expect(generated.contains("typealias MappedType = String"))
   }
-  
+
   @Test func testExtensionWithMultipleInheritance() {
     let extensionDecl = Extension("MyEnum") {
       TypeAlias("MappedType", equals: "String")
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
-    #expect(generated.contains("extension MyEnum: MappedValueRepresentable, MappedValueRepresented"))
+
+    #expect(
+      generated.contains("extension MyEnum: MappedValueRepresentable, MappedValueRepresented"))
     #expect(generated.contains("typealias MappedType = String"))
   }
-  
+
   @Test func testExtensionWithoutInheritance() {
     let extensionDecl = Extension("MyType") {
       Variable(.let, name: "constant", type: "String", equals: "value")
     }
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
+
     #expect(generated.contains("extension MyType"))
     #expect(!generated.contains("extension MyType:"))
     #expect(generated.contains("let constant: String = value"))
   }
-  
+
   // MARK: - Extension with Complex Members Tests
-  
+
   @Test func testExtensionWithStaticVariables() {
     let array: [String] = ["a", "b", "c"]
     let dict: [Int: String] = [1: "one", 2: "two"]
-    
+
     let extensionDecl = Extension("TestEnum") {
       TypeAlias("MappedType", equals: "String")
       Variable(.let, name: "mappedValues", equals: array).static()
       Variable(.let, name: "lookup", equals: dict).static()
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
-    #expect(generated.contains("extension TestEnum: MappedValueRepresentable, MappedValueRepresented"))
+
+    #expect(
+      generated.contains("extension TestEnum: MappedValueRepresentable, MappedValueRepresented"))
     #expect(generated.contains("typealias MappedType = String"))
     #expect(generated.contains("static let mappedValues: [String] = [\"a\", \"b\", \"c\"]"))
     #expect(generated.contains("static let lookup: [Int: String]"))
     #expect(generated.contains("1: \"one\""))
     #expect(generated.contains("2: \"two\""))
   }
-  
+
   @Test func testExtensionWithFunctions() {
     let extensionDecl = Extension("String") {
       Function("uppercasedFirst", returns: "String") {
@@ -125,55 +126,55 @@ struct ExtensionTests {
         }
       }
     }
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
+
     #expect(generated.contains("extension String"))
     #expect(generated.contains("func uppercasedFirst() -> String"))
     #expect(generated.contains("return self.prefix(1).uppercased() + self.dropFirst()"))
   }
-  
+
   // MARK: - Edge Cases
-  
+
   @Test func testExtensionWithEmptyBody() {
     let extensionDecl = Extension("EmptyType") {
       // Empty body
     }
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
+
     #expect(generated.contains("extension EmptyType"))
     #expect(generated.contains("{"))
     #expect(generated.contains("}"))
   }
-  
+
   @Test func testExtensionWithSpecialCharactersInName() {
     let extensionDecl = Extension("MyType<T>") {
       Variable(.let, name: "generic", type: "T", equals: "nil")
     }
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
+
     #expect(generated.contains("extension MyType<T>"))
     #expect(generated.contains("let generic: T = nil"))
   }
-  
+
   @Test func testInheritsMethodReturnsNewInstance() {
     let original = Extension("Test") {
       Variable(.let, name: "value", type: "Int", equals: "42")
     }
-    
+
     let withInheritance = original.inherits("Protocol1", "Protocol2")
-    
+
     // Should be different instances
     #expect(original.generateCode() != withInheritance.generateCode())
-    
+
     // Original should not have inheritance
     let originalGenerated = original.generateCode().normalize()
     #expect(!originalGenerated.contains("extension Test:"))
-    
+
     // With inheritance should have inheritance
     let inheritedGenerated = withInheritance.generateCode().normalize()
     #expect(inheritedGenerated.contains(": Protocol1, Protocol2"))
   }
-} 
+}

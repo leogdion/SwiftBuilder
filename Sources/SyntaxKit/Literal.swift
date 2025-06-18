@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the "Software"), to deal in the Software without
+//  files (the “Software”), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -33,7 +33,7 @@ import SwiftSyntax
 public protocol LiteralValue {
   /// The Swift type name for this literal value.
   var typeName: String { get }
-  
+
   /// Renders this value as a Swift literal string.
   var literalString: String { get }
 }
@@ -78,11 +78,12 @@ public enum Literal: CodeBlock {
 
 extension Array: LiteralValue where Element == String {
   public var typeName: String { "[String]" }
-  
+
   public var literalString: String {
     let elements = self.map { element in
       // Escape quotes and newlines
-      let escaped = element
+      let escaped =
+        element
         .replacingOccurrences(of: "\\", with: "\\\\")
         .replacingOccurrences(of: "\"", with: "\\\"")
         .replacingOccurrences(of: "\n", with: "\\n")
@@ -96,11 +97,12 @@ extension Array: LiteralValue where Element == String {
 
 extension Dictionary: LiteralValue where Key == Int, Value == String {
   public var typeName: String { "[Int: String]" }
-  
+
   public var literalString: String {
     let elements = self.map { key, value in
       // Escape quotes and newlines
-      let escaped = value
+      let escaped =
+        value
         .replacingOccurrences(of: "\\", with: "\\\\")
         .replacingOccurrences(of: "\"", with: "\\\"")
         .replacingOccurrences(of: "\n", with: "\\n")

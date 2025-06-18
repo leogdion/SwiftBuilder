@@ -116,6 +116,7 @@ excluded:
   - .build
   - Mint
   - Examples
+  - Macros
 indentation_width:
   indentation_width: 2
 file_name:

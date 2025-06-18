@@ -32,21 +32,22 @@ import Testing
 @testable import SyntaxKit
 
 struct OptionsMacroIntegrationTests {
-  
   // MARK: - Enum with Raw Values (Dictionary) Tests
-  
+
   @Test func testEnumWithRawValuesCreatesDictionary() {
     // Simulate the Options macro expansion for an enum with raw values
     let keyValues: [Int: String] = [2: "a", 5: "b", 6: "c", 12: "d"]
-    
+
     let extensionDecl = Extension("MockDictionaryEnum") {
       TypeAlias("MappedType", equals: "String")
       Variable(.let, name: "mappedValues", equals: keyValues).static()
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
-    #expect(generated.contains("extension MockDictionaryEnum: MappedValueRepresentable, MappedValueRepresented"))
+
+    #expect(
+      generated.contains(
+        "extension MockDictionaryEnum: MappedValueRepresentable, MappedValueRepresented"))
     #expect(generated.contains("typealias MappedType = String"))
     #expect(generated.contains("static let mappedValues: [Int: String]"))
     #expect(generated.contains("2: \"a\""))
@@ -54,32 +55,33 @@ struct OptionsMacroIntegrationTests {
     #expect(generated.contains("6: \"c\""))
     #expect(generated.contains("12: \"d\""))
   }
-  
+
   @Test func testEnumWithoutRawValuesCreatesArray() {
     // Simulate the Options macro expansion for an enum without raw values
     let caseNames: [String] = ["red", "green", "blue"]
-    
+
     let extensionDecl = Extension("Color") {
       TypeAlias("MappedType", equals: "String")
       Variable(.let, name: "mappedValues", equals: caseNames).static()
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
+
     #expect(generated.contains("extension Color: MappedValueRepresentable, MappedValueRepresented"))
     #expect(generated.contains("typealias MappedType = String"))
-    #expect(generated.contains("static let mappedValues: [String] = [\"red\", \"green\", \"blue\"]"))
+    #expect(
+      generated.contains("static let mappedValues: [String] = [\"red\", \"green\", \"blue\"]"))
   }
-  
+
   // MARK: - Complex Integration Tests
-  
+
   @Test func testCompleteOptionsMacroWorkflow() {
     // This test demonstrates the complete workflow that the Options macro would use
-    
+
     // Step 1: Determine if enum has raw values (simulated)
     let hasRawValues = true
     let enumName = "TestEnum"
-    
+
     // Step 2: Create the appropriate mappedValues variable
     let mappedValuesVariable: Variable
     if hasRawValues {
@@ -89,30 +91,31 @@ struct OptionsMacroIntegrationTests {
       let caseNames: [String] = ["first", "second", "third"]
       mappedValuesVariable = Variable(.let, name: "mappedValues", equals: caseNames).static()
     }
-    
+
     // Step 3: Create the extension
     let extensionDecl = Extension(enumName) {
       TypeAlias("MappedType", equals: "String")
       mappedValuesVariable
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
+
     // Verify the complete extension
-    #expect(generated.contains("extension TestEnum: MappedValueRepresentable, MappedValueRepresented"))
+    #expect(
+      generated.contains("extension TestEnum: MappedValueRepresentable, MappedValueRepresented"))
     #expect(generated.contains("typealias MappedType = String"))
     #expect(generated.contains("static let mappedValues: [Int: String]"))
     #expect(generated.contains("1: \"first\""))
     #expect(generated.contains("2: \"second\""))
     #expect(generated.contains("3: \"third\""))
   }
-  
+
   @Test func testOptionsMacroWorkflowWithoutRawValues() {
     // Test the workflow for enums without raw values
-    
+
     let hasRawValues = false
     let enumName = "SimpleEnum"
-    
+
     let mappedValuesVariable: Variable
     if hasRawValues {
       let keyValues: [Int: String] = [1: "first", 2: "second"]
@@ -121,100 +124,105 @@ struct OptionsMacroIntegrationTests {
       let caseNames: [String] = ["first", "second"]
       mappedValuesVariable = Variable(.let, name: "mappedValues", equals: caseNames).static()
     }
-    
+
     let extensionDecl = Extension(enumName) {
       TypeAlias("MappedType", equals: "String")
       mappedValuesVariable
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
-    #expect(generated.contains("extension SimpleEnum: MappedValueRepresentable, MappedValueRepresented"))
+
+    #expect(
+      generated.contains("extension SimpleEnum: MappedValueRepresentable, MappedValueRepresented"))
     #expect(generated.contains("typealias MappedType = String"))
     #expect(generated.contains("static let mappedValues: [String] = [\"first\", \"second\"]"))
   }
-  
+
   // MARK: - Edge Cases
-  
+
   @Test func testEmptyEnumCases() {
     let caseNames: [String] = []
-    
+
     let extensionDecl = Extension("EmptyEnum") {
       TypeAlias("MappedType", equals: "String")
       Variable(.let, name: "mappedValues", equals: caseNames).static()
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
-    #expect(generated.contains("extension EmptyEnum: MappedValueRepresentable, MappedValueRepresented"))
+
+    #expect(
+      generated.contains("extension EmptyEnum: MappedValueRepresentable, MappedValueRepresented"))
     #expect(generated.contains("typealias MappedType = String"))
     #expect(generated.contains("static let mappedValues: [String] = []"))
   }
-  
+
   @Test func testEmptyDictionary() {
     let keyValues: [Int: String] = [:]
-    
+
     let extensionDecl = Extension("EmptyDictEnum") {
       TypeAlias("MappedType", equals: "String")
       Variable(.let, name: "mappedValues", equals: keyValues).static()
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
-    #expect(generated.contains("extension EmptyDictEnum: MappedValueRepresentable, MappedValueRepresented"))
+
+    #expect(
+      generated.contains(
+        "extension EmptyDictEnum: MappedValueRepresentable, MappedValueRepresented"))
     #expect(generated.contains("typealias MappedType = String"))
     #expect(generated.contains("static let mappedValues: [Int: String] = []"))
   }
-  
+
   @Test func testSpecialCharactersInCaseNames() {
     let caseNames: [String] = ["case_with_underscore", "case-with-dash", "caseWithCamelCase"]
-    
+
     let extensionDecl = Extension("SpecialEnum") {
       TypeAlias("MappedType", equals: "String")
       Variable(.let, name: "mappedValues", equals: caseNames).static()
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
-    
+
     let generated = extensionDecl.generateCode().normalize()
-    
-    #expect(generated.contains("extension SpecialEnum: MappedValueRepresentable, MappedValueRepresented"))
+
+    #expect(
+      generated.contains("extension SpecialEnum: MappedValueRepresentable, MappedValueRepresented"))
     #expect(generated.contains("typealias MappedType = String"))
     #expect(generated.contains("static let mappedValues: [String]"))
     #expect(generated.contains("\"case_with_underscore\""))
     #expect(generated.contains("\"case-with-dash\""))
     #expect(generated.contains("\"caseWithCamelCase\""))
   }
-  
+
   // MARK: - API Validation Tests
-  
+
   @Test func testNewSyntaxKitAPICompleteness() {
     // Verify that all the new API components work together correctly
-    
+
     // Test LiteralValue protocol
     let array: [String] = ["a", "b", "c"]
     #expect(array.typeName == "[String]")
     #expect(array.literalString == "[\"a\", \"b\", \"c\"]")
-    
+
     let dict: [Int: String] = [1: "a", 2: "b"]
     #expect(dict.typeName == "[Int: String]")
     #expect(dict.literalString.contains("1: \"a\""))
     #expect(dict.literalString.contains("2: \"b\""))
-    
+
     // Test Variable with static support
     let staticVar = Variable(.let, name: "test", equals: array).static()
     let staticGenerated = staticVar.generateCode().normalize()
     #expect(staticGenerated.contains("static let test: [String] = [\"a\", \"b\", \"c\"]"))
-    
+
     // Test Extension with inheritance
     let ext = Extension("Test") {
       // Empty content
     }.inherits("Protocol1", "Protocol2")
-    
+
     let extGenerated = ext.generateCode().normalize()
     #expect(extGenerated.contains("extension Test: Protocol1, Protocol2"))
-    
+
     // Test TypeAlias
     let alias = TypeAlias("MyType", equals: "String")
     let aliasGenerated = alias.generateCode().normalize()
     #expect(aliasGenerated.contains("typealias MyType = String"))
   }
-} 
+}
