@@ -4,6 +4,4 @@ Class("Foo") {
         print("bar")
     }.attribute("available", arguments: ["iOS 17.0", "*"])
     Function("baz") {
-        print("baz")
-    }.attribute("MainActor")    
-}.attribute("objc")
+}.attribute("objc")}.attribute("objc")

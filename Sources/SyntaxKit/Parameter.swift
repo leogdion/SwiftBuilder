@@ -37,6 +37,7 @@ public struct Parameter: CodeBlock {
   let type: String
   let defaultValue: String?
   let isUnnamed: Bool
+  private var attributes: [AttributeInfo] = []
 
   /// Creates a parameter for a function or initializer.
   /// - Parameters:
@@ -49,6 +50,17 @@ public struct Parameter: CodeBlock {
     self.type = type
     self.defaultValue = defaultValue
     self.isUnnamed = isUnnamed
+  }
+
+  /// Adds an attribute to the parameter declaration.
+  /// - Parameters:
+  ///   - attribute: The attribute name (without the @ symbol).
+  ///   - arguments: The arguments for the attribute, if any.
+  /// - Returns: A copy of the parameter with the attribute added.
+  public func attribute(_ attribute: String, arguments: [String] = []) -> Self {
+    var copy = self
+    copy.attributes.append(AttributeInfo(name: attribute, arguments: arguments))
+    return copy
   }
 
   public var syntax: SyntaxProtocol {
@@ -66,5 +78,6 @@ public struct Parameter: CodeBlock {
         expression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(name)))
       )
     }
+    // Note: If you want to support attributes in parameter syntax, you would need to update the function signature generation in Function.swift to use these attributes.
   }
 }

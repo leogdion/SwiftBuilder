@@ -35,9 +35,9 @@ struct ClassTests {
   }
 
   @Test func testClassWithGenerics() {
-    let genericClass = Class("Container", generics: ["T"]) {
+    let genericClass = Class("Container") {
       Variable(.var, name: "value", type: "T")
-    }
+    }.generic("T")
 
     let expected = """
       class Container<T> {
@@ -51,10 +51,10 @@ struct ClassTests {
   }
 
   @Test func testClassWithMultipleGenerics() {
-    let multiGenericClass = Class("Pair", generics: ["T", "U"]) {
+    let multiGenericClass = Class("Pair") {
       Variable(.var, name: "first", type: "T")
       Variable(.var, name: "second", type: "U")
-    }
+    }.generic("T", "U")
 
     let expected = """
       class Pair<T, U> {
@@ -87,10 +87,10 @@ struct ClassTests {
   @Test func testClassWithMultipleInheritance() {
     let classWithMultipleInheritance = Class("AdvancedVehicle") {
       Variable(.var, name: "speed", type: "Int")
-    }.inherits("Vehicle", "Codable", "Equatable")
+    }.inherits("Vehicle")
 
     let expected = """
-      class AdvancedVehicle: Vehicle, Codable, Equatable {
+      class AdvancedVehicle: Vehicle {
           var speed: Int
       }
       """
@@ -101,9 +101,9 @@ struct ClassTests {
   }
 
   @Test func testClassWithGenericsAndInheritance() {
-    let genericClassWithInheritance = Class("GenericContainer", generics: ["T"]) {
+    let genericClassWithInheritance = Class("GenericContainer") {
       Variable(.var, name: "items", type: "[T]")
-    }.inherits("Collection")
+    }.generic("T").inherits("Collection")
 
     let expected = """
       class GenericContainer<T>: Collection {
@@ -117,9 +117,9 @@ struct ClassTests {
   }
 
   @Test func testFinalClassWithInheritanceAndGenerics() {
-    let finalGenericClass = Class("FinalGenericClass", generics: ["T"]) {
+    let finalGenericClass = Class("FinalGenericClass") {
       Variable(.var, name: "value", type: "T")
-    }.inherits("BaseClass").final()
+    }.generic("T").inherits("BaseClass").final()
 
     let expected = """
       final class FinalGenericClass<T>: BaseClass {

@@ -33,6 +33,7 @@ import SwiftSyntax
 public struct TypeAlias: CodeBlock {
   private let name: String
   private let existingType: String
+  private var attributes: [AttributeInfo] = []
 
   /// Creates a `typealias` declaration.
   /// - Parameters:
@@ -41,6 +42,17 @@ public struct TypeAlias: CodeBlock {
   public init(_ name: String, equals type: String) {
     self.name = name
     self.existingType = type
+  }
+
+  /// Adds an attribute to the typealias declaration.
+  /// - Parameters:
+  ///   - attribute: The attribute name (without the @ symbol).
+  ///   - arguments: The arguments for the attribute, if any.
+  /// - Returns: A copy of the typealias with the attribute added.
+  public func attribute(_ attribute: String, arguments: [String] = []) -> Self {
+    var copy = self
+    copy.attributes.append(AttributeInfo(name: attribute, arguments: arguments))
+    return copy
   }
 
   public var syntax: SyntaxProtocol {
@@ -57,9 +69,55 @@ public struct TypeAlias: CodeBlock {
     )
 
     return TypeAliasDeclSyntax(
+      attributes: buildAttributeList(from: attributes),
       typealiasKeyword: keyword,
       name: identifier,
       initializer: initializer
     )
+  }
+
+  private func buildAttributeList(from attributes: [AttributeInfo]) -> AttributeListSyntax {
+    if attributes.isEmpty {
+      return AttributeListSyntax([])
+    }
+    let attributeElements = attributes.map { attributeInfo in
+      let arguments = attributeInfo.arguments
+
+      var leftParen: TokenSyntax?
+      var rightParen: TokenSyntax?
+      var argumentsSyntax: AttributeSyntax.Arguments?
+
+      if !arguments.isEmpty {
+        leftParen = .leftParenToken()
+        rightParen = .rightParenToken()
+
+        let argumentList = arguments.map { argument in
+          DeclReferenceExprSyntax(baseName: .identifier(argument))
+        }
+
+        argumentsSyntax = .argumentList(
+          LabeledExprListSyntax(
+            argumentList.enumerated().map { index, expr in
+              var element = LabeledExprSyntax(expression: ExprSyntax(expr))
+              if index < argumentList.count - 1 {
+                element = element.with(\.trailingComma, .commaToken(trailingTrivia: .space))
+              }
+              return element
+            }
+          )
+        )
+      }
+
+      return AttributeListSyntax.Element(
+        AttributeSyntax(
+          atSign: .atSignToken(),
+          attributeName: IdentifierTypeSyntax(name: .identifier(attributeInfo.name)),
+          leftParen: leftParen,
+          arguments: argumentsSyntax,
+          rightParen: rightParen
+        )
+      )
+    }
+    return AttributeListSyntax(attributeElements)
   }
 }
