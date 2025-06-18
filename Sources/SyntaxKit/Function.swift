@@ -120,7 +120,7 @@ public struct Function: CodeBlock {
           var paramSyntax = FunctionParameterSyntax(
             attributes: paramAttributes,
             firstName: param.isUnnamed
-              ? .wildcardToken(leadingTrivia: firstNameLeadingTrivia)
+              ? .wildcardToken(leadingTrivia: firstNameLeadingTrivia, trailingTrivia: .space)
               : .identifier(param.name, leadingTrivia: firstNameLeadingTrivia),
             secondName: param.isUnnamed ? .identifier(param.name) : nil,
             colon: .colonToken(trailingTrivia: .space),
