@@ -38,7 +38,7 @@ import Options
     case c
     case d
 
-    static var codingOptions: CodingOptions = .default
+    nonisolated(unsafe) static var codingOptions: CodingOptions = .default
   }
 #else
   // swiftlint:disable identifier_name

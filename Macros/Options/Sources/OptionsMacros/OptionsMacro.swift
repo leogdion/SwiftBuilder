@@ -34,26 +34,108 @@ import SwiftSyntaxMacros
 import SyntaxKit
 public struct OptionsMacro: ExtensionMacro, PeerMacro {
   public static func expansion(of node: SwiftSyntax.AttributeSyntax, attachedTo declaration: some SwiftSyntax.DeclGroupSyntax, providingExtensionsOf type: some SwiftSyntax.TypeSyntaxProtocol, conformingTo protocols: [SwiftSyntax.TypeSyntax], in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
-    
     guard let enumDecl = declaration.as(EnumDeclSyntax.self) else {
       throw InvalidDeclError.kind(declaration.kind)
     }
 
-    // Build `typealias <EnumName>Set = EnumSet<EnumName>`
+    // Extract the type name
     let typeName = enumDecl.name
-    let aliasName = "\(typeName.trimmed)Set"
-    let aliasDecl = TypeAlias(aliasName, equals: "EnumSet<\(typeName)>").syntax
 
-    let memberItem = MemberBlockItemSyntax(
-      decl: DeclSyntax(aliasDecl.as(TypeAliasDeclSyntax.self)! ),
-      trailingTrivia: .newline
+    // Extract all EnumCaseElementSyntax from the enum
+    let caseElements: [EnumCaseElementSyntax] = enumDecl.memberBlock.members.flatMap { (member) -> [EnumCaseElementSyntax] in
+      guard let caseDecl = member.decl.as(EnumCaseDeclSyntax.self) else {
+        return [EnumCaseElementSyntax]()
+      }
+      return Array(caseDecl.elements)
+    }
+
+    // Build mappedValues variable declaration (static let mappedValues = [...])
+    // Check if any case has a raw value to determine if we need a dictionary
+    let hasRawValues = caseElements.contains { $0.rawValue != nil }
+    
+    let mappedValuesExpr: ExprSyntax
+    if hasRawValues {
+      // Create dictionary mapping raw values to case names
+      let dictionaryElements = caseElements.compactMap { element -> DictionaryElementSyntax? in
+        guard let rawValue = element.rawValue?.value.as(IntegerLiteralExprSyntax.self)?.literal.text,
+              let key = Int(rawValue) else {
+          return nil
+        }
+        let value = element.name.trimmed.text
+        return DictionaryElementSyntax(
+          key: IntegerLiteralExprSyntax(digits: .integerLiteral(String(key))),
+          value: StringLiteralExprSyntax(
+            openingQuote: .stringQuoteToken(),
+            segments: .init([.stringSegment(.init(content: .stringSegment(value)))]),
+            closingQuote: .stringQuoteToken()
+          )
+        )
+      }
+      
+      let dictionaryList = DictionaryElementListSyntax(
+        dictionaryElements.enumerated().map { (idx, element) in
+          var dictElement = element
+          if idx < dictionaryElements.count - 1 {
+            dictElement = dictElement.with(\.trailingComma, TokenSyntax.commaToken(trailingTrivia: .space))
+          }
+          return dictElement
+        }
+      )
+      
+      mappedValuesExpr = ExprSyntax(DictionaryExprSyntax(
+        content: .elements(dictionaryList)
+      ))
+    } else {
+      // Create array of case names
+      mappedValuesExpr = ExprSyntax(ArrayExprSyntax(
+        elements: ArrayElementListSyntax(
+          caseElements.enumerated().map { (idx, element) in
+            ArrayElementSyntax(
+              expression: ExprSyntax(StringLiteralExprSyntax(
+                openingQuote: .stringQuoteToken(),
+                segments: .init([
+                  .stringSegment(.init(content: .stringSegment(element.name.trimmed.text)))
+                ]),
+                closingQuote: .stringQuoteToken()
+              )),
+              trailingComma: idx < caseElements.count - 1 ? TokenSyntax.commaToken(trailingTrivia: .space) : nil
+            )
+          }
+        )
+      ))
+    }
+    let mappedValuesDecl = VariableDeclSyntax(
+      modifiers: DeclModifierListSyntax {
+        DeclModifierSyntax(name: .keyword(.static, trailingTrivia: .space))
+      },
+      bindingSpecifier: .keyword(.let, trailingTrivia: .space),
+      bindings: PatternBindingListSyntax {
+        PatternBindingSyntax(
+          pattern: IdentifierPatternSyntax(identifier: .identifier("mappedValues")),
+          initializer: InitializerClauseSyntax(
+            equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+            value: mappedValuesExpr
+          )
+        )
+      }
+    )
+
+    // Build typealias MappedType = String
+    let mappedTypeAlias = TypeAliasDeclSyntax(
+      typealiasKeyword: .keyword(.typealias, trailingTrivia: .space),
+      name: .identifier("MappedType", trailingTrivia: .space),
+      initializer: TypeInitializerClauseSyntax(
+        equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+        value: IdentifierTypeSyntax(name: .identifier("String"))
+      )
     )
 
     // Build member block
     let memberBlock = MemberBlockSyntax(
-      leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
-      members: MemberBlockItemListSyntax([memberItem]),
-      rightBrace: .rightBraceToken(leadingTrivia: .newline)
+      members: MemberBlockItemListSyntax {
+        MemberBlockItemSyntax(decl: DeclSyntax(mappedTypeAlias), trailingTrivia: .newline)
+        MemberBlockItemSyntax(decl: DeclSyntax(mappedValuesDecl), trailingTrivia: .newline)
+      }
     )
 
     // Build inheritance clause from `protocols` argument
@@ -63,7 +145,7 @@ public struct OptionsMacro: ExtensionMacro, PeerMacro {
         protocols.enumerated().map { idx, proto in
           var inherited = InheritedTypeSyntax(type: proto)
           if idx < protocols.count - 1 {
-            inherited = inherited.with(\.trailingComma, .commaToken(trailingTrivia: .space))
+            inherited = inherited.with(\.trailingComma, TokenSyntax.commaToken(trailingTrivia: .space))
           }
           return inherited
         }
@@ -87,13 +169,15 @@ public struct OptionsMacro: ExtensionMacro, PeerMacro {
     }
     
     let typeName = enumDecl.name
-
-  guard let declSyntax : DeclSyntax = .init(TypeAlias("\(typeName.trimmed)Set", equals: "EnumSet<\(typeName)>").expr) else {
-    throw InvalidDeclError.kind(declaration.kind)
-  }
-  return [
-    declSyntax
-  ]
+    let aliasName = "\(typeName.trimmed)Set"
+    let aliasDecl = TypeAlias(aliasName, equals: "EnumSet<\(typeName)>").syntax
+    
+    guard let declSyntax : DeclSyntax = DeclSyntax(aliasDecl.as(TypeAliasDeclSyntax.self)) else {
+      throw InvalidDeclError.kind(declaration.kind)
+    }
+    return [
+      declSyntax
+    ]
   }
   
 }
@@ -108,16 +192,16 @@ public struct OptionsMacro: ExtensionMacro, PeerMacro {
       throw InvalidDeclError.kind(declaration.kind)
     }
     let typeName = enumDecl.name
-
+    
     let aliasName: TokenSyntax = "\(typeName.trimmed)Set"
-
+    
     let initializerName: TokenSyntax = "EnumSet<\(typeName)>"
-
+    
     return [
       .init(TypeAliasDeclSyntax(name: aliasName, for: initializerName))
     ]
   }
-
+  
   public static func expansion(
     of _: SwiftSyntax.AttributeSyntax,
     attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
@@ -128,7 +212,7 @@ public struct OptionsMacro: ExtensionMacro, PeerMacro {
     guard let enumDecl = declaration.as(EnumDeclSyntax.self) else {
       throw InvalidDeclError.kind(declaration.kind)
     }
-
+    
     let extensionDecl = try ExtensionDeclSyntax(
       enumDecl: enumDecl, conformingTo: protocols
     )

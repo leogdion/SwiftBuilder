@@ -29,6 +29,6 @@
 
 import Foundation
 
-internal struct MockError<T>: Error {
+internal struct MockError<T : Sendable>: Error {
   internal let value: T
 }
