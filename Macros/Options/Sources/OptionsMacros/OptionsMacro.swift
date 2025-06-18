@@ -104,6 +104,7 @@ public struct OptionsMacro: ExtensionMacro, PeerMacro {
         )
       ))
     }
+    
     let mappedValuesDecl = VariableDeclSyntax(
       modifiers: DeclModifierListSyntax {
         DeclModifierSyntax(name: .keyword(.static, trailingTrivia: .space))
@@ -160,7 +161,34 @@ public struct OptionsMacro: ExtensionMacro, PeerMacro {
       memberBlock: memberBlock
     )
 
-    return [extDecl]
+    //return [extDecl]
+    
+    // NOTE: Once SyntaxKit is properly added as a dependency, this could be simplified to:
+    
+    let mappedValuesVariable: Variable
+    if hasRawValues {
+      let keyValues: [Int: String] = caseElements.reduce(into: [:]) { (result, element) in
+        guard let rawValue = element.rawValue?.value.as(IntegerLiteralExprSyntax.self)?.literal.text,
+              let key = Int(rawValue) else {
+          return
+        }
+        result[key] = element.name.trimmed.text
+      }
+      mappedValuesVariable = Variable(.let, name: "mappedValues", equals: keyValues).static()
+    } else {
+      let caseNames: [String] = caseElements.map { element in
+        element.name.trimmed.text
+      }
+      mappedValuesVariable = Variable(.let, name: "mappedValues", equals: caseNames).static()
+    }
+    
+    let extensionDecl = Extension(typeName.trimmed.text) {
+      TypeAlias("MappedType", equals: "String")
+      mappedValuesVariable
+    }.inherits("MappedValueRepresentable", "MappedValueRepresented")
+
+    return [extensionDecl.syntax.as(ExtensionDeclSyntax.self)!]
+    
   }
   
   public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingPeersOf declaration: some SwiftSyntax.DeclSyntaxProtocol, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {

@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -35,6 +35,7 @@ public struct Variable: CodeBlock {
   private let name: String
   private let type: String
   private let defaultValue: String?
+  private var isStatic: Bool = false
 
   /// Creates a `let` or `var` declaration with an explicit type.
   /// - Parameters:
@@ -48,6 +49,26 @@ public struct Variable: CodeBlock {
     self.name = name
     self.type = type
     self.defaultValue = defaultValue
+  }
+  
+  /// Creates a `let` or `var` declaration with a literal value.
+  /// - Parameters:
+  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
+  ///   - name: The name of the variable.
+  ///   - value: A literal value that conforms to ``LiteralValue``.
+  public init<T: LiteralValue>(_ kind: VariableKind, name: String, equals value: T) {
+    self.kind = kind
+    self.name = name
+    self.type = value.typeName
+    self.defaultValue = value.literalString
+  }
+
+  /// Marks the variable as `static`.
+  /// - Returns: A copy of the variable marked as `static`.
+  public func `static`() -> Self {
+    var copy = self
+    copy.isStatic = true
+    return copy
   }
 
   public var syntax: SyntaxProtocol {
@@ -64,8 +85,16 @@ public struct Variable: CodeBlock {
         value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
       )
     }
+    
+    var modifiers: DeclModifierListSyntax = []
+    if isStatic {
+      modifiers = DeclModifierListSyntax([
+        DeclModifierSyntax(name: .keyword(.static, trailingTrivia: .space))
+      ])
+    }
 
     return VariableDeclSyntax(
+      modifiers: modifiers,
       bindingSpecifier: bindingKeyword,
       bindings: PatternBindingListSyntax([
         PatternBindingSyntax(
