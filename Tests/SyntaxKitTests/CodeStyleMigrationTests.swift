@@ -4,10 +4,10 @@ import Testing
 
 /// Tests for code style and API simplification changes introduced during Swift Testing migration
 /// Validates the simplified Swift APIs and formatting changes
-struct CodeStyleMigrationTests {
+internal struct CodeStyleMigrationTests {
   // MARK: - CharacterSet Simplification Tests
 
-  @Test func testCharacterSetSimplification() {
+  @Test internal func testCharacterSetSimplification() {
     // Test that .whitespacesAndNewlines works instead of CharacterSet.whitespacesAndNewlines
     let testString = "\n  test content  \n\t"
 
@@ -20,7 +20,7 @@ struct CodeStyleMigrationTests {
 
   // MARK: - Indentation and Formatting Tests
 
-  @Test func testConsistentIndentationInMigratedCode() throws {
+  @Test internal func testConsistentIndentationInMigratedCode() throws {
     // Test that the indentation changes in the migrated code work correctly
     let syntax = Struct("IndentationTest") {
       Variable(.let, name: "property1", type: "String")

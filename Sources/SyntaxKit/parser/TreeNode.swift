@@ -29,16 +29,16 @@
 
 import Foundation
 
-final class TreeNode: Codable {
-  let id: Int
-  var parent: Int?
+internal final class TreeNode: Codable {
+  internal let id: Int
+  internal var parent: Int?
 
-  var text: String
-  var range = Range(
+  internal var text: String
+  internal var range = Range(
     startRow: 0, startColumn: 0, endRow: 0, endColumn: 0)
-  var structure = [StructureProperty]()
-  var type: SyntaxType
-  var token: Token?
+  internal var structure = [StructureProperty]()
+  internal var type: SyntaxType
+  internal var token: Token?
 
   init(id: Int, text: String, range: Range, type: SyntaxType) {
     self.id = id
@@ -71,11 +71,11 @@ extension TreeNode: CustomStringConvertible {
   }
 }
 
-struct Range: Codable, Equatable {
-  let startRow: Int
-  let startColumn: Int
-  let endRow: Int
-  let endColumn: Int
+internal struct Range: Codable, Equatable {
+  internal let startRow: Int
+  internal let startColumn: Int
+  internal let endRow: Int
+  internal let endColumn: Int
 }
 
 extension Range: CustomStringConvertible {
@@ -91,10 +91,10 @@ extension Range: CustomStringConvertible {
   }
 }
 
-struct StructureProperty: Codable, Equatable {
-  let name: String
-  let value: StructureValue?
-  let ref: String?
+internal struct StructureProperty: Codable, Equatable {
+  internal let name: String
+  internal let value: StructureValue?
+  internal let ref: String?
 
   init(name: String, value: StructureValue? = nil, ref: String? = nil) {
     self.name = name.escapeHTML()
@@ -115,9 +115,9 @@ extension StructureProperty: CustomStringConvertible {
   }
 }
 
-struct StructureValue: Codable, Equatable {
-  let text: String
-  let kind: String?
+internal struct StructureValue: Codable, Equatable {
+  internal let text: String
+  internal let kind: String?
 
   init(text: String, kind: String? = nil) {
     self.text = text.escapeHTML().replaceHTMLWhitespacesToSymbols()
@@ -136,7 +136,7 @@ extension StructureValue: CustomStringConvertible {
   }
 }
 
-enum SyntaxType: String, Codable {
+internal enum SyntaxType: String, Codable {
   case decl
   case expr
   case pattern
@@ -145,10 +145,10 @@ enum SyntaxType: String, Codable {
   case other
 }
 
-struct Token: Codable, Equatable {
-  let kind: String
-  var leadingTrivia: String
-  var trailingTrivia: String
+internal struct Token: Codable, Equatable {
+  internal let kind: String
+  internal var leadingTrivia: String
+  internal var trailingTrivia: String
 
   init(kind: String, leadingTrivia: String, trailingTrivia: String) {
     self.kind = kind.escapeHTML()

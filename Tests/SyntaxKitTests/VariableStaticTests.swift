@@ -31,17 +31,17 @@ import Testing
 
 @testable import SyntaxKit
 
-struct VariableStaticTests {
+internal struct VariableStaticTests {
   // MARK: - Static Variable Tests
 
-  @Test func testStaticVariableWithStringLiteral() {
+  @Test internal func testStaticVariableWithStringLiteral() {
     let variable = Variable(.let, name: "test", type: "String", equals: "hello").static()
     let generated = variable.generateCode().normalize()
 
     #expect(generated.contains("static let test: String = hello"))
   }
 
-  @Test func testStaticVariableWithArrayLiteral() {
+  @Test internal func testStaticVariableWithArrayLiteral() {
     let array: [String] = ["a", "b", "c"]
     let variable = Variable(.let, name: "mappedValues", equals: array).static()
     let generated = variable.generateCode().normalize()
@@ -49,7 +49,7 @@ struct VariableStaticTests {
     #expect(generated.contains("static let mappedValues: [String] = [\"a\", \"b\", \"c\"]"))
   }
 
-  @Test func testStaticVariableWithDictionaryLiteral() {
+  @Test internal func testStaticVariableWithDictionaryLiteral() {
     let dict: [Int: String] = [1: "a", 2: "b", 3: "c"]
     let variable = Variable(.let, name: "mappedValues", equals: dict).static()
     let generated = variable.generateCode().normalize()
@@ -60,7 +60,7 @@ struct VariableStaticTests {
     #expect(generated.contains("3: \"c\""))
   }
 
-  @Test func testStaticVariableWithVar() {
+  @Test internal func testStaticVariableWithVar() {
     let variable = Variable(.var, name: "counter", type: "Int", equals: "0").static()
     let generated = variable.generateCode().normalize()
 
@@ -69,7 +69,7 @@ struct VariableStaticTests {
 
   // MARK: - Non-Static Variable Tests
 
-  @Test func testNonStaticVariableWithLiteral() {
+  @Test internal func testNonStaticVariableWithLiteral() {
     let array: [String] = ["x", "y", "z"]
     let variable = Variable(.let, name: "values", equals: array)
     let generated = variable.generateCode().normalize()
@@ -78,7 +78,7 @@ struct VariableStaticTests {
     #expect(!generated.contains("static"))
   }
 
-  @Test func testNonStaticVariableWithDictionary() {
+  @Test internal func testNonStaticVariableWithDictionary() {
     let dict: [Int: String] = [10: "ten", 20: "twenty"]
     let variable = Variable(.let, name: "lookup", equals: dict)
     let generated = variable.generateCode().normalize()
@@ -91,7 +91,7 @@ struct VariableStaticTests {
 
   // MARK: - Static Method Tests
 
-  @Test func testStaticMethodReturnsNewInstance() {
+  @Test internal func testStaticMethodReturnsNewInstance() {
     let original = Variable(.let, name: "test", type: "String", equals: "value")
     let staticVersion = original.static()
 
@@ -107,7 +107,7 @@ struct VariableStaticTests {
     #expect(staticGenerated.contains("static"))
   }
 
-  @Test func testStaticMethodPreservesOtherProperties() {
+  @Test internal func testStaticMethodPreservesOtherProperties() {
     let original = Variable(.var, name: "test", type: "String", equals: "value")
     let staticVersion = original.static()
 
@@ -127,7 +127,7 @@ struct VariableStaticTests {
 
   // MARK: - Edge Cases
 
-  @Test func testEmptyArrayLiteral() {
+  @Test internal func testEmptyArrayLiteral() {
     let array: [String] = []
     let variable = Variable(.let, name: "empty", equals: array).static()
     let generated = variable.generateCode().normalize()
@@ -135,7 +135,7 @@ struct VariableStaticTests {
     #expect(generated.contains("static let empty: [String] = []"))
   }
 
-  @Test func testEmptyDictionaryLiteral() {
+  @Test internal func testEmptyDictionaryLiteral() {
     let dict: [Int: String] = [:]
     let variable = Variable(.let, name: "empty", equals: dict).static()
     let generated = variable.generateCode().normalize()
@@ -143,7 +143,7 @@ struct VariableStaticTests {
     #expect(generated.contains("static let empty: [Int: String] = []"))
   }
 
-  @Test func testMultipleStaticCalls() {
+  @Test internal func testMultipleStaticCalls() {
     let variable = Variable(.let, name: "test", type: "String", equals: "value").static().static()
     let generated = variable.generateCode().normalize()
 

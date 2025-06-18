@@ -2,8 +2,8 @@ import Testing
 
 @testable import SyntaxKit
 
-struct ProtocolTests {
-  @Test func testSimpleProtocol() {
+internal struct ProtocolTests {
+  @Test internal func testSimpleProtocol() {
     let vehicleProtocol = Protocol("Vehicle") {
       PropertyRequirement("numberOfWheels", type: "Int", access: .get)
       PropertyRequirement("brand", type: "String", access: .getSet)
@@ -27,7 +27,7 @@ struct ProtocolTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testEmptyProtocol() {
+  @Test internal func testEmptyProtocol() {
     let emptyProtocol = Protocol("EmptyProtocol") {}
 
     let expected = """
@@ -40,7 +40,7 @@ struct ProtocolTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testProtocolWithInheritance() {
+  @Test internal func testProtocolWithInheritance() {
     let protocolWithInheritance = Protocol("MyProtocol") {
       PropertyRequirement("value", type: "String", access: .getSet)
     }.inherits("Equatable", "Hashable")
@@ -56,7 +56,7 @@ struct ProtocolTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testFunctionRequirementWithParameters() {
+  @Test internal func testFunctionRequirementWithParameters() {
     let protocolWithFunction = Protocol("Calculator") {
       FunctionRequirement("add", returns: "Int") {
         Parameter(name: "a", type: "Int")
@@ -75,7 +75,7 @@ struct ProtocolTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testStaticFunctionRequirement() {
+  @Test internal func testStaticFunctionRequirement() {
     let protocolWithStaticFunction = Protocol("Factory") {
       FunctionRequirement("create", returns: "Self").static()
     }
@@ -91,7 +91,7 @@ struct ProtocolTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testMutatingFunctionRequirement() {
+  @Test internal func testMutatingFunctionRequirement() {
     let protocolWithMutatingFunction = Protocol("Resettable") {
       FunctionRequirement("reset").mutating()
     }
@@ -107,7 +107,7 @@ struct ProtocolTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testPropertyRequirementGetOnly() {
+  @Test internal func testPropertyRequirementGetOnly() {
     let propertyReq = PropertyRequirement("readOnlyProperty", type: "String", access: .get)
     let prtcl = Protocol("TestProtocol") {
       propertyReq
@@ -124,7 +124,7 @@ struct ProtocolTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testPropertyRequirementGetSet() {
+  @Test internal func testPropertyRequirementGetSet() {
     let propertyReq = PropertyRequirement("readWriteProperty", type: "Int", access: .getSet)
     let prtcl = Protocol("TestProtocol") {
       propertyReq
@@ -141,7 +141,7 @@ struct ProtocolTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testFunctionRequirementWithDefaultParameters() {
+  @Test internal func testFunctionRequirementWithDefaultParameters() {
     let functionReq = FunctionRequirement("process", returns: "String") {
       Parameter(name: "input", type: "String")
       Parameter(name: "options", type: "ProcessingOptions", defaultValue: "ProcessingOptions()")
@@ -161,7 +161,7 @@ struct ProtocolTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testComplexProtocolWithMixedRequirements() {
+  @Test internal func testComplexProtocolWithMixedRequirements() {
     let complexProtocol = Protocol("ComplexProtocol") {
       PropertyRequirement("id", type: "UUID", access: .get)
       PropertyRequirement("name", type: "String", access: .getSet)

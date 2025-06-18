@@ -2,8 +2,8 @@ import Testing
 
 @testable import SyntaxKit
 
-struct BlackjackTests {
-  @Test func testBlackjackCardExample() throws {
+internal struct BlackjackTests {
+  @Test internal func testBlackjackCardExample() throws {
     let syntax = Struct("BlackjackCard") {
       Enum("Suit") {
         EnumCase("spades").equals("♠")
@@ -71,7 +71,7 @@ struct BlackjackTests {
   }
 
   // swiftlint:disable:next function_body_length
-  @Test func testFullBlackjackCardExample() throws {
+  @Test internal func testFullBlackjackCardExample() throws {
     // swiftlint:disable:next closure_body_length
     let syntax = Struct("BlackjackCard") {
       Enum("Suit") {

@@ -33,10 +33,10 @@ import SwiftSyntax
 
 /// A parameter for a function or initializer.
 public struct Parameter: CodeBlock {
-  let name: String
-  let type: String
-  let defaultValue: String?
-  let isUnnamed: Bool
+  internal let name: String
+  internal let type: String
+  internal let defaultValue: String?
+  internal let isUnnamed: Bool
   internal var attributes: [AttributeInfo] = []
 
   /// Creates a parameter for a function or initializer.

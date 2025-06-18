@@ -4,16 +4,16 @@ import Testing
 
 /// Tests specifically for verifying the Swift Testing framework migration
 /// These tests ensure that the migration from XCTest to Swift Testing works correctly
-struct MigrationTests {
+internal struct MigrationTests {
   // MARK: - Basic Test Structure Migration Tests
 
-  @Test func testStructBasedTestExecution() {
+  @Test internal func testStructBasedTestExecution() {
     // Test that struct-based tests execute properly
     let result = true
     #expect(result == true)
   }
 
-  @Test func testThrowingTestMethod() throws {
+  @Test internal func testThrowingTestMethod() throws {
     // Test that @Test works with throws declaration
     let syntax = Struct("TestStruct") {
       Variable(.let, name: "value", type: "String")
@@ -25,21 +25,21 @@ struct MigrationTests {
 
   // MARK: - Assertion Migration Tests
 
-  @Test func testExpectEqualityAssertion() {
+  @Test internal func testExpectEqualityAssertion() {
     // Test #expect() replacement for XCTAssertEqual
     let actual = "test"
     let expected = "test"
     #expect(actual == expected)
   }
 
-  @Test func testExpectBooleanAssertion() {
+  @Test internal func testExpectBooleanAssertion() {
     // Test #expect() replacement for XCTAssertTrue/XCTAssertFalse
     let condition = true
     #expect(condition)
     #expect(!false)
   }
 
-  @Test func testExpectEmptyStringAssertion() {
+  @Test internal func testExpectEmptyStringAssertion() {
     // Test #expect() replacement for XCTAssertFalse(string.isEmpty)
     let generated = "non-empty string"
     #expect(!generated.isEmpty)
@@ -47,7 +47,7 @@ struct MigrationTests {
 
   // MARK: - Code Generation Testing with New Framework
 
-  @Test func testBasicCodeGenerationWithNewFramework() throws {
+  @Test internal func testBasicCodeGenerationWithNewFramework() throws {
     let blackjackCard = Struct("BlackjackCard") {
       Enum("Suit") {
         EnumCase("spades").equals("♠")
@@ -78,7 +78,7 @@ struct MigrationTests {
 
   // MARK: - String Options Migration Tests
 
-  @Test func testStringCompareOptionsSimplification() {
+  @Test internal func testStringCompareOptionsSimplification() {
     // Test that .regularExpression works instead of String.CompareOptions.regularExpression
     let testString = "public func test() { }"
     let result = testString.replacingOccurrences(
@@ -87,7 +87,7 @@ struct MigrationTests {
     #expect(result == expected)
   }
 
-  @Test func testCharacterSetSimplification() {
+  @Test internal func testCharacterSetSimplification() {
     // Test that .whitespacesAndNewlines works instead of CharacterSet.whitespacesAndNewlines
     let testString = "  test  \n"
     let result = testString.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -97,7 +97,7 @@ struct MigrationTests {
 
   // MARK: - Complex Code Generation Tests
 
-  @Test func testComplexStructGeneration() throws {
+  @Test internal func testComplexStructGeneration() throws {
     let syntax = Struct("TestCard") {
       Variable(.let, name: "rank", type: "String")
       Variable(.let, name: "suit", type: "String")
@@ -118,7 +118,7 @@ struct MigrationTests {
     #expect(generated.contains("func description() -> String".normalize()))
   }
 
-  @Test func testMigrationBackwardCompatibility() {
+  @Test internal func testMigrationBackwardCompatibility() {
     // Ensure that the migrated tests maintain the same functionality
     let group = Group {
       Return {

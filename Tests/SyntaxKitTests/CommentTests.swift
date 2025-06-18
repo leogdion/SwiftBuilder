@@ -2,9 +2,9 @@ import Testing
 
 @testable import SyntaxKit
 
-struct CommentTests {
+internal struct CommentTests {
   // swiftlint:disable:next function_body_length
-  @Test func testCommentInjection() {
+  @Test internal func testCommentInjection() {
     // swiftlint:disable:next closure_body_length
     let syntax = Group {
       Struct("Card") {
