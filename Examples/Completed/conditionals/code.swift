@@ -32,3 +32,18 @@ let possibleAge: Int? = 30
 if let name = possibleName, let age = possibleAge {
     print("\(name) is \(age) years old")
 }
+
+// MARK: - Guard Statements
+func greet(person: [String: String]) {
+    guard let name = person["name"] else {
+        print("No name provided")
+        return
+    }
+    
+    guard let age = person["age"], let ageInt = Int(age) else {
+        print("Invalid age provided")
+        return
+    }
+    
+    print("Hello \(name), you are \(ageInt) years old")
+}

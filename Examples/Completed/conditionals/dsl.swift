@@ -56,4 +56,23 @@ Group {
     } then: {
         Call("print", "\\(name) is \\(age) years old") 
     }
+
+    Function("greet", parameters: [Parameter("person", type: "[String: String]")]) {
+        Guard {
+            Let("name", "person[\"name\"]")
+        } else: {
+            Call("print", "No name provided")
+        }
+        Guard {
+            Let("age", "person[\"age\"]")
+            Let("ageInt", Init("Int") {
+                Parameter(unlabeled: "age")
+            })
+        } else: {
+            Call("print", "Invalid age provided")
+        }
+        Call("print", "Hello \\(name), you are \\(ageInt) years old")
+    }
+}.comment {
+    Line("MARK: - Guard Statements")
 }

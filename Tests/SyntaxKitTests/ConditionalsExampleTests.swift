@@ -114,6 +114,38 @@ import Testing
           ParameterExp(name: "", value: "\"\\(name) is \\(age) years old\"")
         }
       }
+
+      // MARK: - Guard Statements
+      Function(
+        "greet",
+        {
+          Parameter(name: "person", type: "[String: String]")
+        }
+      ) {
+        Guard {
+          Let("name", "person[\"name\"]")
+        } else: {
+          Call("print") {
+            ParameterExp(name: "", value: "\"No name provided\"")
+          }
+        }
+
+        Guard {
+          Let("age", "person[\"age\"]")
+          Let("ageInt", "Int(age)")
+        } else: {
+          Call("print") {
+            ParameterExp(name: "", value: "\"Invalid age provided\"")
+          }
+        }
+
+        Call("print") {
+          ParameterExp(name: "", value: "\"Hello \\(name), you are \\(ageInt) years old\"")
+        }
+      }
+      .comment {
+        Line("MARK: - Guard Statements")
+      }
     }
 
     // Generate Swift from DSL
@@ -121,8 +153,7 @@ import Testing
     // Remove type annotations like ": Int =" for comparison to example code
     generated = generated.replacingOccurrences(
       of: ":\\s*\\w+\\s*=", with: "=", options: .regularExpression
-    )
-    .normalize()
+    ).normalize()
 
     // Load expected Swift from example file
     let projectRoot = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
