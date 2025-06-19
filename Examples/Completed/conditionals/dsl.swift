@@ -126,3 +126,21 @@ Switch("somePoint") {
         Call("print", "(\\(somePoint.0), \\(somePoint.1)) is outside of the box")
     }
 }
+Variable(.let, "anotherPoint", equals: TupleLiteral([.int(2), .int(0)])).withExplicitType()
+.comment {
+    Line("Switch with value binding")
+}
+Switch("anotherPoint") {
+    SwitchCase(Tuple.pattern([.let("x"), 0])) {
+        Call("print", "on the x-axis with an x value of \\(x)")
+        
+    }
+    SwitchCase(Tuple.pattern([0, .let("y")])) {
+        Call("print", "on the y-axis with a y value of \\(y)")
+     
+    }
+    SwitchCase(Tuple.pattern([.let("x"), .let("y")])) {
+        Call("print", "somewhere else at (\\(x), \\(y))")
+        
+    }
+}
