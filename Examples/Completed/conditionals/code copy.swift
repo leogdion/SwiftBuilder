@@ -101,19 +101,8 @@ case let (x, y):
     print("somewhere else at (\(x), \(y))")
 }
 
-// Switch with where clause
-let yetAnotherPoint = (1, -1)
-switch yetAnotherPoint {
-case let (x, y) where x == y:
-    print("(\(x), \(y)) is on the line x == y")
-case let (x, y) where x == -y:
-    print("(\(x), \(y)) is on the line x == -y")
-case let (x, y):
-    print("(\(x), \(y)) is just some arbitrary point")
-}
 
 // MARK: - Compound Cases
-
 // Switch with compound cases
 let stillAnotherPoint = (9, 0)
 switch stillAnotherPoint {
@@ -123,15 +112,7 @@ default:
     print("Not on an axis")
 }
 
-// MARK: - Control Transfer Statements
-if let integerValue = possibleIntegerValue {
-    print("The integer value of \(numberSymbol) is \(integerValue).")
-} else {
-    print("An integer value could not be found for \(numberSymbol).")
-}
-
 // MARK: - Fallthrough
-
 // Using fallthrough in switch
 let integerToDescribe = 5
 var description = "The number \(integerToDescribe) is"

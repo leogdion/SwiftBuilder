@@ -86,7 +86,7 @@ import Testing
             ParameterExp(
               name: "",
               value:
-                "\"The string \\\"\\(possibleNumber)\\\" has an integer value of \\(actualNumber)\""
+                "\"The string \"\\(possibleNumber)\" has an integer value of \\(actualNumber)\""
             )
           }
         },
@@ -218,6 +218,29 @@ import Testing
           }
         }
       }
+
+      // MARK: - Switch with value binding
+      Variable(.let, name: "anotherPoint", equals: TupleLiteral([.int(2), .int(0)])).withExplicitType()
+        .comment {
+          Line("Switch with value binding")
+        }
+      Switch("anotherPoint") {
+        SwitchCase(Tuple.pattern([Pattern.let("x"), 0])) {
+          Call("print") {
+            ParameterExp(name: "", value: "\"on the x-axis with an x value of \\(x)\"")
+          }
+        }
+        SwitchCase(Tuple.pattern([0, Pattern.let("y")])) {
+          Call("print") {
+            ParameterExp(name: "", value: "\"on the y-axis with a y value of \\(y)\"")
+          }
+        }
+        SwitchCase(Tuple.pattern([Pattern.let("x"), Pattern.let("y")])) {
+          Call("print") {
+            ParameterExp(name: "", value: "\"somewhere else at (\\(x), \\(y))\"")
+          }
+        }
+      }
     }
 
     // Generate Swift from DSL
@@ -251,9 +274,9 @@ import Testing
       // Using if let for optional binding
       let possibleNumber = "123"
       if let actualNumber = Int(possibleNumber) {
-          print("The string \\"\\(possibleNumber)\\" has an integer value of \\(actualNumber)")
+          print("The string \"\\(possibleNumber)\" has an integer value of \\(actualNumber)")
       } else {
-          print("The string \\"\\(possibleNumber)\\" could not be converted to an integer")
+          print("The string \"\\(possibleNumber)\" could not be converted to an integer")
       }
 
       // Multiple optional bindings
@@ -312,6 +335,17 @@ import Testing
           print("(\\(somePoint.0), \\(somePoint.1)) is inside the box")
       default:
           print("(\\(somePoint.0), \\(somePoint.1)) is outside of the box")
+      }
+
+      // Switch with value binding
+      let anotherPoint: (Int, Int) = (2, 0)
+      switch anotherPoint {
+      case (let x, 0):
+          print("on the x-axis with an x value of \\(x)")
+      case (0, let y):
+          print("on the y-axis with a y value of \\(y)")
+      case (let x, let y):
+          print("somewhere else at (\\(x), \\(y))")
       }
       """
       .normalize()
