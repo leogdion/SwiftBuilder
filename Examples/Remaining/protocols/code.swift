@@ -1,5 +1,3 @@
-import Foundation
-
 // MARK: - Protocol Definition
 protocol Vehicle {
     var numberOfWheels: Int { get }

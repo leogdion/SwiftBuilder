@@ -57,11 +57,11 @@ public struct Class: CodeBlock {
   }
 
   /// Sets the inheritance for the class.
-  /// - Parameter type: The type to inherit from.
+  /// - Parameter inheritance: The types to inherit from.
   /// - Returns: A copy of the class with the inheritance set.
-  public func inherits(_ type: String) -> Self {
+  public func inherits(_ inheritance: String...) -> Self {
     var copy = self
-    copy.inheritance = [type]
+    copy.inheritance = inheritance
     return copy
   }
 

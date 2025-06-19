@@ -33,7 +33,7 @@ import SwiftSyntax
 public struct Enum: CodeBlock {
   private let name: String
   private let members: [CodeBlock]
-  private var inheritance: String?
+  private var inheritance: [String] = []
   private var attributes: [AttributeInfo] = []
 
   /// Creates an `enum` declaration.
@@ -46,11 +46,11 @@ public struct Enum: CodeBlock {
   }
 
   /// Sets the inheritance for the enum.
-  /// - Parameter type: The type to inherit from.
+  /// - Parameter inheritance: The types to inherit from.
   /// - Returns: A copy of the enum with the inheritance set.
-  public func inherits(_ type: String) -> Self {
+  public func inherits(_ inheritance: String...) -> Self {
     var copy = self
-    copy.inheritance = type
+    copy.inheritance = inheritance
     return copy
   }
 
@@ -70,11 +70,26 @@ public struct Enum: CodeBlock {
     let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
 
     var inheritanceClause: InheritanceClauseSyntax?
-    if let inheritance = inheritance {
-      let inheritedType = InheritedTypeSyntax(
-        type: IdentifierTypeSyntax(name: .identifier(inheritance)))
+    if !inheritance.isEmpty {
+      let inheritedTypes = inheritance.map { type in
+        InheritedTypeSyntax(
+          type: IdentifierTypeSyntax(name: .identifier(type)))
+      }
       inheritanceClause = InheritanceClauseSyntax(
-        colon: .colonToken(), inheritedTypes: InheritedTypeListSyntax([inheritedType]))
+        colon: .colonToken(),
+        inheritedTypes: InheritedTypeListSyntax(
+          inheritedTypes.enumerated().map { idx, inherited in
+            var inheritedType = inherited
+            if idx < inheritedTypes.count - 1 {
+              inheritedType = inheritedType.with(
+                \.trailingComma,
+                TokenSyntax.commaToken(trailingTrivia: .space)
+              )
+            }
+            return inheritedType
+          }
+        )
+      )
     }
 
     let memberBlock = MemberBlockSyntax(
