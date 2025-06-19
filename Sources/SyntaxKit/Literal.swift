@@ -51,6 +51,7 @@ public enum Literal: CodeBlock {
   /// A boolean literal.
   case boolean(Bool)
 
+  /// The SwiftSyntax representation of this literal.
   public var syntax: SyntaxProtocol {
     switch self {
     case .string(let value):
@@ -77,8 +78,10 @@ public enum Literal: CodeBlock {
 // MARK: - LiteralValue Implementations
 
 extension Array: LiteralValue where Element == String {
+  /// The Swift type name for an array of strings.
   public var typeName: String { "[String]" }
 
+  /// Renders this array as a Swift literal string with proper escaping.
   public var literalString: String {
     let elements = self.map { element in
       // Escape quotes and newlines
@@ -96,8 +99,10 @@ extension Array: LiteralValue where Element == String {
 }
 
 extension Dictionary: LiteralValue where Key == Int, Value == String {
+  /// The Swift type name for a dictionary mapping integers to strings.
   public var typeName: String { "[Int: String]" }
 
+  /// Renders this dictionary as a Swift literal string with proper escaping.
   public var literalString: String {
     let elements = self.map { key, value in
       // Escape quotes and newlines
