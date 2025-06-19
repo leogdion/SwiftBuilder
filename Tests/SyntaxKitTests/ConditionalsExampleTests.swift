@@ -95,7 +95,8 @@ import Testing
             ParameterExp(
               name: "",
               value:
-                "\"The string \\\"\\(possibleNumber)\\\" could not be converted to an integer\"")
+                "\"The string \"\\(possibleNumber)\" could not be converted to an integer\""
+            )
           }
         })
 
@@ -220,7 +221,8 @@ import Testing
       }
 
       // MARK: - Switch with value binding
-      Variable(.let, name: "anotherPoint", equals: TupleLiteral([.int(2), .int(0)])).withExplicitType()
+      Variable(.let, name: "anotherPoint", equals: TupleLiteral([.int(2), .int(0)]))
+        .withExplicitType()
         .comment {
           Line("Switch with value binding")
         }

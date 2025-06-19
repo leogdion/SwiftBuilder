@@ -60,9 +60,11 @@ extension Int: PatternConvertible {
 
 extension Swift.Range: PatternConvertible where Bound == Int {
   public var patternSyntax: PatternSyntax {
-    let lhs = ExprSyntax(IntegerLiteralExprSyntax(literal: .integerLiteral(String(self.lowerBound))))
+    let lhs = ExprSyntax(
+      IntegerLiteralExprSyntax(literal: .integerLiteral(String(self.lowerBound))))
     let op = ExprSyntax(BinaryOperatorExprSyntax(operator: .binaryOperator("..<")))
-    let rhs = ExprSyntax(IntegerLiteralExprSyntax(literal: .integerLiteral(String(self.upperBound))))
+    let rhs = ExprSyntax(
+      IntegerLiteralExprSyntax(literal: .integerLiteral(String(self.upperBound))))
     let seq = SequenceExprSyntax(elements: ExprListSyntax([lhs, op, rhs]))
     return PatternSyntax(ExpressionPatternSyntax(expression: ExprSyntax(seq)))
   }
@@ -70,9 +72,11 @@ extension Swift.Range: PatternConvertible where Bound == Int {
 
 extension Swift.ClosedRange: PatternConvertible where Bound == Int {
   public var patternSyntax: PatternSyntax {
-    let lhs = ExprSyntax(IntegerLiteralExprSyntax(literal: .integerLiteral(String(self.lowerBound))))
+    let lhs = ExprSyntax(
+      IntegerLiteralExprSyntax(literal: .integerLiteral(String(self.lowerBound))))
     let op = ExprSyntax(BinaryOperatorExprSyntax(operator: .binaryOperator("...")))
-    let rhs = ExprSyntax(IntegerLiteralExprSyntax(literal: .integerLiteral(String(self.upperBound))))
+    let rhs = ExprSyntax(
+      IntegerLiteralExprSyntax(literal: .integerLiteral(String(self.upperBound))))
     let seq = SequenceExprSyntax(elements: ExprListSyntax([lhs, op, rhs]))
     return PatternSyntax(ExpressionPatternSyntax(expression: ExprSyntax(seq)))
   }
@@ -91,11 +95,11 @@ extension String: PatternConvertible {
 /// A `let` binding pattern for switch cases.
 public struct LetBindingPattern: PatternConvertible {
   private let identifier: String
-  
+
   internal init(identifier: String) {
     self.identifier = identifier
   }
-  
+
   public var patternSyntax: PatternSyntax {
     PatternSyntax(
       ValueBindingPatternSyntax(

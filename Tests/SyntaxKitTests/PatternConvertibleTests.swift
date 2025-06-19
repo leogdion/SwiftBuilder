@@ -27,64 +27,63 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Testing
 import SwiftSyntax
+import Testing
 
 @testable import SyntaxKit
 
 internal struct PatternConvertibleTests {
-  
   // MARK: - Let Binding Pattern Tests
-  
+
   @Test internal func testLetBindingPattern() {
     let pattern = Pattern.let("x")
     let syntax = pattern.patternSyntax
-    
+
     let generated = syntax.description
     #expect(generated.contains("let x"))
   }
-  
+
   @Test internal func testLetBindingPatternInTuple() {
     let tuplePattern = Tuple.pattern([Pattern.let("x"), 0])
     let syntax = tuplePattern.patternSyntax
-    
+
     let generated = syntax.description
     #expect(generated.contains("(let x, 0)"))
   }
-  
+
   @Test internal func testLetBindingPatternInSwitchCase() {
     let switchCase = SwitchCase(Tuple.pattern([Pattern.let("x"), Pattern.let("y")])) {
       Call("print") {
         ParameterExp(name: "", value: "\"somewhere else at (\\(x), \\(y))\"")
       }
     }
-    
+
     let generated = switchCase.generateCode()
     #expect(generated.contains("case (let x, let y):"))
     #expect(generated.contains("print(\"somewhere else at (\\(x), \\(y))\")"))
   }
-  
+
   @Test internal func testLetBindingPatternWithSingleElement() {
     let pattern = Pattern.let("value")
     let syntax = pattern.patternSyntax
-    
+
     let generated = syntax.description
     #expect(generated.contains("let value"))
   }
-  
+
   @Test internal func testLetBindingPatternInComplexTuple() {
     let tuplePattern = Tuple.pattern([Pattern.let("x"), 0, Pattern.let("y")])
     let syntax = tuplePattern.patternSyntax
-    
+
     let generated = syntax.description
     #expect(generated.contains("(let x, 0, let y)"))
   }
-  
+
   @Test internal func testLetBindingPatternWithWildcard() {
     let tuplePattern = Tuple.pattern([Pattern.let("x"), nil, Pattern.let("y")])
     let syntax = tuplePattern.patternSyntax
-    
+
     let generated = syntax.description
     #expect(generated.contains("(let x, _, let y)"))
   }
-} 
+}
