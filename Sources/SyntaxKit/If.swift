@@ -31,47 +31,76 @@ import SwiftSyntax
 
 /// An `if` statement.
 public struct If: CodeBlock {
-  private let condition: CodeBlock
+  private let conditions: [CodeBlock]
   private let body: [CodeBlock]
   private let elseBody: [CodeBlock]?
 
-  /// Creates an `if` statement.
+  /// Creates an `if` statement with optional `else`.
   /// - Parameters:
-  ///   - condition: The condition to evaluate. This can be a ``Let`` for optional binding.
-  ///   - then: A ``CodeBlockBuilder`` that provides the body of the `if` block.
-  ///   - elseBody: A ``CodeBlockBuilder`` that provides the body of the `else` block, if any.
+  ///   - condition: A single `CodeBlock` produced by the builder that describes the `if` condition.
+  ///   - then: Builder that produces the body for the `if` branch.
+  ///   - elseBody: Builder that produces the body for the `else` branch. The body may contain
+  ///               nested `If` instances (representing `else if`) and/or a ``Then`` block for the
+  ///               final `else` statements.
   public init(
-    _ condition: CodeBlock, @CodeBlockBuilderResult then: () -> [CodeBlock],
-    else elseBody: (() -> [CodeBlock])? = nil
+    @CodeBlockBuilderResult _ condition: () -> [CodeBlock],
+    @CodeBlockBuilderResult then: () -> [CodeBlock],
+    @CodeBlockBuilderResult else elseBody: () -> [CodeBlock] = { [] }
   ) {
-    self.condition = condition
+    let allConditions = condition()
+    guard !allConditions.isEmpty else {
+      fatalError("If requires at least one condition CodeBlock")
+    }
+    self.conditions = allConditions
     self.body = then()
-    self.elseBody = elseBody?()
+    let generatedElse = elseBody()
+    self.elseBody = generatedElse.isEmpty ? nil : generatedElse
+  }
+
+  /// Convenience initializer that keeps the previous API: pass the condition directly.
+  public init(
+    _ condition: CodeBlock,
+    @CodeBlockBuilderResult then: () -> [CodeBlock],
+    @CodeBlockBuilderResult else elseBody: () -> [CodeBlock] = { [] }
+  ) {
+    self.init({ condition }, then: then, else: elseBody)
   }
 
   public var syntax: SyntaxProtocol {
-    let cond: ConditionElementSyntax
-    if let letCond = condition as? Let {
-      cond = ConditionElementSyntax(
-        condition: .optionalBinding(
-          OptionalBindingConditionSyntax(
-            bindingSpecifier: .keyword(.let, trailingTrivia: .space),
-            pattern: IdentifierPatternSyntax(identifier: .identifier(letCond.name)),
-            initializer: InitializerClauseSyntax(
-              equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-              value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(letCond.value)))
+    // Build list of ConditionElements from all provided conditions
+    let condList = ConditionElementListSyntax(
+      conditions.enumerated().map { index, block in
+        let needsComma = index < conditions.count - 1
+
+        func appendComma(_ element: ConditionElementSyntax) -> ConditionElementSyntax {
+          needsComma ? element.with(\.trailingComma, .commaToken(trailingTrivia: .space)) : element
+        }
+
+        if let letCond = block as? Let {
+          let element = ConditionElementSyntax(
+            condition: .optionalBinding(
+              OptionalBindingConditionSyntax(
+                bindingSpecifier: .keyword(.let, trailingTrivia: .space),
+                pattern: IdentifierPatternSyntax(identifier: .identifier(letCond.name)),
+                initializer: InitializerClauseSyntax(
+                  equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+                  value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(letCond.value)))
+                )
+              )
             )
           )
-        )
-      )
-    } else {
-      cond = ConditionElementSyntax(
-        condition: .expression(
-          ExprSyntax(
-            fromProtocol: condition.syntax.as(ExprSyntax.self)
-              ?? DeclReferenceExprSyntax(baseName: .identifier(""))))
-      )
-    }
+          return appendComma(element)
+        } else {
+          let element = ConditionElementSyntax(
+            condition: .expression(
+              ExprSyntax(
+                fromProtocol: block.syntax.as(ExprSyntax.self)
+                ?? DeclReferenceExprSyntax(baseName: .identifier(""))))
+          )
+          return appendComma(element)
+        }
+      }
+    )
     let bodyBlock = CodeBlockSyntax(
       leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
       statements: CodeBlockItemListSyntax(
@@ -88,31 +117,90 @@ public struct If: CodeBlock {
         }),
       rightBrace: .rightBraceToken(leadingTrivia: .newline)
     )
-    let elseBlock = elseBody.map {
-      IfExprSyntax.ElseBody(
-        CodeBlockSyntax(
-          leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
-          statements: CodeBlockItemListSyntax(
-            $0.compactMap {
-              var item: CodeBlockItemSyntax?
-              if let decl = $0.syntax.as(DeclSyntax.self) {
-                item = CodeBlockItemSyntax(item: .decl(decl))
-              } else if let expr = $0.syntax.as(ExprSyntax.self) {
-                item = CodeBlockItemSyntax(item: .expr(expr))
-              } else if let stmt = $0.syntax.as(StmtSyntax.self) {
-                item = CodeBlockItemSyntax(item: .stmt(stmt))
+    let elseBlock: IfExprSyntax.ElseBody? = {
+      guard let elseBlocks = elseBody else { return nil }
+
+      // Build a chained else-if structure if the builder provided If blocks.
+      var current: SyntaxProtocol?
+
+      for block in elseBlocks.reversed() {
+        switch block {
+        case let thenBlock as Then:
+          // Leaf `else` – produce a code-block.
+          let stmts = CodeBlockItemListSyntax(
+            thenBlock.body.compactMap { element in
+              if let decl = element.syntax.as(DeclSyntax.self) {
+                return CodeBlockItemSyntax(item: .decl(decl)).with(\.trailingTrivia, .newline)
+              } else if let expr = element.syntax.as(ExprSyntax.self) {
+                return CodeBlockItemSyntax(item: .expr(expr)).with(\.trailingTrivia, .newline)
+              } else if let stmt = element.syntax.as(StmtSyntax.self) {
+                return CodeBlockItemSyntax(item: .stmt(stmt)).with(\.trailingTrivia, .newline)
               }
-              return item?.with(\.trailingTrivia, .newline)
-            }),
-          rightBrace: .rightBraceToken(leadingTrivia: .newline)
-        ))
-    }
+              return nil
+            })
+          let codeBlock = CodeBlockSyntax(
+            leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
+            statements: stmts,
+            rightBrace: .rightBraceToken(leadingTrivia: .newline)
+          )
+          current = codeBlock as SyntaxProtocol
+
+        case let ifBlock as If:
+          guard var ifExpr = ifBlock.syntax.as(IfExprSyntax.self) else { continue }
+          if let nested = current {
+            let elseChoice: IfExprSyntax.ElseBody
+            if let cb = nested.as(CodeBlockSyntax.self) {
+              elseChoice = IfExprSyntax.ElseBody(cb)
+            } else if let nestedIf = nested.as(IfExprSyntax.self) {
+              elseChoice = IfExprSyntax.ElseBody(nestedIf)
+            } else {
+              continue
+            }
+
+            ifExpr = ifExpr
+              .with(\.elseKeyword, .keyword(.else, leadingTrivia: .space, trailingTrivia: .space))
+              .with(\.elseBody, elseChoice)
+          }
+          current = ifExpr as SyntaxProtocol
+
+        default:
+          // Treat any other CodeBlock as part of a final code-block
+          let item: CodeBlockItemSyntax?
+          if let decl = block.syntax.as(DeclSyntax.self) {
+            item = CodeBlockItemSyntax(item: .decl(decl))
+          } else if let expr = block.syntax.as(ExprSyntax.self) {
+            item = CodeBlockItemSyntax(item: .expr(expr))
+          } else if let stmt = block.syntax.as(StmtSyntax.self) {
+            item = CodeBlockItemSyntax(item: .stmt(stmt))
+          } else {
+            item = nil
+          }
+          if let itm = item {
+            let codeBlock = CodeBlockSyntax(
+              leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
+              statements: CodeBlockItemListSyntax([itm.with(\.trailingTrivia, .newline)]),
+              rightBrace: .rightBraceToken(leadingTrivia: .newline)
+            )
+            current = codeBlock as SyntaxProtocol
+          }
+        }
+      }
+
+      if let final = current {
+        if let cb = final.as(CodeBlockSyntax.self) {
+          return IfExprSyntax.ElseBody(cb)
+        } else if let ifExpr = final.as(IfExprSyntax.self) {
+          return IfExprSyntax.ElseBody(ifExpr)
+        }
+      }
+      return nil
+    }()
     return ExprSyntax(
       IfExprSyntax(
         ifKeyword: .keyword(.if, trailingTrivia: .space),
-        conditions: ConditionElementListSyntax([cond]),
+        conditions: condList,
         body: bodyBlock,
-        elseKeyword: elseBlock != nil ? .keyword(.else, trailingTrivia: .space) : nil,
+        elseKeyword: elseBlock != nil ? .keyword(.else, leadingTrivia: .space, trailingTrivia: .space) : nil,
         elseBody: elseBlock
       )
     )

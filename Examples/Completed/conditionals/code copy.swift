@@ -1,0 +1,230 @@
+import Foundation
+
+// MARK: - Basic If Statements
+
+// Simple if statement
+let temperature = 25
+if temperature > 30 {
+    print("It's hot outside!")
+}
+
+// If-else statement
+let score = 85
+if score >= 90 {
+    print("Excellent!")
+} else if score >= 80 {
+    print("Good job!")
+} else if score >= 70 {
+    print("Passing")
+} else {
+    print("Needs improvement")
+}
+
+// MARK: - Optional Binding with If
+
+// Using if let for optional binding
+let possibleNumber = "123"
+if let actualNumber = Int(possibleNumber) {
+    print("The string \"\(possibleNumber)\" has an integer value of \(actualNumber)")
+} else {
+    print("The string \"\(possibleNumber)\" could not be converted to an integer")
+}
+
+// Multiple optional bindings
+let possibleName: String? = "John"
+let possibleAge: Int? = 30
+if let name = possibleName, let age = possibleAge {
+    print("\(name) is \(age) years old")
+}
+
+// MARK: - Guard Statements
+
+func greet(person: [String: String]) {
+    guard let name = person["name"] else {
+        print("No name provided")
+        return
+    }
+    
+    guard let age = person["age"], let ageInt = Int(age) else {
+        print("Invalid age provided")
+        return
+    }
+    
+    print("Hello \(name), you are \(ageInt) years old")
+}
+
+// MARK: - Switch Statements
+
+// Switch with range matching
+let approximateCount = 62
+let countedThings = "moons orbiting Saturn"
+let naturalCount: String
+switch approximateCount {
+case 0:
+    naturalCount = "no"
+case 1..<5:
+    naturalCount = "a few"
+case 5..<12:
+    naturalCount = "several"
+case 12..<100:
+    naturalCount = "dozens of"
+case 100..<1000:
+    naturalCount = "hundreds of"
+default:
+    naturalCount = "many"
+}
+print("There are \(naturalCount) \(countedThings).")
+
+// Switch with tuple matching
+let somePoint = (1, 1)
+switch somePoint {
+case (0, 0):
+    print("(0, 0) is at the origin")
+case (_, 0):
+    print("(\(somePoint.0), 0) is on the x-axis")
+case (0, _):
+    print("(0, \(somePoint.1)) is on the y-axis")
+case (-2...2, -2...2):
+    print("(\(somePoint.0), \(somePoint.1)) is inside the box")
+default:
+    print("(\(somePoint.0), \(somePoint.1)) is outside of the box")
+}
+
+// Switch with value binding
+let anotherPoint = (2, 0)
+switch anotherPoint {
+case (let x, 0):
+    print("on the x-axis with an x value of \(x)")
+case (0, let y):
+    print("on the y-axis with a y value of \(y)")
+case let (x, y):
+    print("somewhere else at (\(x), \(y))")
+}
+
+// Switch with where clause
+let yetAnotherPoint = (1, -1)
+switch yetAnotherPoint {
+case let (x, y) where x == y:
+    print("(\(x), \(y)) is on the line x == y")
+case let (x, y) where x == -y:
+    print("(\(x), \(y)) is on the line x == -y")
+case let (x, y):
+    print("(\(x), \(y)) is just some arbitrary point")
+}
+
+// MARK: - Compound Cases
+
+// Switch with compound cases
+let stillAnotherPoint = (9, 0)
+switch stillAnotherPoint {
+case (let distance, 0), (0, let distance):
+    print("On an axis, \(distance) units from the origin")
+default:
+    print("Not on an axis")
+}
+
+// MARK: - Control Transfer Statements
+if let integerValue = possibleIntegerValue {
+    print("The integer value of \(numberSymbol) is \(integerValue).")
+} else {
+    print("An integer value could not be found for \(numberSymbol).")
+}
+
+// MARK: - Fallthrough
+
+// Using fallthrough in switch
+let integerToDescribe = 5
+var description = "The number \(integerToDescribe) is"
+switch integerToDescribe {
+case 2, 3, 5, 7, 11, 13, 17, 19:
+    description += " a prime number, and also"
+    fallthrough
+default:
+    description += " an integer."
+}
+print(description)
+
+// MARK: - Labeled Statements
+
+// Using labeled statements with break
+let finalSquare = 25
+var board = [Int](repeating: 0, count: finalSquare + 1)
+board[03] = +08; board[06] = +11; board[09] = +09; board[10] = +02
+board[14] = -10; board[19] = -11; board[22] = -02; board[24] = -08
+
+var square = 0
+var diceRoll = 0
+while square != finalSquare {
+    diceRoll += 1
+    if diceRoll == 7 { diceRoll = 1 }
+    switch square + diceRoll {
+    case finalSquare:
+        break gameLoop
+    case let newSquare where newSquare > finalSquare:
+        continue gameLoop
+    default:
+        square += diceRoll
+        square += board[square]
+    }
+}
+print("Game over!")
+
+// MARK: - Early Exit with Guard
+
+// Function demonstrating early exit pattern
+func processUser(_ user: [String: Any]) -> String {
+    guard let name = user["name"] as? String, !name.isEmpty else {
+        return "Invalid user name"
+    }
+    
+    guard let age = user["age"] as? Int, age >= 0 else {
+        return "Invalid age"
+    }
+    
+    guard let email = user["email"] as? String, email.contains("@") else {
+        return "Invalid email"
+    }
+    
+    return "Valid user: \(name), age \(age), email: \(email)"
+}
+
+// MARK: - Conditional Compilation
+
+// Using conditional compilation
+#if DEBUG
+    print("Debug mode is enabled")
+#else
+    print("Release mode is enabled")
+#endif
+
+#if os(iOS)
+    print("Running on iOS")
+#elseif os(macOS)
+    print("Running on macOS")
+#elseif os(Linux)
+    print("Running on Linux")
+#else
+    print("Running on unknown platform")
+#endif
+
+// MARK: - Testing the Examples
+
+// Test the examples
+print("\n=== Testing Conditional Examples ===")
+
+// Test if-else
+let testScore = 92
+if testScore >= 90 {
+    print("Test score \(testScore): Excellent!")
+} else if testScore >= 80 {
+    print("Test score \(testScore): Good job!")
+} else {
+    print("Test score \(testScore): Needs improvement")
+}
+
+// Test guard statement
+let userData = ["name": "Alice", "age": "25", "email": "alice@example.com"]
+print(processUser(userData))
+
+let invalidUserData = ["name": "", "age": "invalid"]
+print(processUser(invalidUserData))
