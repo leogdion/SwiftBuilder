@@ -105,3 +105,24 @@ Switch("approximateCount") {
     }
 }
 Call("print", "There are \\(naturalCount) \\(countedThings).")
+Variable(.let, "somePoint", equals: TupleLiteral([.int(1), .int(1)])).withExplicitType()
+.comment {
+    Line("Switch with tuple matching")
+}
+Switch("somePoint") {
+    SwitchCase(Tuple.pattern([0, 0])) {
+        Call("print", "(0, 0) is at the origin")
+    }
+    SwitchCase(Tuple.pattern([nil, 0])) {
+        Call("print", "(\\(somePoint.0), 0) is on the x-axis")
+    }
+    SwitchCase(Tuple.pattern([0, nil])) {
+        Call("print", "(0, \\(somePoint.1)) is on the y-axis")
+    }
+    SwitchCase(Tuple.pattern([(-2...2), (-2...2)])) {
+        Call("print", "(\\(somePoint.0), \\(somePoint.1)) is inside the box")
+    }
+    Default {
+        Call("print", "(\\(somePoint.0), \\(somePoint.1)) is outside of the box")
+    }
+}

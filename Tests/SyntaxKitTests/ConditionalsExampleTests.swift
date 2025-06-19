@@ -183,6 +183,41 @@ import Testing
       Call("print") {
         ParameterExp(name: "", value: "\"There are \\(naturalCount) \\(countedThings).\"")
       }
+
+      // MARK: - Tuple literal and tuple pattern switch
+      Variable(.let, name: "somePoint", equals: TupleLiteral([.int(1), .int(1)]))
+        .comment {
+          Line("Switch with tuple matching")
+        }
+      Switch("somePoint") {
+        SwitchCase(Tuple.pattern([0, 0])) {
+          Call("print") {
+            ParameterExp(name: "", value: "\"(0, 0) is at the origin\"")
+          }
+        }
+        SwitchCase(Tuple.pattern([nil, 0])) {
+          Call("print") {
+            ParameterExp(name: "", value: "\"(\\(somePoint.0), 0) is on the x-axis\"")
+          }
+        }
+        SwitchCase(Tuple.pattern([0, nil])) {
+          Call("print") {
+            ParameterExp(name: "", value: "\"(0, \\(somePoint.1)) is on the y-axis\"")
+          }
+        }
+        SwitchCase(Tuple.pattern([(-2...2), (-2...2)])) {
+          Call("print") {
+            ParameterExp(
+              name: "", value: "\"(\\(somePoint.0), \\(somePoint.1)) is inside the box\"")
+          }
+        }
+        Default {
+          Call("print") {
+            ParameterExp(
+              name: "", value: "\"(\\(somePoint.0), \\(somePoint.1)) is outside of the box\"")
+          }
+        }
+      }
     }
 
     // Generate Swift from DSL

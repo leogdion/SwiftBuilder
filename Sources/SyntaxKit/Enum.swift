@@ -242,6 +242,8 @@ public struct EnumCase: CodeBlock {
           equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
           value: DeclReferenceExprSyntax(baseName: .identifier(value))
         )
+      case .tuple:
+        fatalError("Tuple is not supported as a raw value for enum cases.")
       }
     }
 
