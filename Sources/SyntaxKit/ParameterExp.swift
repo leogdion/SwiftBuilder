@@ -31,8 +31,8 @@ import SwiftSyntax
 
 /// A parameter for a function call.
 public struct ParameterExp: CodeBlock {
-  let name: String
-  let value: String
+  internal let name: String
+  internal let value: String
 
   /// Creates a parameter for a function call.
   /// - Parameters:

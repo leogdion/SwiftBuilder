@@ -31,10 +31,10 @@ import Testing
 
 @testable import SyntaxKit
 
-struct OptionsMacroIntegrationTests {
+internal struct OptionsMacroIntegrationTests {
   // MARK: - Enum with Raw Values (Dictionary) Tests
 
-  @Test func testEnumWithRawValuesCreatesDictionary() {
+  @Test internal func testEnumWithRawValuesCreatesDictionary() {
     // Simulate the Options macro expansion for an enum with raw values
     let keyValues: [Int: String] = [2: "a", 5: "b", 6: "c", 12: "d"]
 
@@ -56,7 +56,7 @@ struct OptionsMacroIntegrationTests {
     #expect(generated.contains("12: \"d\""))
   }
 
-  @Test func testEnumWithoutRawValuesCreatesArray() {
+  @Test internal func testEnumWithoutRawValuesCreatesArray() {
     // Simulate the Options macro expansion for an enum without raw values
     let caseNames: [String] = ["red", "green", "blue"]
 
@@ -75,7 +75,7 @@ struct OptionsMacroIntegrationTests {
 
   // MARK: - Complex Integration Tests
 
-  @Test func testCompleteOptionsMacroWorkflow() {
+  @Test internal func testCompleteOptionsMacroWorkflow() {
     // This test demonstrates the complete workflow that the Options macro would use
 
     // Step 1: Determine if enum has raw values (simulated)
@@ -110,7 +110,7 @@ struct OptionsMacroIntegrationTests {
     #expect(generated.contains("3: \"third\""))
   }
 
-  @Test func testOptionsMacroWorkflowWithoutRawValues() {
+  @Test internal func testOptionsMacroWorkflowWithoutRawValues() {
     // Test the workflow for enums without raw values
 
     let hasRawValues = false
@@ -140,7 +140,7 @@ struct OptionsMacroIntegrationTests {
 
   // MARK: - Edge Cases
 
-  @Test func testEmptyEnumCases() {
+  @Test internal func testEmptyEnumCases() {
     let caseNames: [String] = []
 
     let extensionDecl = Extension("EmptyEnum") {
@@ -156,7 +156,7 @@ struct OptionsMacroIntegrationTests {
     #expect(generated.contains("static let mappedValues: [String] = []"))
   }
 
-  @Test func testEmptyDictionary() {
+  @Test internal func testEmptyDictionary() {
     let keyValues: [Int: String] = [:]
 
     let extensionDecl = Extension("EmptyDictEnum") {
@@ -173,7 +173,7 @@ struct OptionsMacroIntegrationTests {
     #expect(generated.contains("static let mappedValues: [Int: String] = []"))
   }
 
-  @Test func testSpecialCharactersInCaseNames() {
+  @Test internal func testSpecialCharactersInCaseNames() {
     let caseNames: [String] = ["case_with_underscore", "case-with-dash", "caseWithCamelCase"]
 
     let extensionDecl = Extension("SpecialEnum") {
@@ -194,7 +194,7 @@ struct OptionsMacroIntegrationTests {
 
   // MARK: - API Validation Tests
 
-  @Test func testNewSyntaxKitAPICompleteness() {
+  @Test internal func testNewSyntaxKitAPICompleteness() {
     // Verify that all the new API components work together correctly
 
     // Test LiteralValue protocol

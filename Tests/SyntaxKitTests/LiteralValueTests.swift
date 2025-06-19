@@ -31,37 +31,37 @@ import Testing
 
 @testable import SyntaxKit
 
-struct LiteralValueTests {
+internal struct LiteralValueTests {
   // MARK: - Array<String> LiteralValue Tests
 
-  @Test func testArrayStringTypeName() {
+  @Test internal func testArrayStringTypeName() {
     let array: [String] = ["a", "b", "c"]
     #expect(array.typeName == "[String]")
   }
 
-  @Test func testArrayStringLiteralString() {
+  @Test internal func testArrayStringLiteralString() {
     let array: [String] = ["a", "b", "c"]
     #expect(array.literalString == "[\"a\", \"b\", \"c\"]")
   }
 
-  @Test func testEmptyArrayStringLiteralString() {
+  @Test internal func testEmptyArrayStringLiteralString() {
     let array: [String] = []
     #expect(array.literalString == "[]")
   }
 
-  @Test func testArrayStringWithSpecialCharacters() {
+  @Test internal func testArrayStringWithSpecialCharacters() {
     let array: [String] = ["hello world", "test\"quote", "line\nbreak"]
     #expect(array.literalString == "[\"hello world\", \"test\\\"quote\", \"line\\nbreak\"]")
   }
 
   // MARK: - Dictionary<Int, String> LiteralValue Tests
 
-  @Test func testDictionaryIntStringTypeName() {
+  @Test internal func testDictionaryIntStringTypeName() {
     let dict: [Int: String] = [1: "a", 2: "b"]
     #expect(dict.typeName == "[Int: String]")
   }
 
-  @Test func testDictionaryIntStringLiteralString() {
+  @Test internal func testDictionaryIntStringLiteralString() {
     let dict: [Int: String] = [1: "a", 2: "b", 3: "c"]
     let literal = dict.literalString
 
@@ -73,12 +73,12 @@ struct LiteralValueTests {
     #expect(literal.hasSuffix("]"))
   }
 
-  @Test func testEmptyDictionaryLiteralString() {
+  @Test internal func testEmptyDictionaryLiteralString() {
     let dict: [Int: String] = [:]
     #expect(dict.literalString == "[]")
   }
 
-  @Test func testDictionaryWithSpecialCharacters() {
+  @Test internal func testDictionaryWithSpecialCharacters() {
     let dict: [Int: String] = [1: "hello world", 2: "test\"quote"]
     let literal = dict.literalString
 
@@ -91,7 +91,7 @@ struct LiteralValueTests {
 
   // MARK: - Dictionary Ordering Tests
 
-  @Test func testDictionaryOrderingIsConsistent() {
+  @Test internal func testDictionaryOrderingIsConsistent() {
     let dict1: [Int: String] = [2: "b", 1: "a", 3: "c"]
     let dict2: [Int: String] = [1: "a", 2: "b", 3: "c"]
 

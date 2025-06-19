@@ -30,9 +30,9 @@
 import SyntaxKit
 import Testing
 
-@Suite struct AttributeTests {
+@Suite internal struct AttributeTests {
   @Test("Class with attribute generates correct syntax")
-  func testClassWithAttribute() throws {
+  internal func testClassWithAttribute() throws {
     let classDecl = Class("Foo") {
       Variable(.var, name: "bar", type: "String", equals: "bar")
     }.attribute("objc")
@@ -43,7 +43,7 @@ import Testing
   }
 
   @Test("Function with attribute generates correct syntax")
-  func testFunctionWithAttribute() throws {
+  internal func testFunctionWithAttribute() throws {
     let function = Function("bar") {
       Variable(.let, name: "message", type: "String", equals: "bar")
     }.attribute("available")
@@ -54,7 +54,7 @@ import Testing
   }
 
   @Test("Variable with attribute generates correct syntax")
-  func testVariableWithAttribute() throws {
+  internal func testVariableWithAttribute() throws {
     let variable = Variable(.var, name: "bar", type: "String", equals: "bar")
       .attribute("Published")
 
@@ -64,7 +64,7 @@ import Testing
   }
 
   @Test("Multiple attributes on class generates correct syntax")
-  func testMultipleAttributesOnClass() throws {
+  internal func testMultipleAttributesOnClass() throws {
     let classDecl = Class("Foo") {
       Variable(.var, name: "bar", type: "String", equals: "bar")
     }
@@ -78,7 +78,7 @@ import Testing
   }
 
   @Test("Attribute with arguments generates correct syntax")
-  func testAttributeWithArguments() throws {
+  internal func testAttributeWithArguments() throws {
     let attribute = Attribute("available", arguments: ["iOS", "17.0", "*"])
 
     let generated = attribute.syntax.description
@@ -89,7 +89,7 @@ import Testing
   }
 
   @Test("Attribute with single argument generates correct syntax")
-  func testAttributeWithSingleArgument() throws {
+  internal func testAttributeWithSingleArgument() throws {
     let attribute = Attribute("available", argument: "iOS 17.0")
 
     let generated = attribute.syntax.description
@@ -98,7 +98,7 @@ import Testing
   }
 
   @Test("Comprehensive attribute example generates correct syntax")
-  func testComprehensiveAttributeExample() throws {
+  internal func testComprehensiveAttributeExample() throws {
     let classDecl = Class("Foo") {
       Variable(.var, name: "bar", type: "String", equals: "bar")
         .attribute("Published")
@@ -127,7 +127,7 @@ import Testing
   }
 
   @Test("Function with attribute arguments generates correct syntax")
-  func testFunctionWithAttributeArguments() throws {
+  internal func testFunctionWithAttributeArguments() throws {
     let function = Function("bar") {
       Variable(.let, name: "message", type: "String", equals: "bar")
     }.attribute("available", arguments: ["iOS", "17.0", "*"])
@@ -141,7 +141,7 @@ import Testing
   }
 
   @Test("Class with attribute arguments generates correct syntax")
-  func testClassWithAttributeArguments() throws {
+  internal func testClassWithAttributeArguments() throws {
     let classDecl = Class("Foo") {
       Variable(.var, name: "bar", type: "String", equals: "bar")
     }.attribute("available", arguments: ["iOS", "17.0"])
@@ -154,7 +154,7 @@ import Testing
   }
 
   @Test("Variable with attribute arguments generates correct syntax")
-  func testVariableWithAttributeArguments() throws {
+  internal func testVariableWithAttributeArguments() throws {
     let variable = Variable(.var, name: "bar", type: "String", equals: "bar")
       .attribute("available", arguments: ["iOS", "17.0"])
 
@@ -166,7 +166,7 @@ import Testing
   }
 
   @Test("Parameter with attribute generates correct syntax")
-  func testParameterWithAttribute() throws {
+  internal func testParameterWithAttribute() throws {
     let function = Function("process") {
       Parameter(name: "data", type: "Data")
         .attribute("escaping")
@@ -181,7 +181,7 @@ import Testing
   }
 
   @Test("Parameter with attribute arguments generates correct syntax")
-  func testParameterWithAttributeArguments() throws {
+  internal func testParameterWithAttributeArguments() throws {
     let function = Function("validate") {
       Parameter(name: "input", type: "String")
         .attribute("available", arguments: ["iOS", "17.0"])

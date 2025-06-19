@@ -2,8 +2,8 @@ import Testing
 
 @testable import SyntaxKit
 
-struct LiteralTests {
-  @Test func testGroupWithLiterals() {
+internal struct LiteralTests {
+  @Test internal func testGroupWithLiterals() {
     let group = Group {
       Return {
         Literal.integer(1)

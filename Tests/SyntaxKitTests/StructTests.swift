@@ -2,8 +2,8 @@ import Testing
 
 @testable import SyntaxKit
 
-struct StructTests {
-  @Test func testGenericStruct() {
+internal struct StructTests {
+  @Test internal func testGenericStruct() {
     let stackStruct = Struct("Stack") {
       Variable(.var, name: "items", type: "[Element]", equals: "[]")
 
@@ -63,7 +63,7 @@ struct StructTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testGenericStructWithInheritance() {
+  @Test internal func testGenericStructWithInheritance() {
     let containerStruct = Struct("Container") {
       Variable(.var, name: "value", type: "T")
     }.generic("T").inherits("Equatable")
@@ -79,7 +79,7 @@ struct StructTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testNonGenericStruct() {
+  @Test internal func testNonGenericStruct() {
     let simpleStruct = Struct("Point") {
       Variable(.var, name: "x", type: "Double")
       Variable(.var, name: "y", type: "Double")

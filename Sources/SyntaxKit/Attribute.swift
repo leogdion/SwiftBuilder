@@ -31,10 +31,10 @@ import SwiftSyntax
 
 /// Internal representation of a Swift attribute with its arguments.
 internal struct AttributeInfo {
-  let name: String
-  let arguments: [String]
+  internal let name: String
+  internal let arguments: [String]
 
-  init(name: String, arguments: [String] = []) {
+  internal init(name: String, arguments: [String] = []) {
     self.name = name
     self.arguments = arguments
   }

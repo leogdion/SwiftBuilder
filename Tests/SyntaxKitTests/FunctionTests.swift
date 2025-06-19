@@ -2,8 +2,8 @@ import Testing
 
 @testable import SyntaxKit
 
-struct FunctionTests {
-  @Test func testBasicFunction() throws {
+internal struct FunctionTests {
+  @Test internal func testBasicFunction() throws {
     let function = Function("calculateSum", returns: "Int") {
       Parameter(name: "a", type: "Int")
       Parameter(name: "b", type: "Int")
@@ -27,7 +27,7 @@ struct FunctionTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testStaticFunction() throws {
+  @Test internal func testStaticFunction() throws {
     let function = Function(
       "createInstance", returns: "MyType",
       {
@@ -55,7 +55,7 @@ struct FunctionTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testMutatingFunction() throws {
+  @Test internal func testMutatingFunction() throws {
     let function = Function(
       "updateValue",
       {

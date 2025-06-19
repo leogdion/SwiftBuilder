@@ -31,8 +31,8 @@ import SwiftSyntax
 
 /// A Swift `let` declaration for use in an `if` statement.
 public struct Let: CodeBlock {
-  let name: String
-  let value: String
+  internal let name: String
+  internal let value: String
 
   /// Creates a `let` declaration for an `if` statement.
   /// - Parameters:

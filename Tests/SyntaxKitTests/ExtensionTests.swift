@@ -31,10 +31,10 @@ import Testing
 
 @testable import SyntaxKit
 
-struct ExtensionTests {
+internal struct ExtensionTests {
   // MARK: - Basic Extension Tests
 
-  @Test func testBasicExtension() {
+  @Test internal func testBasicExtension() {
     let extensionDecl = Extension("String") {
       Variable(.let, name: "test", type: "Int", equals: "42")
     }
@@ -45,7 +45,7 @@ struct ExtensionTests {
     #expect(generated.contains("let test: Int = 42"))
   }
 
-  @Test func testExtensionWithMultipleMembers() {
+  @Test internal func testExtensionWithMultipleMembers() {
     let extensionDecl = Extension("Array") {
       Variable(.let, name: "isEmpty", type: "Bool", equals: "true")
       Variable(.let, name: "count", type: "Int", equals: "0")
@@ -60,7 +60,7 @@ struct ExtensionTests {
 
   // MARK: - Extension with Inheritance Tests
 
-  @Test func testExtensionWithSingleInheritance() {
+  @Test internal func testExtensionWithSingleInheritance() {
     let extensionDecl = Extension("MyEnum") {
       TypeAlias("MappedType", equals: "String")
     }.inherits("MappedValueRepresentable")
@@ -71,7 +71,7 @@ struct ExtensionTests {
     #expect(generated.contains("typealias MappedType = String"))
   }
 
-  @Test func testExtensionWithMultipleInheritance() {
+  @Test internal func testExtensionWithMultipleInheritance() {
     let extensionDecl = Extension("MyEnum") {
       TypeAlias("MappedType", equals: "String")
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
@@ -83,7 +83,7 @@ struct ExtensionTests {
     #expect(generated.contains("typealias MappedType = String"))
   }
 
-  @Test func testExtensionWithoutInheritance() {
+  @Test internal func testExtensionWithoutInheritance() {
     let extensionDecl = Extension("MyType") {
       Variable(.let, name: "constant", type: "String", equals: "value")
     }
@@ -97,7 +97,7 @@ struct ExtensionTests {
 
   // MARK: - Extension with Complex Members Tests
 
-  @Test func testExtensionWithStaticVariables() {
+  @Test internal func testExtensionWithStaticVariables() {
     let array: [String] = ["a", "b", "c"]
     let dict: [Int: String] = [1: "one", 2: "two"]
 
@@ -118,7 +118,7 @@ struct ExtensionTests {
     #expect(generated.contains("2: \"two\""))
   }
 
-  @Test func testExtensionWithFunctions() {
+  @Test internal func testExtensionWithFunctions() {
     let extensionDecl = Extension("String") {
       Function("uppercasedFirst", returns: "String") {
         Return {
@@ -136,7 +136,7 @@ struct ExtensionTests {
 
   // MARK: - Edge Cases
 
-  @Test func testExtensionWithEmptyBody() {
+  @Test internal func testExtensionWithEmptyBody() {
     let extensionDecl = Extension("EmptyType") {
       // Empty body
     }
@@ -148,7 +148,7 @@ struct ExtensionTests {
     #expect(generated.contains("}"))
   }
 
-  @Test func testExtensionWithSpecialCharactersInName() {
+  @Test internal func testExtensionWithSpecialCharactersInName() {
     let extensionDecl = Extension("MyType<T>") {
       Variable(.let, name: "generic", type: "T", equals: "nil")
     }
@@ -159,7 +159,7 @@ struct ExtensionTests {
     #expect(generated.contains("let generic: T = nil"))
   }
 
-  @Test func testInheritsMethodReturnsNewInstance() {
+  @Test internal func testInheritsMethodReturnsNewInstance() {
     let original = Extension("Test") {
       Variable(.let, name: "value", type: "Int", equals: "42")
     }

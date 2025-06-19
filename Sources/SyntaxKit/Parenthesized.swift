@@ -1,5 +1,5 @@
 //
-//  Group.swift
+//  Parenthesized.swift
 //  SyntaxKit
 //
 //  Created by Leo Dion.
@@ -29,34 +29,27 @@
 
 import SwiftSyntax
 
-/// A group of code blocks.
-public struct Group: CodeBlock {
-  internal let members: [CodeBlock]
+/// A code block that wraps its content in parentheses.
+public struct Parenthesized: CodeBlock {
+  private let content: CodeBlock
 
-  /// Creates a group of code blocks.
-  /// - Parameter content: A ``CodeBlockBuilder`` that provides the members of the group.
+  /// Creates a parenthesized code block.
+  /// - Parameter content: The code block to wrap in parentheses.
   public init(@CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
-    self.members = content()
+    let blocks = content()
+    precondition(blocks.count == 1, "Parenthesized expects exactly one code block.")
+    self.content = blocks[0]
   }
 
   public var syntax: SyntaxProtocol {
-    let statements = members.flatMap { block -> [CodeBlockItemSyntax] in
-      if let list = block.syntax.as(CodeBlockItemListSyntax.self) {
-        return Array(list)
-      }
-
-      let item: CodeBlockItemSyntax.Item
-      if let decl = block.syntax.as(DeclSyntax.self) {
-        item = .decl(decl)
-      } else if let stmt = block.syntax.as(StmtSyntax.self) {
-        item = .stmt(stmt)
-      } else if let expr = block.syntax.as(ExprSyntax.self) {
-        item = .expr(expr)
-      } else {
-        fatalError("Unsupported syntax type in group: \(type(of: block.syntax)) from \(block)")
-      }
-      return [CodeBlockItemSyntax(item: item, trailingTrivia: .newline)]
-    }
-    return CodeBlockItemListSyntax(statements)
+    ExprSyntax(
+      TupleExprSyntax(
+        leftParen: .leftParenToken(),
+        elements: LabeledExprListSyntax([
+          LabeledExprSyntax(expression: content.expr)
+        ]),
+        rightParen: .rightParenToken()
+      )
+    )
   }
 }

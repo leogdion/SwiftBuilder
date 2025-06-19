@@ -145,33 +145,43 @@ public struct Enum: CodeBlock {
 /// A Swift `case` declaration inside an `enum`.
 public struct EnumCase: CodeBlock {
   private let name: String
-  private var value: String?
-  private var intValue: Int?
+  private var literalValue: Literal?
 
   /// Creates a `case` declaration.
   /// - Parameter name: The name of the case.
   public init(_ name: String) {
     self.name = name
+    self.literalValue = nil
   }
 
-  /// Sets the raw value of the case to a string.
+  /// Sets the raw value of the case to a Literal.
+  /// - Parameter value: The literal value.
+  /// - Returns: A copy of the case with the raw value set.
+  public func equals(_ value: Literal) -> Self {
+    var copy = self
+    copy.literalValue = value
+    return copy
+  }
+
+  /// Sets the raw value of the case to a string (for backward compatibility).
   /// - Parameter value: The string value.
   /// - Returns: A copy of the case with the raw value set.
   public func equals(_ value: String) -> Self {
-    var copy = self
-    copy.value = value
-    copy.intValue = nil
-    return copy
+    self.equals(.string(value))
   }
 
-  /// Sets the raw value of the case to an integer.
+  /// Sets the raw value of the case to an integer (for backward compatibility).
   /// - Parameter value: The integer value.
   /// - Returns: A copy of the case with the raw value set.
   public func equals(_ value: Int) -> Self {
-    var copy = self
-    copy.value = nil
-    copy.intValue = value
-    return copy
+    self.equals(.integer(value))
+  }
+
+  /// Sets the raw value of the case to a float (for backward compatibility).
+  /// - Parameter value: The float value.
+  /// - Returns: A copy of the case with the raw value set.
+  public func equals(_ value: Double) -> Self {
+    self.equals(.float(value))
   }
 
   public var syntax: SyntaxProtocol {
@@ -179,22 +189,40 @@ public struct EnumCase: CodeBlock {
     let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
 
     var initializer: InitializerClauseSyntax?
-    if let value = value {
-      initializer = InitializerClauseSyntax(
-        equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-        value: StringLiteralExprSyntax(
-          openingQuote: .stringQuoteToken(),
-          segments: StringLiteralSegmentListSyntax([
-            .stringSegment(StringSegmentSyntax(content: .stringSegment(value)))
-          ]),
-          closingQuote: .stringQuoteToken()
+    if let literal = literalValue {
+      switch literal {
+      case .string(let value):
+        initializer = InitializerClauseSyntax(
+          equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+          value: StringLiteralExprSyntax(
+            openingQuote: .stringQuoteToken(),
+            segments: StringLiteralSegmentListSyntax([
+              .stringSegment(StringSegmentSyntax(content: .stringSegment(value)))
+            ]),
+            closingQuote: .stringQuoteToken()
+          )
         )
-      )
-    } else if let intValue = intValue {
-      initializer = InitializerClauseSyntax(
-        equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-        value: IntegerLiteralExprSyntax(digits: .integerLiteral(String(intValue)))
-      )
+      case .float(let value):
+        initializer = InitializerClauseSyntax(
+          equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+          value: FloatLiteralExprSyntax(literal: .floatLiteral(String(value)))
+        )
+      case .integer(let value):
+        initializer = InitializerClauseSyntax(
+          equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+          value: IntegerLiteralExprSyntax(digits: .integerLiteral(String(value)))
+        )
+      case .nil:
+        initializer = InitializerClauseSyntax(
+          equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+          value: NilLiteralExprSyntax(nilKeyword: .keyword(.nil))
+        )
+      case .boolean(let value):
+        initializer = InitializerClauseSyntax(
+          equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+          value: BooleanLiteralExprSyntax(literal: value ? .keyword(.true) : .keyword(.false))
+        )
+      }
     }
 
     return EnumCaseDeclSyntax(

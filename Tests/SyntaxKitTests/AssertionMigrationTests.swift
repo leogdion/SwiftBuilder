@@ -4,10 +4,10 @@ import Testing
 
 /// Tests specifically focused on assertion migration from XCTest to Swift Testing
 /// Ensures all assertion patterns from the original tests work correctly with #expect()
-struct AssertionMigrationTests {
+internal struct AssertionMigrationTests {
   // MARK: - XCTAssertEqual Migration Tests
 
-  @Test func testEqualityAssertionMigration() throws {
+  @Test internal func testEqualityAssertionMigration() throws {
     // Test the most common migration: XCTAssertEqual -> #expect(a == b)
     let function = Function("test", returns: "String") {
       Return {
@@ -29,7 +29,7 @@ struct AssertionMigrationTests {
 
   // MARK: - XCTAssertFalse Migration Tests
 
-  @Test func testFalseAssertionMigration() {
+  @Test internal func testFalseAssertionMigration() {
     let syntax = Group {
       Variable(.let, name: "test", type: "String", equals: "\"value\"")
     }
@@ -42,7 +42,7 @@ struct AssertionMigrationTests {
 
   // MARK: - Complex Assertion Migration Tests
 
-  @Test func testNormalizedStringComparisonMigration() throws {
+  @Test internal func testNormalizedStringComparisonMigration() throws {
     let blackjackCard = Struct("Card") {
       Enum("Suit") {
         EnumCase("hearts").equals("♡")
@@ -68,7 +68,7 @@ struct AssertionMigrationTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testMultipleAssertionsInSingleTest() {
+  @Test internal func testMultipleAssertionsInSingleTest() {
     let generated = "struct Test { var value: Int }"
 
     // Test multiple assertions in one test method

@@ -2,8 +2,8 @@ import Testing
 
 @testable import SyntaxKit
 
-struct BasicTests {
-  @Test func testBlackjackCardExample() throws {
+internal struct BasicTests {
+  @Test internal func testBlackjackCardExample() throws {
     let blackjackCard = Struct("BlackjackCard") {
       Enum("Suit") {
         EnumCase("spades").equals("♠")

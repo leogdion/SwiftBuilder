@@ -2,8 +2,8 @@ import Testing
 
 @testable import SyntaxKit
 
-struct ClassTests {
-  @Test func testClassWithInheritance() {
+internal struct ClassTests {
+  @Test internal func testClassWithInheritance() {
     let carClass = Class("Car") {
       Variable(.var, name: "brand", type: "String")
       Variable(.var, name: "numberOfWheels", type: "Int")
@@ -21,7 +21,7 @@ struct ClassTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testEmptyClass() {
+  @Test internal func testEmptyClass() {
     let emptyClass = Class("EmptyClass") {}
 
     let expected = """
@@ -34,7 +34,7 @@ struct ClassTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testClassWithGenerics() {
+  @Test internal func testClassWithGenerics() {
     let genericClass = Class("Container") {
       Variable(.var, name: "value", type: "T")
     }.generic("T")
@@ -50,7 +50,7 @@ struct ClassTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testClassWithMultipleGenerics() {
+  @Test internal func testClassWithMultipleGenerics() {
     let multiGenericClass = Class("Pair") {
       Variable(.var, name: "first", type: "T")
       Variable(.var, name: "second", type: "U")
@@ -68,7 +68,7 @@ struct ClassTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testFinalClass() {
+  @Test internal func testFinalClass() {
     let finalClass = Class("FinalClass") {
       Variable(.var, name: "value", type: "String")
     }.final()
@@ -84,7 +84,7 @@ struct ClassTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testClassWithMultipleInheritance() {
+  @Test internal func testClassWithMultipleInheritance() {
     let classWithMultipleInheritance = Class("AdvancedVehicle") {
       Variable(.var, name: "speed", type: "Int")
     }.inherits("Vehicle")
@@ -100,7 +100,7 @@ struct ClassTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testClassWithGenericsAndInheritance() {
+  @Test internal func testClassWithGenericsAndInheritance() {
     let genericClassWithInheritance = Class("GenericContainer") {
       Variable(.var, name: "items", type: "[T]")
     }.generic("T").inherits("Collection")
@@ -116,7 +116,7 @@ struct ClassTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testFinalClassWithInheritanceAndGenerics() {
+  @Test internal func testFinalClassWithInheritanceAndGenerics() {
     let finalGenericClass = Class("FinalGenericClass") {
       Variable(.var, name: "value", type: "T")
     }.generic("T").inherits("BaseClass").final()
@@ -132,7 +132,7 @@ struct ClassTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  @Test func testClassWithFunctions() {
+  @Test internal func testClassWithFunctions() {
     let classWithFunctions = Class("Calculator") {
       Function("add", returns: "Int") {
         Parameter(name: "a", type: "Int")

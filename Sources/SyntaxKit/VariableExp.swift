@@ -31,7 +31,7 @@ import SwiftSyntax
 
 /// An expression that refers to a variable.
 public struct VariableExp: CodeBlock {
-  let name: String
+  internal let name: String
 
   /// Creates a variable expression.
   /// - Parameter name: The name of the variable.
@@ -71,8 +71,8 @@ public struct VariableExp: CodeBlock {
 
 /// An expression that accesses a property on a base expression.
 public struct PropertyAccessExp: CodeBlock {
-  let baseName: String
-  let propertyName: String
+  internal let baseName: String
+  internal let propertyName: String
 
   /// Creates a property access expression.
   /// - Parameters:
@@ -97,9 +97,9 @@ public struct PropertyAccessExp: CodeBlock {
 
 /// An expression that calls a function.
 public struct FunctionCallExp: CodeBlock {
-  let baseName: String
-  let methodName: String
-  let parameters: [ParameterExp]
+  internal let baseName: String
+  internal let methodName: String
+  internal let parameters: [ParameterExp]
 
   /// Creates a function call expression.
   /// - Parameters:

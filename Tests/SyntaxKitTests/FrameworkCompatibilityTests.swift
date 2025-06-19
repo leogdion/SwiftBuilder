@@ -4,17 +4,17 @@ import Testing
 
 /// Tests to ensure compatibility and feature parity between XCTest and Swift Testing
 /// Validates that the migration maintains all testing capabilities
-struct FrameworkCompatibilityTests {
+internal struct FrameworkCompatibilityTests {
   // MARK: - Test Organization Migration Tests
 
-  @Test func testStructBasedOrganization() {
+  @Test internal func testStructBasedOrganization() {
     // Test that struct-based test organization works
     // This replaces: final class TestClass: XCTestCase
     let testExecuted = true
     #expect(testExecuted)
   }
 
-  @Test func testMethodAnnotationMigration() throws {
+  @Test internal func testMethodAnnotationMigration() throws {
     // Test that @Test annotation works with throws
     // This replaces: func testMethod() throws
     let syntax = Enum("TestEnum") {
@@ -29,7 +29,7 @@ struct FrameworkCompatibilityTests {
 
   // MARK: - Error Handling Compatibility Tests
 
-  @Test func testThrowingTestCompatibility() throws {
+  @Test internal func testThrowingTestCompatibility() throws {
     // Ensure throws declaration works properly with @Test
     let function = Function("throwingFunction", returns: "String") {
       Parameter(name: "input", type: "String")
@@ -45,7 +45,7 @@ struct FrameworkCompatibilityTests {
 
   // MARK: - Complex DSL Compatibility Tests
 
-  @Test func testFullBlackjackCompatibility() throws {
+  @Test internal func testFullBlackjackCompatibility() throws {
     // Test complex DSL patterns work with new framework
     let syntax = Struct("BlackjackCard") {
       Enum("Suit") {
@@ -80,7 +80,7 @@ struct FrameworkCompatibilityTests {
 
   // MARK: - Function Generation Compatibility Tests
 
-  @Test func testFunctionGenerationCompatibility() throws {
+  @Test internal func testFunctionGenerationCompatibility() throws {
     let function = Function("calculateValue", returns: "Int") {
       Parameter(name: "multiplier", type: "Int")
       Parameter(name: "base", type: "Int", defaultValue: "10")
@@ -101,7 +101,7 @@ struct FrameworkCompatibilityTests {
 
   // MARK: - Comment Injection Compatibility Tests
 
-  @Test func testCommentInjectionCompatibility() {
+  @Test internal func testCommentInjectionCompatibility() {
     let syntax = Struct("DocumentedStruct") {
       Variable(.let, name: "value", type: "String")
         .comment {
@@ -121,7 +121,7 @@ struct FrameworkCompatibilityTests {
 
   // MARK: - Migration Regression Tests
 
-  @Test func testNoRegressionInCodeGeneration() {
+  @Test internal func testNoRegressionInCodeGeneration() {
     // Ensure migration doesn't introduce regressions
     let simpleStruct = Struct("Point") {
       Variable(.var, name: "x", type: "Double", equals: "0.0")
@@ -135,7 +135,7 @@ struct FrameworkCompatibilityTests {
     #expect(generated.contains("var y: Double = 0.0".normalize()))
   }
 
-  @Test func testLiteralGeneration() {
+  @Test internal func testLiteralGeneration() {
     let group = Group {
       Return {
         Literal.integer(100)
