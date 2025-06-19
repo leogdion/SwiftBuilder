@@ -32,40 +32,31 @@ import SwiftSyntax
 /// An assignment expression.
 public struct Assignment: CodeBlock {
   private let target: String
-  private let value: String
+  private let valueExpr: ExprSyntax
 
-  /// Creates an assignment expression.
-  /// - Parameters:
-  ///   - target: The variable to assign to.
-  ///   - value: The value to assign.
-  public init(_ target: String, _ value: String) {
+  /// Creates an assignment where the value is a literal.
+  public init(_ target: String, _ literal: Literal) {
     self.target = target
-    self.value = value
+    guard let expr = literal.syntax.as(ExprSyntax.self) else {
+      fatalError("Literal.syntax did not produce ExprSyntax")
+    }
+    self.valueExpr = expr
   }
+
   public var syntax: SyntaxProtocol {
     let left = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(target)))
-    let right: ExprSyntax
-    if value.hasPrefix("\"") && value.hasSuffix("\"") || value.contains("\\(") {
-      right = ExprSyntax(
-        StringLiteralExprSyntax(
-          openingQuote: .stringQuoteToken(),
-          segments: StringLiteralSegmentListSyntax([
-            .stringSegment(
-              StringSegmentSyntax(content: .stringSegment(String(value.dropFirst().dropLast()))))
-          ]),
-          closingQuote: .stringQuoteToken()
-        ))
-    } else {
-      right = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
-    }
-    let assign = ExprSyntax(
-      AssignmentExprSyntax(equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space)))
-    return SequenceExprSyntax(
-      elements: ExprListSyntax([
-        left,
-        assign,
-        right,
-      ])
+    let right = valueExpr
+    let assignmentExpr = ExprSyntax(
+      SequenceExprSyntax(
+        elements: ExprListSyntax([
+          left,
+          ExprSyntax(
+            AssignmentExprSyntax(equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space))),
+          right,
+        ])
+      )
     )
+    // Wrap the expression as a statement
+    return StmtSyntax(ExpressionStmtSyntax(expression: assignmentExpr))
   }
 }

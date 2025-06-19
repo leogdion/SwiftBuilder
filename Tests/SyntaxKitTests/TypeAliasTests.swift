@@ -67,7 +67,7 @@ internal struct TypeAliasTests {
   @Test internal func testTypeAliasInExtension() {
     let extensionDecl = Extension("MyEnum") {
       TypeAlias("MappedType", equals: "String")
-      Variable(.let, name: "test", type: "MappedType", equals: "value")
+      Variable(.let, name: "test", type: "MappedType", equals: "value").withExplicitType()
     }
 
     let generated = extensionDecl.generateCode().normalize()
@@ -80,7 +80,7 @@ internal struct TypeAliasTests {
   @Test internal func testTypeAliasInStruct() {
     let structDecl = Struct("Container") {
       TypeAlias("ElementType", equals: "String")
-      Variable(.let, name: "element", type: "ElementType")
+      Variable(.let, name: "element", type: "ElementType").withExplicitType()
     }
 
     let generated = structDecl.generateCode().normalize()
@@ -149,7 +149,7 @@ internal struct TypeAliasTests {
   @Test internal func testTypeAliasWithStaticVariable() {
     let extensionDecl = Extension("MyEnum") {
       TypeAlias("MappedType", equals: "String")
-      Variable(.let, name: "mappedValues", equals: ["a", "b", "c"]).static()
+      Variable(.let, name: "mappedValues", equals: ["a", "b", "c"]).withExplicitType().static()
     }.inherits("MappedValueRepresentable")
 
     let generated = extensionDecl.generateCode().normalize()
@@ -162,7 +162,7 @@ internal struct TypeAliasTests {
   @Test internal func testTypeAliasWithDictionaryVariable() {
     let extensionDecl = Extension("MyEnum") {
       TypeAlias("MappedType", equals: "String")
-      Variable(.let, name: "mappedValues", equals: [1: "a", 2: "b"]).static()
+      Variable(.let, name: "mappedValues", equals: [1: "a", 2: "b"]).withExplicitType().static()
     }.inherits("MappedValueRepresentable")
 
     let generated = extensionDecl.generateCode().normalize()

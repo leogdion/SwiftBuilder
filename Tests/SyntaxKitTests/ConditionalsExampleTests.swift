@@ -100,11 +100,11 @@ import Testing
         })
 
       // Multiple optional bindings
-      Variable(.let, name: "possibleName", type: "String?", equals: "\"John\"")
+      Variable(.let, name: "possibleName", type: "String?", equals: "\"John\"").withExplicitType()
         .comment {
           Line("Multiple optional bindings")
         }
-      Variable(.let, name: "possibleAge", type: "Int?", equals: "30")
+      Variable(.let, name: "possibleAge", type: "Int?", equals: "30").withExplicitType()
 
       If {
         Let("name", "possibleName")
@@ -146,14 +146,71 @@ import Testing
       .comment {
         Line("MARK: - Guard Statements")
       }
+
+      // MARK: - Switch Statements
+      Variable(.let, name: "approximateCount", type: "Int", equals: "62")
+        .comment {
+          Line("MARK: - Switch Statements")
+          Line("Switch with range matching")
+        }
+      Variable(
+        .let,
+        name: "countedThings",
+        type: "String",
+        equals: "\"moons orbiting Saturn\""
+      )
+      Variable(.let, name: "naturalCount", type: "String").withExplicitType()
+      Switch("approximateCount") {
+        SwitchCase(0) {
+          Assignment("naturalCount", Literal.string("no"))
+        }
+        SwitchCase(1..<5) {
+          Assignment("naturalCount", Literal.string("a few"))
+        }
+        SwitchCase(5..<12) {
+          Assignment("naturalCount", Literal.string("several"))
+        }
+        SwitchCase(12..<100) {
+          Assignment("naturalCount", Literal.string("dozens of"))
+        }
+        SwitchCase(100..<1_000) {
+          Assignment("naturalCount", Literal.string("hundreds of"))
+        }
+        Default {
+          Assignment("naturalCount", Literal.string("many"))
+        }
+      }
+      Call("print") {
+        ParameterExp(name: "", value: "\"There are \\(naturalCount) \\(countedThings).\"")
+      }
     }
 
     // Generate Swift from DSL
     var generated = program.generateCode()
+    // Print just the generated switch statement for debugging
+    let switchStmt = Switch("approximateCount") {
+      SwitchCase(0) {
+        Assignment("naturalCount", Literal.string("no"))
+      }
+      SwitchCase(1..<5) {
+        Assignment("naturalCount", Literal.string("a few"))
+      }
+      SwitchCase(5..<12) {
+        Assignment("naturalCount", Literal.string("several"))
+      }
+      SwitchCase(12..<100) {
+        Assignment("naturalCount", Literal.string("dozens of"))
+      }
+      SwitchCase(100..<1_000) {
+        Assignment("naturalCount", Literal.string("hundreds of"))
+      }
+      Default {
+        Assignment("naturalCount", Literal.string("many"))
+      }
+    }
+
     // Remove type annotations like ": Int =" for comparison to example code
-    generated = generated.replacingOccurrences(
-      of: ":\\s*\\w+\\s*=", with: "=", options: .regularExpression
-    ).normalize()
+    generated = generated.normalize()
 
     // Load expected Swift from example file
     let projectRoot = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)

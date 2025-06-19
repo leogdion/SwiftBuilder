@@ -37,6 +37,7 @@ public struct Variable: CodeBlock {
   private let defaultValue: String?
   private var isStatic: Bool = false
   private var attributes: [AttributeInfo] = []
+  private var explicitType: Bool = false
 
   /// Creates a `let` or `var` declaration with an explicit type.
   /// - Parameters:
@@ -44,12 +45,21 @@ public struct Variable: CodeBlock {
   ///   - name: The name of the variable.
   ///   - type: The type of the variable.
   ///   - defaultValue: The initial value of the variable, if any.
-  public init(_ kind: VariableKind, name: String, type: String, equals defaultValue: String? = nil)
-  {
+  ///   - explicitType: Whether the variable has an explicit type.
+  public init(
+    _ kind: VariableKind, name: String, type: String, equals defaultValue: String? = nil,
+    explicitType: Bool? = nil
+  ) {
     self.kind = kind
     self.name = name
     self.type = type
     self.defaultValue = defaultValue
+    // If explicitType is provided, use it. Otherwise, default to true if no defaultValue, else false.
+    if let explicitType = explicitType {
+      self.explicitType = explicitType
+    } else {
+      self.explicitType = (defaultValue == nil)
+    }
   }
 
   /// Creates a `let` or `var` declaration with a literal value.
@@ -57,11 +67,15 @@ public struct Variable: CodeBlock {
   ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
   ///   - name: The name of the variable.
   ///   - value: A literal value that conforms to ``LiteralValue``.
-  public init<T: LiteralValue>(_ kind: VariableKind, name: String, equals value: T) {
+  ///   - explicitType: Whether the variable has an explicit type.
+  public init<T: LiteralValue>(
+    _ kind: VariableKind, name: String, equals value: T, explicitType: Bool = false
+  ) {
     self.kind = kind
     self.name = name
     self.type = value.typeName
     self.defaultValue = value.literalString
+    self.explicitType = explicitType
   }
 
   /// Marks the variable as `static`.
@@ -83,28 +97,33 @@ public struct Variable: CodeBlock {
     return copy
   }
 
+  public func withExplicitType() -> Self {
+    var copy = self
+    copy.explicitType = true
+    return copy
+  }
+
   public var syntax: SyntaxProtocol {
     let bindingKeyword = TokenSyntax.keyword(kind == .let ? .let : .var, trailingTrivia: .space)
     let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
-    let typeAnnotation = TypeAnnotationSyntax(
-      colon: .colonToken(leadingTrivia: .space, trailingTrivia: .space),
-      type: IdentifierTypeSyntax(name: .identifier(type))
-    )
-
+    let typeAnnotation: TypeAnnotationSyntax? =
+      (explicitType && !type.isEmpty)
+      ? TypeAnnotationSyntax(
+        colon: .colonToken(leadingTrivia: .space, trailingTrivia: .space),
+        type: IdentifierTypeSyntax(name: .identifier(type))
+      ) : nil
     let initializer = defaultValue.map { value in
       InitializerClauseSyntax(
         equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
         value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
       )
     }
-
     var modifiers: DeclModifierListSyntax = []
     if isStatic {
       modifiers = DeclModifierListSyntax([
         DeclModifierSyntax(name: .keyword(.static, trailingTrivia: .space))
       ])
     }
-
     return VariableDeclSyntax(
       attributes: buildAttributeList(from: attributes),
       modifiers: modifiers,

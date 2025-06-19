@@ -35,7 +35,8 @@ internal struct VariableStaticTests {
   // MARK: - Static Variable Tests
 
   @Test internal func testStaticVariableWithStringLiteral() {
-    let variable = Variable(.let, name: "test", type: "String", equals: "hello").static()
+    let variable = Variable(.let, name: "test", type: "String", equals: "hello").withExplicitType()
+      .static()
     let generated = variable.generateCode().normalize()
 
     #expect(generated.contains("static let test: String = hello"))
@@ -43,7 +44,7 @@ internal struct VariableStaticTests {
 
   @Test internal func testStaticVariableWithArrayLiteral() {
     let array: [String] = ["a", "b", "c"]
-    let variable = Variable(.let, name: "mappedValues", equals: array).static()
+    let variable = Variable(.let, name: "mappedValues", equals: array).withExplicitType().static()
     let generated = variable.generateCode().normalize()
 
     #expect(generated.contains("static let mappedValues: [String] = [\"a\", \"b\", \"c\"]"))
@@ -51,7 +52,7 @@ internal struct VariableStaticTests {
 
   @Test internal func testStaticVariableWithDictionaryLiteral() {
     let dict: [Int: String] = [1: "a", 2: "b", 3: "c"]
-    let variable = Variable(.let, name: "mappedValues", equals: dict).static()
+    let variable = Variable(.let, name: "mappedValues", equals: dict).withExplicitType().static()
     let generated = variable.generateCode().normalize()
 
     #expect(generated.contains("static let mappedValues: [Int: String]"))
@@ -61,7 +62,8 @@ internal struct VariableStaticTests {
   }
 
   @Test internal func testStaticVariableWithVar() {
-    let variable = Variable(.var, name: "counter", type: "Int", equals: "0").static()
+    let variable = Variable(.var, name: "counter", type: "Int", equals: "0").withExplicitType()
+      .static()
     let generated = variable.generateCode().normalize()
 
     #expect(generated.contains("static var counter: Int = 0"))
@@ -71,7 +73,7 @@ internal struct VariableStaticTests {
 
   @Test internal func testNonStaticVariableWithLiteral() {
     let array: [String] = ["x", "y", "z"]
-    let variable = Variable(.let, name: "values", equals: array)
+    let variable = Variable(.let, name: "values", equals: array).withExplicitType()
     let generated = variable.generateCode().normalize()
 
     #expect(generated.contains("let values: [String] = [\"x\", \"y\", \"z\"]"))
@@ -80,7 +82,7 @@ internal struct VariableStaticTests {
 
   @Test internal func testNonStaticVariableWithDictionary() {
     let dict: [Int: String] = [10: "ten", 20: "twenty"]
-    let variable = Variable(.let, name: "lookup", equals: dict)
+    let variable = Variable(.let, name: "lookup", equals: dict).withExplicitType()
     let generated = variable.generateCode().normalize()
 
     #expect(generated.contains("let lookup: [Int: String]"))
@@ -92,7 +94,7 @@ internal struct VariableStaticTests {
   // MARK: - Static Method Tests
 
   @Test internal func testStaticMethodReturnsNewInstance() {
-    let original = Variable(.let, name: "test", type: "String", equals: "value")
+    let original = Variable(.let, name: "test", type: "String", equals: "value").withExplicitType()
     let staticVersion = original.static()
 
     // Should be different instances
@@ -108,7 +110,7 @@ internal struct VariableStaticTests {
   }
 
   @Test internal func testStaticMethodPreservesOtherProperties() {
-    let original = Variable(.var, name: "test", type: "String", equals: "value")
+    let original = Variable(.var, name: "test", type: "String", equals: "value").withExplicitType()
     let staticVersion = original.static()
 
     let originalGenerated = original.generateCode().normalize()
@@ -129,7 +131,7 @@ internal struct VariableStaticTests {
 
   @Test internal func testEmptyArrayLiteral() {
     let array: [String] = []
-    let variable = Variable(.let, name: "empty", equals: array).static()
+    let variable = Variable(.let, name: "empty", equals: array).withExplicitType().static()
     let generated = variable.generateCode().normalize()
 
     #expect(generated.contains("static let empty: [String] = []"))
@@ -137,14 +139,15 @@ internal struct VariableStaticTests {
 
   @Test internal func testEmptyDictionaryLiteral() {
     let dict: [Int: String] = [:]
-    let variable = Variable(.let, name: "empty", equals: dict).static()
+    let variable = Variable(.let, name: "empty", equals: dict).withExplicitType().static()
     let generated = variable.generateCode().normalize()
 
     #expect(generated.contains("static let empty: [Int: String] = []"))
   }
 
   @Test internal func testMultipleStaticCalls() {
-    let variable = Variable(.let, name: "test", type: "String", equals: "value").static().static()
+    let variable = Variable(.let, name: "test", type: "String", equals: "value").withExplicitType()
+      .static().static()
     let generated = variable.generateCode().normalize()
 
     // Should still only have one "static" keyword

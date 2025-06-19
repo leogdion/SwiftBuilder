@@ -52,7 +52,7 @@ let generatedCode = Group {
             Call("print") {
                 ParameterExp(name: "", value: "\"Charging \\(brand) electric car...\"")
             }
-            Assignment("batteryLevel", "100.0")
+            Assignment("batteryLevel", Literal.float(100.0))
         }
     }.inherits("Vehicle")
     

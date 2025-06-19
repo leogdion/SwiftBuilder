@@ -237,6 +237,11 @@ public struct EnumCase: CodeBlock {
           equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
           value: BooleanLiteralExprSyntax(literal: value ? .keyword(.true) : .keyword(.false))
         )
+      case .ref(let value):
+        initializer = InitializerClauseSyntax(
+          equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+          value: DeclReferenceExprSyntax(baseName: .identifier(value))
+        )
       }
     }
 

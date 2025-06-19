@@ -31,41 +31,44 @@ import SwiftSyntax
 
 /// A `case` in a `switch` statement.
 public struct SwitchCase: CodeBlock {
-  private let patterns: [String]
+  private let patterns: [PatternConvertible]
   private let body: [CodeBlock]
 
   /// Creates a `case` for a `switch` statement.
   /// - Parameters:
   ///   - patterns: The patterns to match for the case.
   ///   - content: A ``CodeBlockBuilder`` that provides the body of the case.
-  public init(_ patterns: String..., @CodeBlockBuilderResult content: () -> [CodeBlock]) {
+  public init(_ patterns: PatternConvertible..., @CodeBlockBuilderResult content: () -> [CodeBlock])
+  {
     self.patterns = patterns
     self.body = content()
   }
 
   public var switchCaseSyntax: SwitchCaseSyntax {
     let caseItems = SwitchCaseItemListSyntax(
-      patterns.enumerated().map { index, pattern in
-        var item = SwitchCaseItemSyntax(
-          pattern: PatternSyntax(IdentifierPatternSyntax(identifier: .identifier(pattern)))
-        )
+      patterns.enumerated().map { index, pat in
+        var item = SwitchCaseItemSyntax(pattern: pat.patternSyntax)
         if index < patterns.count - 1 {
           item = item.with(\.trailingComma, .commaToken(trailingTrivia: .space))
         }
         return item
       })
-    let statements = CodeBlockItemListSyntax(
-      body.compactMap {
-        var item: CodeBlockItemSyntax?
-        if let decl = $0.syntax.as(DeclSyntax.self) {
-          item = CodeBlockItemSyntax(item: .decl(decl))
-        } else if let expr = $0.syntax.as(ExprSyntax.self) {
-          item = CodeBlockItemSyntax(item: .expr(expr))
-        } else if let stmt = $0.syntax.as(StmtSyntax.self) {
-          item = CodeBlockItemSyntax(item: .stmt(stmt))
-        }
-        return item?.with(\.trailingTrivia, .newline)
-      })
+    var statementItems = body.compactMap { block -> CodeBlockItemSyntax? in
+      if let decl = block.syntax.as(DeclSyntax.self) {
+        return CodeBlockItemSyntax(item: .decl(decl)).with(\.trailingTrivia, .newline)
+      } else if let expr = block.syntax.as(ExprSyntax.self) {
+        return CodeBlockItemSyntax(item: .expr(expr)).with(\.trailingTrivia, .newline)
+      } else if let stmt = block.syntax.as(StmtSyntax.self) {
+        return CodeBlockItemSyntax(item: .stmt(stmt)).with(\.trailingTrivia, .newline)
+      }
+      return nil
+    }
+    if statementItems.isEmpty {
+      // Add a break statement if the case body is empty
+      let breakStmt = BreakStmtSyntax(breakKeyword: .keyword(.break, trailingTrivia: .newline))
+      statementItems = [CodeBlockItemSyntax(item: .stmt(StmtSyntax(breakStmt)))]
+    }
+    let statements = CodeBlockItemListSyntax(statementItems)
     let label = SwitchCaseLabelSyntax(
       caseKeyword: .keyword(.case, trailingTrivia: .space),
       caseItems: caseItems,

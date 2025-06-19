@@ -40,7 +40,7 @@ internal struct OptionsMacroIntegrationTests {
 
     let extensionDecl = Extension("MockDictionaryEnum") {
       TypeAlias("MappedType", equals: "String")
-      Variable(.let, name: "mappedValues", equals: keyValues).static()
+      Variable(.let, name: "mappedValues", equals: keyValues).withExplicitType().static()
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
 
     let generated = extensionDecl.generateCode().normalize()
@@ -62,7 +62,7 @@ internal struct OptionsMacroIntegrationTests {
 
     let extensionDecl = Extension("Color") {
       TypeAlias("MappedType", equals: "String")
-      Variable(.let, name: "mappedValues", equals: caseNames).static()
+      Variable(.let, name: "mappedValues", equals: caseNames).withExplicitType().static()
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
 
     let generated = extensionDecl.generateCode().normalize()
@@ -86,10 +86,12 @@ internal struct OptionsMacroIntegrationTests {
     let mappedValuesVariable: Variable
     if hasRawValues {
       let keyValues: [Int: String] = [1: "first", 2: "second", 3: "third"]
-      mappedValuesVariable = Variable(.let, name: "mappedValues", equals: keyValues).static()
+      mappedValuesVariable = Variable(.let, name: "mappedValues", equals: keyValues)
+        .withExplicitType().static()
     } else {
       let caseNames: [String] = ["first", "second", "third"]
-      mappedValuesVariable = Variable(.let, name: "mappedValues", equals: caseNames).static()
+      mappedValuesVariable = Variable(.let, name: "mappedValues", equals: caseNames)
+        .withExplicitType().static()
     }
 
     // Step 3: Create the extension
@@ -119,10 +121,12 @@ internal struct OptionsMacroIntegrationTests {
     let mappedValuesVariable: Variable
     if hasRawValues {
       let keyValues: [Int: String] = [1: "first", 2: "second"]
-      mappedValuesVariable = Variable(.let, name: "mappedValues", equals: keyValues).static()
+      mappedValuesVariable = Variable(.let, name: "mappedValues", equals: keyValues)
+        .withExplicitType().static()
     } else {
       let caseNames: [String] = ["first", "second"]
-      mappedValuesVariable = Variable(.let, name: "mappedValues", equals: caseNames).static()
+      mappedValuesVariable = Variable(.let, name: "mappedValues", equals: caseNames)
+        .withExplicitType().static()
     }
 
     let extensionDecl = Extension(enumName) {
@@ -145,7 +149,7 @@ internal struct OptionsMacroIntegrationTests {
 
     let extensionDecl = Extension("EmptyEnum") {
       TypeAlias("MappedType", equals: "String")
-      Variable(.let, name: "mappedValues", equals: caseNames).static()
+      Variable(.let, name: "mappedValues", equals: caseNames).withExplicitType().static()
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
 
     let generated = extensionDecl.generateCode().normalize()
@@ -161,7 +165,7 @@ internal struct OptionsMacroIntegrationTests {
 
     let extensionDecl = Extension("EmptyDictEnum") {
       TypeAlias("MappedType", equals: "String")
-      Variable(.let, name: "mappedValues", equals: keyValues).static()
+      Variable(.let, name: "mappedValues", equals: keyValues).withExplicitType().static()
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
 
     let generated = extensionDecl.generateCode().normalize()
@@ -178,7 +182,7 @@ internal struct OptionsMacroIntegrationTests {
 
     let extensionDecl = Extension("SpecialEnum") {
       TypeAlias("MappedType", equals: "String")
-      Variable(.let, name: "mappedValues", equals: caseNames).static()
+      Variable(.let, name: "mappedValues", equals: caseNames).withExplicitType().static()
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
 
     let generated = extensionDecl.generateCode().normalize()
@@ -208,7 +212,7 @@ internal struct OptionsMacroIntegrationTests {
     #expect(dict.literalString.contains("2: \"b\""))
 
     // Test Variable with static support
-    let staticVar = Variable(.let, name: "test", equals: array).static()
+    let staticVar = Variable(.let, name: "test", equals: array).withExplicitType().static()
     let staticGenerated = staticVar.generateCode().normalize()
     #expect(staticGenerated.contains("static let test: [String] = [\"a\", \"b\", \"c\"]"))
 

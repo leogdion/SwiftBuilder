@@ -46,6 +46,7 @@ public struct Switch: CodeBlock {
   public var syntax: SyntaxProtocol {
     let expr = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(expression)))
     let casesArr: [SwitchCaseSyntax] = self.cases.compactMap {
+      if let tupleCase = $0 as? Case { return tupleCase.switchCaseSyntax }
       if let switchCase = $0 as? SwitchCase { return switchCase.switchCaseSyntax }
       if let switchDefault = $0 as? Default { return switchDefault.switchCaseSyntax }
       return nil

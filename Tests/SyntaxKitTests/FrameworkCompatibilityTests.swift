@@ -124,8 +124,8 @@ internal struct FrameworkCompatibilityTests {
   @Test internal func testNoRegressionInCodeGeneration() {
     // Ensure migration doesn't introduce regressions
     let simpleStruct = Struct("Point") {
-      Variable(.var, name: "x", type: "Double", equals: "0.0")
-      Variable(.var, name: "y", type: "Double", equals: "0.0")
+      Variable(.var, name: "x", type: "Double", equals: "0.0").withExplicitType()
+      Variable(.var, name: "y", type: "Double", equals: "0.0").withExplicitType()
     }
 
     let generated = simpleStruct.generateCode().normalize()

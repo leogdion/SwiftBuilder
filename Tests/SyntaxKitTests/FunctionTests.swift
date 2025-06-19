@@ -62,7 +62,7 @@ internal struct FunctionTests {
         Parameter(name: "newValue", type: "String")
       }
     ) {
-      Assignment("value", "newValue")
+      Assignment("value", Literal.ref("newValue"))
     }.mutating()
 
     let expected = """

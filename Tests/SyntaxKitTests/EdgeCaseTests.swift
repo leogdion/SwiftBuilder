@@ -124,8 +124,8 @@ internal struct EdgeCaseTests {
   @Test("CodeBlock generateCode with CodeBlockItemListSyntax")
   internal func testCodeBlockGenerateCodeWithItemList() throws {
     let group = Group {
-      Variable(.let, name: "x", type: "Int", equals: "1")
-      Variable(.let, name: "y", type: "Int", equals: "2")
+      Variable(.let, name: "x", type: "Int", equals: "1").withExplicitType()
+      Variable(.let, name: "y", type: "Int", equals: "2").withExplicitType()
     }
 
     let generated = group.generateCode()
@@ -135,7 +135,7 @@ internal struct EdgeCaseTests {
 
   @Test("CodeBlock generateCode with single declaration")
   internal func testCodeBlockGenerateCodeWithSingleDeclaration() throws {
-    let variable = Variable(.let, name: "x", type: "Int", equals: "1")
+    let variable = Variable(.let, name: "x", type: "Int", equals: "1").withExplicitType()
 
     let generated = variable.generateCode()
     #expect(generated.contains("let x  : Int = 1"))
@@ -143,7 +143,7 @@ internal struct EdgeCaseTests {
 
   @Test("CodeBlock generateCode with single statement")
   internal func testCodeBlockGenerateCodeWithSingleStatement() throws {
-    let assignment = Assignment("x", "42")
+    let assignment = Assignment("x", Literal.integer(42))
 
     let generated = assignment.generateCode()
     #expect(generated.contains("x = 42"))

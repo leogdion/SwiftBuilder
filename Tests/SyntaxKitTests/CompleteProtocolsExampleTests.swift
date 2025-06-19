@@ -78,8 +78,8 @@ import Testing
 
       // MARK: - Concrete Types
       Struct("Car") {
-        Variable(.let, name: "numberOfWheels", type: "Int", equals: "4")
-        Variable(.let, name: "brand", type: "String")
+        Variable(.let, name: "numberOfWheels", type: "Int", equals: "4").withExplicitType()
+        Variable(.let, name: "brand", type: "String").withExplicitType()
 
         Function("start") {
           Call("print") {
@@ -93,15 +93,15 @@ import Testing
       }
 
       Struct("ElectricCar") {
-        Variable(.let, name: "numberOfWheels", type: "Int", equals: "4")
-        Variable(.let, name: "brand", type: "String")
-        Variable(.var, name: "batteryLevel", type: "Double")
+        Variable(.let, name: "numberOfWheels", type: "Int", equals: "4").withExplicitType()
+        Variable(.let, name: "brand", type: "String").withExplicitType()
+        Variable(.var, name: "batteryLevel", type: "Double").withExplicitType()
 
         Function("charge") {
           Call("print") {
             ParameterExp(name: "", value: "\"Charging \\(brand) electric car...\"")
           }
-          Assignment("batteryLevel", "100.0")
+          Assignment("batteryLevel", Literal.float(100.0))
         }
       }
       .inherits("Vehicle", "Electric")

@@ -5,8 +5,8 @@ import Testing
 internal struct ClassTests {
   @Test internal func testClassWithInheritance() {
     let carClass = Class("Car") {
-      Variable(.var, name: "brand", type: "String")
-      Variable(.var, name: "numberOfWheels", type: "Int")
+      Variable(.var, name: "brand", type: "String").withExplicitType()
+      Variable(.var, name: "numberOfWheels", type: "Int").withExplicitType()
     }.inherits("Vehicle")
 
     let expected = """
@@ -36,7 +36,7 @@ internal struct ClassTests {
 
   @Test internal func testClassWithGenerics() {
     let genericClass = Class("Container") {
-      Variable(.var, name: "value", type: "T")
+      Variable(.var, name: "value", type: "T").withExplicitType()
     }.generic("T")
 
     let expected = """
@@ -52,8 +52,8 @@ internal struct ClassTests {
 
   @Test internal func testClassWithMultipleGenerics() {
     let multiGenericClass = Class("Pair") {
-      Variable(.var, name: "first", type: "T")
-      Variable(.var, name: "second", type: "U")
+      Variable(.var, name: "first", type: "T").withExplicitType()
+      Variable(.var, name: "second", type: "U").withExplicitType()
     }.generic("T", "U")
 
     let expected = """
@@ -70,7 +70,7 @@ internal struct ClassTests {
 
   @Test internal func testFinalClass() {
     let finalClass = Class("FinalClass") {
-      Variable(.var, name: "value", type: "String")
+      Variable(.var, name: "value", type: "String").withExplicitType()
     }.final()
 
     let expected = """
@@ -86,7 +86,7 @@ internal struct ClassTests {
 
   @Test internal func testClassWithMultipleInheritance() {
     let classWithMultipleInheritance = Class("AdvancedVehicle") {
-      Variable(.var, name: "speed", type: "Int")
+      Variable(.var, name: "speed", type: "Int").withExplicitType()
     }.inherits("Vehicle")
 
     let expected = """
@@ -102,7 +102,7 @@ internal struct ClassTests {
 
   @Test internal func testClassWithGenericsAndInheritance() {
     let genericClassWithInheritance = Class("GenericContainer") {
-      Variable(.var, name: "items", type: "[T]")
+      Variable(.var, name: "items", type: "[T]").withExplicitType()
     }.generic("T").inherits("Collection")
 
     let expected = """
@@ -118,7 +118,7 @@ internal struct ClassTests {
 
   @Test internal func testFinalClassWithInheritanceAndGenerics() {
     let finalGenericClass = Class("FinalGenericClass") {
-      Variable(.var, name: "value", type: "T")
+      Variable(.var, name: "value", type: "T").withExplicitType()
     }.generic("T").inherits("BaseClass").final()
 
     let expected = """

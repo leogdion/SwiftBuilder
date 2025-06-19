@@ -50,6 +50,8 @@ public enum Literal: CodeBlock {
   case `nil`
   /// A boolean literal.
   case boolean(Bool)
+  /// A reference to a variable or identifier (outputs without quotes).
+  case ref(String)
 
   /// The SwiftSyntax representation of this literal.
   public var syntax: SyntaxProtocol {
@@ -71,6 +73,8 @@ public enum Literal: CodeBlock {
       return NilLiteralExprSyntax(nilKeyword: .keyword(.nil))
     case .boolean(let value):
       return BooleanLiteralExprSyntax(literal: value ? .keyword(.true) : .keyword(.false))
+    case .ref(let value):
+      return DeclReferenceExprSyntax(baseName: .identifier(value))
     }
   }
 }

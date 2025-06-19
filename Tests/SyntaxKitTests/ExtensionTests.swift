@@ -36,7 +36,7 @@ internal struct ExtensionTests {
 
   @Test internal func testBasicExtension() {
     let extensionDecl = Extension("String") {
-      Variable(.let, name: "test", type: "Int", equals: "42")
+      Variable(.let, name: "test", type: "Int", equals: "42").withExplicitType()
     }
 
     let generated = extensionDecl.generateCode().normalize()
@@ -47,8 +47,8 @@ internal struct ExtensionTests {
 
   @Test internal func testExtensionWithMultipleMembers() {
     let extensionDecl = Extension("Array") {
-      Variable(.let, name: "isEmpty", type: "Bool", equals: "true")
-      Variable(.let, name: "count", type: "Int", equals: "0")
+      Variable(.let, name: "isEmpty", type: "Bool", equals: "true").withExplicitType()
+      Variable(.let, name: "count", type: "Int", equals: "0").withExplicitType()
     }
 
     let generated = extensionDecl.generateCode().normalize()
@@ -85,7 +85,7 @@ internal struct ExtensionTests {
 
   @Test internal func testExtensionWithoutInheritance() {
     let extensionDecl = Extension("MyType") {
-      Variable(.let, name: "constant", type: "String", equals: "value")
+      Variable(.let, name: "constant", type: "String", equals: "value").withExplicitType()
     }
 
     let generated = extensionDecl.generateCode().normalize()
@@ -103,8 +103,8 @@ internal struct ExtensionTests {
 
     let extensionDecl = Extension("TestEnum") {
       TypeAlias("MappedType", equals: "String")
-      Variable(.let, name: "mappedValues", equals: array).static()
-      Variable(.let, name: "lookup", equals: dict).static()
+      Variable(.let, name: "mappedValues", equals: array).withExplicitType().static()
+      Variable(.let, name: "lookup", equals: dict).withExplicitType().static()
     }.inherits("MappedValueRepresentable", "MappedValueRepresented")
 
     let generated = extensionDecl.generateCode().normalize()
@@ -150,7 +150,7 @@ internal struct ExtensionTests {
 
   @Test internal func testExtensionWithSpecialCharactersInName() {
     let extensionDecl = Extension("MyType<T>") {
-      Variable(.let, name: "generic", type: "T", equals: "nil")
+      Variable(.let, name: "generic", type: "T", equals: "nil").withExplicitType()
     }
 
     let generated = extensionDecl.generateCode().normalize()
@@ -161,7 +161,7 @@ internal struct ExtensionTests {
 
   @Test internal func testInheritsMethodReturnsNewInstance() {
     let original = Extension("Test") {
-      Variable(.let, name: "value", type: "Int", equals: "42")
+      Variable(.let, name: "value", type: "Int", equals: "42").withExplicitType()
     }
 
     let withInheritance = original.inherits("Protocol1", "Protocol2")

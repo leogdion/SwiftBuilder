@@ -45,11 +45,11 @@ Group {
         Call("print", "The string \"\\(possibleNumber)\" could not be converted to an integer")
     })
 
-    Variable(.let, "possibleName", type: "String?", equals: "John")
+    Variable(.let, "possibleName", type: "String?", equals: "John").withExplicitType()
       .comment {
         Line("Multiple optional bindings")
       }
-    Variable(.let, "possibleAge", type: "Int?", equals: 30)
+    Variable(.let, "possibleAge", type: "Int?", equals: 30).withExplicitType()
     If {
         Let("name", "possibleName")
         Let("age", "possibleAge")
@@ -76,3 +76,32 @@ Group {
 }.comment {
     Line("MARK: - Guard Statements")
 }
+
+Variable(.let, "approximateCount", equals: 62)
+  .comment {
+    Line("MARK: - Switch Statements")
+    Line("Switch with range matching")
+  }
+Variable(.let, "countedThings", equals: "moons orbiting Saturn")
+Variable(.let, "naturalCount", type: "String").withExplicitType()
+Switch("approximateCount") {
+    SwitchCase(0) {
+        Assignment("naturalCount", Literal.string("no"))
+    }
+    SwitchCase(1..<5) {
+        Assignment("naturalCount", Literal.string("a few"))
+    }
+    SwitchCase(5..<12) {
+        Assignment("naturalCount", Literal.string("several"))
+    }
+    SwitchCase(12..<100) {
+        Assignment("naturalCount", Literal.string("dozens of"))
+    }
+    SwitchCase(100..<1000) {
+        Assignment("naturalCount", Literal.string("hundreds of"))
+    }
+    Default {
+        Assignment("naturalCount", Literal.string("many"))
+    }
+}
+Call("print", "There are \\(naturalCount) \\(countedThings).")

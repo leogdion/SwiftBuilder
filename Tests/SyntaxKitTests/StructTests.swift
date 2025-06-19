@@ -5,7 +5,7 @@ import Testing
 internal struct StructTests {
   @Test internal func testGenericStruct() {
     let stackStruct = Struct("Stack") {
-      Variable(.var, name: "items", type: "[Element]", equals: "[]")
+      Variable(.var, name: "items", type: "[Element]", equals: "[]").withExplicitType()
 
       Function("push") {
         Parameter(name: "item", type: "Element", isUnnamed: true)
@@ -65,7 +65,7 @@ internal struct StructTests {
 
   @Test internal func testGenericStructWithInheritance() {
     let containerStruct = Struct("Container") {
-      Variable(.var, name: "value", type: "T")
+      Variable(.var, name: "value", type: "T").withExplicitType()
     }.generic("T").inherits("Equatable")
 
     let expectedCode = """
@@ -81,8 +81,8 @@ internal struct StructTests {
 
   @Test internal func testNonGenericStruct() {
     let simpleStruct = Struct("Point") {
-      Variable(.var, name: "x", type: "Double")
-      Variable(.var, name: "y", type: "Double")
+      Variable(.var, name: "x", type: "Double").withExplicitType()
+      Variable(.var, name: "y", type: "Double").withExplicitType()
     }
 
     let expectedCode = """
