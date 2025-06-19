@@ -297,3 +297,4 @@ import Testing
     #expect(normalizedCode == normalizedGenerated)
   }
 }
+// swiftlint:enable function_body_length

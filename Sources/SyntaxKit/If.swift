@@ -95,7 +95,7 @@ public struct If: CodeBlock {
             condition: .expression(
               ExprSyntax(
                 fromProtocol: block.syntax.as(ExprSyntax.self)
-                ?? DeclReferenceExprSyntax(baseName: .identifier(""))))
+                  ?? DeclReferenceExprSyntax(baseName: .identifier(""))))
           )
           return appendComma(element)
         }
@@ -117,6 +117,7 @@ public struct If: CodeBlock {
         }),
       rightBrace: .rightBraceToken(leadingTrivia: .newline)
     )
+    // swiftlint:disable:next closure_body_length
     let elseBlock: IfExprSyntax.ElseBody? = {
       guard let elseBlocks = elseBody else { return nil }
 
@@ -157,7 +158,8 @@ public struct If: CodeBlock {
               continue
             }
 
-            ifExpr = ifExpr
+            ifExpr =
+              ifExpr
               .with(\.elseKeyword, .keyword(.else, leadingTrivia: .space, trailingTrivia: .space))
               .with(\.elseBody, elseChoice)
           }
@@ -200,7 +202,8 @@ public struct If: CodeBlock {
         ifKeyword: .keyword(.if, trailingTrivia: .space),
         conditions: condList,
         body: bodyBlock,
-        elseKeyword: elseBlock != nil ? .keyword(.else, leadingTrivia: .space, trailingTrivia: .space) : nil,
+        elseKeyword: elseBlock != nil
+          ? .keyword(.else, leadingTrivia: .space, trailingTrivia: .space) : nil,
         elseBody: elseBlock
       )
     )

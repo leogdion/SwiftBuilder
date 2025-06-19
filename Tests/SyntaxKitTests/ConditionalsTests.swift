@@ -1,4 +1,5 @@
 import Testing
+
 @testable import SyntaxKit
 
 @Suite internal struct ConditionalsTests {
@@ -46,4 +47,4 @@ import Testing
     #expect(generated.contains("else if score >= 80".normalize()))
     #expect(generated.contains("else {".normalize()))
   }
-} 
+}
