@@ -65,7 +65,7 @@ public struct VariableExp: CodeBlock {
   }
 
   public var syntax: SyntaxProtocol {
-    TokenSyntax.identifier(name)
+    ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(name)))
   }
 }
 

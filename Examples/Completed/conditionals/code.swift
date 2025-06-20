@@ -94,3 +94,39 @@ case (0, let y):
 case let (x, y):
     print("somewhere else at (\(x), \(y))")
 }
+
+// MARK: - Fallthrough
+// Using fallthrough in switch
+let integerToDescribe = 5
+var description = "The number \(integerToDescribe) is"
+switch integerToDescribe {
+case 2, 3, 5, 7, 11, 13, 17, 19:
+    description += " a prime number, and also"
+    fallthrough
+default:
+    description += " an integer."
+}
+print(description)
+
+// MARK: - Labeled Statements
+// Using labeled statements with break
+let finalSquare = 25
+var board = [Int](repeating: 0, count: finalSquare + 1)
+board[03] = +08; board[06] = +11; board[09] = +09; board[10] = +02
+board[14] = -10; board[19] = -11; board[22] = -02; board[24] = -08
+
+var square = 0
+var diceRoll = 0
+while square != finalSquare {
+    diceRoll += 1
+    if diceRoll == 7 { diceRoll = 1 }
+    switch square + diceRoll {
+    case finalSquare:
+        break 
+    case let newSquare where newSquare > finalSquare:
+        continue
+    default:
+        square += diceRoll
+        square += board[square]
+    }
+}

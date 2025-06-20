@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -31,20 +31,32 @@ import SwiftSyntax
 
 /// A `switch` statement.
 public struct Switch: CodeBlock {
-  private let expression: String
+  private let expression: CodeBlock
   private let cases: [CodeBlock]
 
   /// Creates a `switch` statement.
   /// - Parameters:
   ///   - expression: The expression to switch on.
   ///   - content: A ``CodeBlockBuilder`` that provides the cases for the switch.
-  public init(_ expression: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
+  public init(_ expression: CodeBlock, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
     self.expression = expression
     self.cases = content()
   }
 
+  /// Convenience initializer that accepts a string expression.
+  /// - Parameters:
+  ///   - expression: The string expression to switch on.
+  ///   - content: A ``CodeBlockBuilder`` that provides the cases for the switch.
+  public init(_ expression: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
+    self.expression = VariableExp(expression)
+    self.cases = content()
+  }
+
   public var syntax: SyntaxProtocol {
-    let expr = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(expression)))
+    let expr = ExprSyntax(
+      fromProtocol: expression.syntax.as(ExprSyntax.self)
+        ?? DeclReferenceExprSyntax(baseName: .identifier(""))
+    )
     let casesArr: [SwitchCaseSyntax] = self.cases.compactMap {
       if let tupleCase = $0 as? Case { return tupleCase.switchCaseSyntax }
       if let switchCase = $0 as? SwitchCase { return switchCase.switchCaseSyntax }

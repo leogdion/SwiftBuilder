@@ -144,3 +144,55 @@ Switch("anotherPoint") {
         
     }
 }
+Variable(.let, "integerToDescribe", equals: 5)
+Variable(.var, "description", equals: "The number \\(integerToDescribe) is")
+Switch("integerToDescribe") {
+    SwitchCase(2, 3, 5, 7, 11, 13, 17, 19) {
+        PlusAssign("description", "a prime number, and also")
+        Fallthrough()
+    }
+    Default {
+        PlusAssign("description", "an integer.")
+    }
+}
+Call("print", "description")
+
+Variable(.let, "finalSquare", equals: 25)
+Variable(.var, "board", equals: Init("[Int]") {
+    Parameter("repeating", 0)
+    Parameter("count", "finalSquare + 1")
+})
+
+Infix("board[03]", "+=", 8)
+Infix("board[06]", "+=", 11)
+Infix("board[09]", "+=", 9)
+Infix("board[10]", "+=", 2)
+Infix("board[14]", "-=", 10)
+Infix("board[19]", "-=", 11)
+Infix("board[22]", "-=", 2)
+Infix("board[24]", "-=", 8)
+
+Variable(.var, "square", equals: 0)
+Variable(.var, "diceRoll", equals: 0)
+While {
+    Infix("square", "!=", "finalSquare")
+} then: {
+    Assignment("diceRoll", "+", 1)
+    If {
+        Infix("diceRoll", "==", 7)
+    } then: {
+        Assignment("diceRoll", 1)
+    }
+    Switch(Infix("square", "+", "diceRoll")) {
+        SwitchCase("finalSquare") {
+            Break()
+        }
+        SwitchCase(Infix("newSquare", ">", "finalSquare")) {
+            Continue()
+        }
+        Default {
+            Infix("square", "+=", "diceRoll")
+            Infix("square", "+=", "board[square]")
+        }
+    }
+}

@@ -31,14 +31,14 @@ import SwiftSyntax
 
 /// A `case` in a `switch` statement.
 public struct SwitchCase: CodeBlock {
-  private let patterns: [PatternConvertible]
+  private let patterns: [Any]
   private let body: [CodeBlock]
 
   /// Creates a `case` for a `switch` statement.
   /// - Parameters:
-  ///   - patterns: The patterns to match for the case.
+  ///   - patterns: The patterns to match for the case. Can be `PatternConvertible` or `CodeBlock`.
   ///   - content: A ``CodeBlockBuilder`` that provides the body of the case.
-  public init(_ patterns: PatternConvertible..., @CodeBlockBuilderResult content: () -> [CodeBlock])
+  public init(_ patterns: Any..., @CodeBlockBuilderResult content: () -> [CodeBlock])
   {
     self.patterns = patterns
     self.body = content()
@@ -46,8 +46,23 @@ public struct SwitchCase: CodeBlock {
 
   public var switchCaseSyntax: SwitchCaseSyntax {
     let caseItems = SwitchCaseItemListSyntax(
-      patterns.enumerated().map { index, pat in
-        var item = SwitchCaseItemSyntax(pattern: pat.patternSyntax)
+      patterns.enumerated().compactMap { index, pattern -> SwitchCaseItemSyntax? in
+        let patternSyntax: PatternSyntax
+        
+        if let patternConvertible = pattern as? PatternConvertible {
+          patternSyntax = patternConvertible.patternSyntax
+        } else if let codeBlock = pattern as? CodeBlock {
+          // Convert CodeBlock to expression pattern
+          let expr = ExprSyntax(
+            fromProtocol: codeBlock.syntax.as(ExprSyntax.self)
+              ?? DeclReferenceExprSyntax(baseName: .identifier(""))
+          )
+          patternSyntax = PatternSyntax(ExpressionPatternSyntax(expression: expr))
+        } else {
+          return nil
+        }
+        
+        var item = SwitchCaseItemSyntax(pattern: patternSyntax)
         if index < patterns.count - 1 {
           item = item.with(\.trailingComma, .commaToken(trailingTrivia: .space))
         }

@@ -242,6 +242,81 @@ import Testing
           }
         }
       }
+
+      // MARK: - Fallthrough
+      Variable(.let, name: "integerToDescribe", type: "Int", equals: "5")
+        .comment {
+          Line("MARK: - Fallthrough")
+          Line("Using fallthrough in switch")
+        }
+      Variable(.var, name: "description", type: "String", equals: "\"The number \\(integerToDescribe) is\"")
+      Switch("integerToDescribe") {
+        SwitchCase(2, 3, 5, 7, 11, 13, 17, 19) {
+          PlusAssign("description", "\" a prime number, and also\"")
+          Fallthrough()
+        }
+        Default {
+          PlusAssign("description", "\" an integer.\"")
+        }
+      }
+      Call("print") {
+        ParameterExp(name: "", value: "description")
+      }
+
+      // MARK: - Labeled Statements
+      Variable(.let, name: "finalSquare", type: "Int", equals: "25")
+        .comment {
+          Line("MARK: - Labeled Statements")
+          Line("Using labeled statements with break")
+        }
+      Variable(.var, name: "board", type: "[Int]", equals: "[Int](repeating: 0, count: finalSquare + 1)")
+      
+      // Board setup
+      Infix("board[03]", "+=", 8)
+      Infix("board[06]", "+=", 11)
+      Infix("board[09]", "+=", 9)
+      Infix("board[10]", "+=", 2)
+      Infix("board[14]", "-=", 10)
+      Infix("board[19]", "-=", 11)
+      Infix("board[22]", "-=", 2)
+      Infix("board[24]", "-=", 8)
+
+      Variable(.var, name: "square", type: "Int", equals: "0")
+      Variable(.var, name: "diceRoll", type: "Int", equals: "0")
+      While {
+        Infix("!=") {
+          VariableExp("square")
+          VariableExp("finalSquare")
+        }
+      } then: {
+        Assignment("diceRoll", "+", 1)
+        If {
+          Infix("==") {
+            VariableExp("diceRoll")
+            Literal.integer(7)
+          }
+        } then: {
+          Assignment("diceRoll", 1)
+        }
+        Switch(Infix("+") {
+          VariableExp("square")
+          VariableExp("diceRoll")
+        }) {
+          SwitchCase(VariableExp("finalSquare")) {
+            Break()
+          }
+          SwitchCase(Infix(">") {
+            VariableExp("newSquare")
+            VariableExp("finalSquare")
+          }) {
+            Continue()
+          }
+          Default {
+            Infix("square", "+=", "diceRoll")
+            Infix("square", "+=", "board[square]")
+          }
+        }
+      }
     }
 
     // Generate Swift from DSL
@@ -347,6 +422,42 @@ import Testing
           print("on the y-axis with a y value of \\(y)")
       case (let x, let y):
           print("somewhere else at (\\(x), \\(y))")
+      }
+
+      // MARK: - Fallthrough
+      // Using fallthrough in switch
+      let integerToDescribe = 5
+      var description = "The number \\(integerToDescribe) is"
+      switch integerToDescribe {
+      case 2, 3, 5, 7, 11, 13, 17, 19:
+          description += " a prime number, and also"
+          fallthrough
+      default:
+          description += " an integer."
+      }
+      print(description)
+
+      // MARK: - Labeled Statements
+      // Using labeled statements with break
+      let finalSquare = 25
+      var board = [Int](repeating: 0, count: finalSquare + 1)
+      board[03] = +08; board[06] = +11; board[09] = +09; board[10] = +02
+      board[14] = -10; board[19] = -11; board[22] = -02; board[24] = -08
+
+      var square = 0
+      var diceRoll = 0
+      while square != finalSquare {
+          diceRoll += 1
+          if diceRoll == 7 { diceRoll = 1 }
+          switch square + diceRoll {
+          case finalSquare:
+              break 
+          case let newSquare where newSquare > finalSquare:
+              continue
+          default:
+              square += diceRoll
+              square += board[square]
+          }
       }
       """
       .normalize()
