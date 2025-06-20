@@ -39,6 +39,7 @@ public protocol PatternConvertible {
 // MARK: - Literal conformance
 
 extension Literal: PatternConvertible {
+  /// SwiftSyntax representation of the literal as a pattern.
   public var patternSyntax: PatternSyntax {
     guard let expr = self.syntax.as(ExprSyntax.self) else {
       fatalError("Literal.syntax did not return ExprSyntax")
@@ -50,6 +51,7 @@ extension Literal: PatternConvertible {
 // MARK: - Int conformance
 
 extension Int: PatternConvertible {
+  /// SwiftSyntax representation of the integer as a pattern.
   public var patternSyntax: PatternSyntax {
     let expr = ExprSyntax(IntegerLiteralExprSyntax(literal: .integerLiteral(String(self))))
     return PatternSyntax(ExpressionPatternSyntax(expression: expr))
@@ -59,6 +61,7 @@ extension Int: PatternConvertible {
 // MARK: - Ranges
 
 extension Swift.Range: PatternConvertible where Bound == Int {
+  /// SwiftSyntax representation of the range as a pattern.
   public var patternSyntax: PatternSyntax {
     let lhs = ExprSyntax(
       IntegerLiteralExprSyntax(literal: .integerLiteral(String(self.lowerBound))))
@@ -71,6 +74,7 @@ extension Swift.Range: PatternConvertible where Bound == Int {
 }
 
 extension Swift.ClosedRange: PatternConvertible where Bound == Int {
+  /// SwiftSyntax representation of the closed range as a pattern.
   public var patternSyntax: PatternSyntax {
     let lhs = ExprSyntax(
       IntegerLiteralExprSyntax(literal: .integerLiteral(String(self.lowerBound))))
@@ -85,6 +89,7 @@ extension Swift.ClosedRange: PatternConvertible where Bound == Int {
 // MARK: - String identifiers
 
 extension String: PatternConvertible {
+  /// SwiftSyntax representation of the string as an identifier pattern.
   public var patternSyntax: PatternSyntax {
     PatternSyntax(IdentifierPatternSyntax(identifier: .identifier(self)))
   }
@@ -100,6 +105,7 @@ public struct LetBindingPattern: PatternConvertible {
     self.identifier = identifier
   }
 
+  /// SwiftSyntax representation of the let binding pattern.
   public var patternSyntax: PatternSyntax {
     PatternSyntax(
       ValueBindingPatternSyntax(

@@ -186,12 +186,12 @@ internal final class TokenVisitor: SyntaxRewriter {
 
     current.token = Token(kind: "\(token.tokenKind)", leadingTrivia: "", trailingTrivia: "")
 
-    token.leadingTrivia.forEach { piece in
+    for piece in token.leadingTrivia {
       let trivia = processTriviaPiece(piece)
       current.token?.leadingTrivia += trivia.replaceHTMLWhitespacesWithSymbols()
     }
     processToken(token)
-    token.trailingTrivia.forEach { piece in
+    for piece in token.trailingTrivia {
       let trivia = processTriviaPiece(piece)
       current.token?.trailingTrivia += trivia.replaceHTMLWhitespacesWithSymbols()
     }
