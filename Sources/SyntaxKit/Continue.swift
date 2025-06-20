@@ -43,7 +43,7 @@ public struct Continue: CodeBlock {
     let continueStmt = ContinueStmtSyntax(
       continueKeyword: .keyword(.continue, trailingTrivia: .newline)
     )
-    
+
     if let label = label {
       return StmtSyntax(
         continueStmt.with(
@@ -55,4 +55,4 @@ public struct Continue: CodeBlock {
       return StmtSyntax(continueStmt)
     }
   }
-} 
+}

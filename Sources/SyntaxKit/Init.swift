@@ -42,7 +42,7 @@ public struct Init: CodeBlock, ExprCodeBlock {
     self.type = type
     self.parameters = params()
   }
-  
+
   public var exprSyntax: ExprSyntax {
     let args = LabeledExprListSyntax(
       parameters.enumerated().compactMap { index, param in
@@ -62,7 +62,7 @@ public struct Init: CodeBlock, ExprCodeBlock {
         rightParen: .rightParenToken()
       ))
   }
-  
+
   public var syntax: SyntaxProtocol {
     exprSyntax
   }

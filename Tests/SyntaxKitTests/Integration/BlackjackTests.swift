@@ -103,24 +103,24 @@ internal struct BlackjackTests {
             SwitchCase(".ace") {
               Return {
                 Init("Values") {
-                  ParameterExp(name: "first", value: "1")
-                  ParameterExp(name: "second", value: "11")
+                  ParameterExp(name: "first", value: Literal.integer(1))
+                  ParameterExp(name: "second", value: Literal.integer(11))
                 }
               }
             }
             SwitchCase(".jack", ".queen", ".king") {
               Return {
                 Init("Values") {
-                  ParameterExp(name: "first", value: "10")
-                  ParameterExp(name: "second", value: "nil")
+                  ParameterExp(name: "first", value: Literal.integer(10))
+                  ParameterExp(name: "second", value: Literal.nil)
                 }
               }
             }
             Default {
               Return {
                 Init("Values") {
-                  ParameterExp(name: "first", value: "self.rawValue")
-                  ParameterExp(name: "second", value: "nil")
+                  ParameterExp(name: "first", value: Literal.ref("self.rawValue"))
+                  ParameterExp(name: "second", value: Literal.nil)
                 }
               }
             }
@@ -132,12 +132,12 @@ internal struct BlackjackTests {
       Variable(.let, name: "rank", type: "Rank")
       Variable(.let, name: "suit", type: "Suit")
       ComputedProperty("description", type: "String") {
-        VariableDecl(.var, name: "output", equals: "\"suit is \\(suit.rawValue),\"")
-        PlusAssign("output", "\" value is \\(rank.values.first)\"")
+        VariableDecl(.var, name: "output", equals: "suit is \\(suit.rawValue),")
+        PlusAssign("output", " value is \\(rank.values.first)")
         If(
           Let("second", "rank.values.second"),
           then: {
-            PlusAssign("output", "\" or \\(second)\"")
+            PlusAssign("output", " or \\(second)")
           }
         )
         Return {
@@ -190,10 +190,10 @@ internal struct BlackjackTests {
         let rank: Rank
         let suit: Suit
         var description: String {
-          var output = \"suit is \\(suit.rawValue),\"
-          output += \" value is \\(rank.values.first)\"
+          var output = "suit is \\(suit.rawValue),"
+          output += " value is \\(rank.values.first)"
           if let second = rank.values.second {
-            output += \" or \\(second)\"
+            output += " or \\(second)"
           }
           return output
         }

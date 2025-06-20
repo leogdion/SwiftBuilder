@@ -67,7 +67,8 @@ internal struct TypeAliasTests {
   @Test internal func testTypeAliasInExtension() {
     let extensionDecl = Extension("MyEnum") {
       TypeAlias("MappedType", equals: "String")
-      Variable(.let, name: "test", type: "MappedType", equals: "value").withExplicitType()
+      Variable(.let, name: "test", type: "MappedType", equals: Literal.ref("value"))
+        .withExplicitType()
     }
 
     let generated = extensionDecl.generateCode().normalize()

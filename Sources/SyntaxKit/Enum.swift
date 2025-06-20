@@ -244,6 +244,10 @@ public struct EnumCase: CodeBlock {
         )
       case .tuple:
         fatalError("Tuple is not supported as a raw value for enum cases.")
+      case .array:
+        fatalError("Array is not supported as a raw value for enum cases.")
+      case .dictionary:
+        fatalError("Dictionary is not supported as a raw value for enum cases.")
       }
     }
 

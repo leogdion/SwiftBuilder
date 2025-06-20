@@ -36,7 +36,7 @@ internal struct ExtensionTests {
 
   @Test internal func testBasicExtension() {
     let extensionDecl = Extension("String") {
-      Variable(.let, name: "test", type: "Int", equals: "42").withExplicitType()
+      Variable(.let, name: "test", type: "Int", equals: Literal.integer(42)).withExplicitType()
     }
 
     let generated = extensionDecl.generateCode().normalize()
@@ -47,8 +47,9 @@ internal struct ExtensionTests {
 
   @Test internal func testExtensionWithMultipleMembers() {
     let extensionDecl = Extension("Array") {
-      Variable(.let, name: "isEmpty", type: "Bool", equals: "true").withExplicitType()
-      Variable(.let, name: "count", type: "Int", equals: "0").withExplicitType()
+      Variable(.let, name: "isEmpty", type: "Bool", equals: Literal.boolean(true))
+        .withExplicitType()
+      Variable(.let, name: "count", type: "Int", equals: Literal.integer(0)).withExplicitType()
     }
 
     let generated = extensionDecl.generateCode().normalize()
@@ -85,7 +86,8 @@ internal struct ExtensionTests {
 
   @Test internal func testExtensionWithoutInheritance() {
     let extensionDecl = Extension("MyType") {
-      Variable(.let, name: "constant", type: "String", equals: "value").withExplicitType()
+      Variable(.let, name: "constant", type: "String", equals: Literal.ref("value"))
+        .withExplicitType()
     }
 
     let generated = extensionDecl.generateCode().normalize()
@@ -150,7 +152,7 @@ internal struct ExtensionTests {
 
   @Test internal func testExtensionWithSpecialCharactersInName() {
     let extensionDecl = Extension("MyType<T>") {
-      Variable(.let, name: "generic", type: "T", equals: "nil").withExplicitType()
+      Variable(.let, name: "generic", type: "T", equals: Literal.nil).withExplicitType()
     }
 
     let generated = extensionDecl.generateCode().normalize()
@@ -161,7 +163,7 @@ internal struct ExtensionTests {
 
   @Test internal func testInheritsMethodReturnsNewInstance() {
     let original = Extension("Test") {
-      Variable(.let, name: "value", type: "Int", equals: "42").withExplicitType()
+      Variable(.let, name: "value", type: "Int", equals: Literal.integer(42)).withExplicitType()
     }
 
     let withInheritance = original.inherits("Protocol1", "Protocol2")

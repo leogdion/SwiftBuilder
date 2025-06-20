@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -60,6 +60,10 @@ public enum Literal: CodeBlock {
   case ref(String)
   /// A tuple literal.
   case tuple([Literal?])
+  /// An array literal.
+  case array([Literal])
+  /// A dictionary literal.
+  case dictionary([(Literal, Literal)])
 
   /// The Swift type name for this literal.
   public var typeName: String {
@@ -81,12 +85,27 @@ public enum Literal: CodeBlock {
           case .nil: return "Any?"
           case .ref: return "Any"
           case .tuple: return "Any"
+          case .array: return "Any"
+          case .dictionary: return "Any"
           }
         } else {
           return "Any"
         }
       }
       return "(\(elementTypes.joined(separator: ", ")))"
+    case .array(let elements):
+      if elements.isEmpty {
+        return "[Any]"
+      }
+      let elementType = elements.first?.typeName ?? "Any"
+      return "[\(elementType)]"
+    case .dictionary(let elements):
+      if elements.isEmpty {
+        return "[Any: Any]"
+      }
+      let keyType = elements.first?.0.typeName ?? "Any"
+      let valueType = elements.first?.1.typeName ?? "Any"
+      return "[\(keyType): \(valueType)]"
     }
   }
 
@@ -137,6 +156,41 @@ public enum Literal: CodeBlock {
         elements: tupleElements,
         rightParen: .rightParenToken()
       )
+    case .array(let elements):
+      let arrayElements = ArrayElementListSyntax(
+        elements.enumerated().map { index, element in
+          ArrayElementSyntax(
+            expression: element.syntax.as(ExprSyntax.self)
+              ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(""))),
+            trailingComma: index < elements.count - 1 ? .commaToken(trailingTrivia: .space) : nil
+          )
+        }
+      )
+      return ArrayExprSyntax(elements: arrayElements)
+    case .dictionary(let elements):
+      if elements.isEmpty {
+        // Empty dictionary should generate [:]
+        return DictionaryExprSyntax(
+          leftSquare: .leftSquareToken(),
+          content: .colon(.colonToken(leadingTrivia: .init(), trailingTrivia: .init())),
+          rightSquare: .rightSquareToken()
+        )
+      } else {
+        let dictionaryElements = DictionaryElementListSyntax(
+          elements.enumerated().map { index, keyValue in
+            let (key, value) = keyValue
+            return DictionaryElementSyntax(
+              keyExpression: key.syntax.as(ExprSyntax.self)
+                ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(""))),
+              colon: .colonToken(),
+              valueExpression: value.syntax.as(ExprSyntax.self)
+                ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(""))),
+              trailingComma: index < elements.count - 1 ? .commaToken(trailingTrivia: .space) : nil
+            )
+          }
+        )
+        return DictionaryExprSyntax(content: .elements(dictionaryElements))
+      }
     }
   }
 }
@@ -147,13 +201,14 @@ extension Literal: ExprCodeBlock {
   public var exprSyntax: ExprSyntax {
     switch self {
     case .string(let value):
-      return ExprSyntax(StringLiteralExprSyntax(
-        openingQuote: .stringQuoteToken(),
-        segments: .init([
-          .stringSegment(.init(content: .stringSegment(value)))
-        ]),
-        closingQuote: .stringQuoteToken()
-      ))
+      return ExprSyntax(
+        StringLiteralExprSyntax(
+          openingQuote: .stringQuoteToken(),
+          segments: .init([
+            .stringSegment(.init(content: .stringSegment(value)))
+          ]),
+          closingQuote: .stringQuoteToken()
+        ))
     case .float(let value):
       return ExprSyntax(FloatLiteralExprSyntax(literal: .floatLiteral(String(value))))
     case .integer(let value):
@@ -161,7 +216,8 @@ extension Literal: ExprCodeBlock {
     case .nil:
       return ExprSyntax(NilLiteralExprSyntax(nilKeyword: .keyword(.nil)))
     case .boolean(let value):
-      return ExprSyntax(BooleanLiteralExprSyntax(literal: value ? .keyword(.true) : .keyword(.false)))
+      return ExprSyntax(
+        BooleanLiteralExprSyntax(literal: value ? .keyword(.true) : .keyword(.false)))
     case .ref(let value):
       return ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
     case .tuple(let elements):
@@ -182,11 +238,46 @@ extension Literal: ExprCodeBlock {
           )
         }
       )
-      return ExprSyntax(TupleExprSyntax(
-        leftParen: .leftParenToken(),
-        elements: tupleElements,
-        rightParen: .rightParenToken()
-      ))
+      return ExprSyntax(
+        TupleExprSyntax(
+          leftParen: .leftParenToken(),
+          elements: tupleElements,
+          rightParen: .rightParenToken()
+        ))
+    case .array(let elements):
+      let arrayElements = ArrayElementListSyntax(
+        elements.enumerated().map { index, element in
+          ArrayElementSyntax(
+            expression: element.syntax.as(ExprSyntax.self)
+              ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(""))),
+            trailingComma: index < elements.count - 1 ? .commaToken(trailingTrivia: .space) : nil
+          )
+        }
+      )
+      return ExprSyntax(ArrayExprSyntax(elements: arrayElements))
+    case .dictionary(let elements):
+      if elements.isEmpty {
+        // Empty dictionary should generate [:]
+        return ExprSyntax(
+          DictionaryExprSyntax(
+            leftSquare: .leftSquareToken(),
+            content: .colon(.colonToken(leadingTrivia: .init(), trailingTrivia: .init())),
+            rightSquare: .rightSquareToken()
+          ))
+      } else {
+        let dictionaryElements = DictionaryElementListSyntax(
+          elements.enumerated().map { index, keyValue in
+            let (key, value) = keyValue
+            return DictionaryElementSyntax(
+              keyExpression: key.exprSyntax,
+              colon: .colonToken(),
+              valueExpression: value.exprSyntax,
+              trailingComma: index < elements.count - 1 ? .commaToken(trailingTrivia: .space) : nil
+            )
+          }
+        )
+        return ExprSyntax(DictionaryExprSyntax(content: .elements(dictionaryElements)))
+      }
     }
   }
 }
@@ -195,7 +286,7 @@ extension Literal: ExprCodeBlock {
 
 /// A tuple value that can be used as a literal.
 public struct TupleLiteral: LiteralValue {
-  private let elements: [Literal?]
+  let elements: [Literal?]
 
   /// Creates a tuple with the given elements.
   /// - Parameter elements: The tuple elements, where `nil` represents a wildcard.
@@ -215,6 +306,8 @@ public struct TupleLiteral: LiteralValue {
         case .nil: return "Any?"
         case .ref: return "Any"
         case .tuple: return "Any"
+        case .array: return "Any"
+        case .dictionary: return "Any"
         }
       } else {
         return "Any"
@@ -237,12 +330,130 @@ public struct TupleLiteral: LiteralValue {
         case .tuple(let tupleElements):
           let tuple = TupleLiteral(tupleElements)
           return tuple.literalString
+        case .array(let arrayElements):
+          let array = ArrayLiteral(arrayElements)
+          return array.literalString
+        case .dictionary(let dictionaryElements):
+          let dictionary = DictionaryLiteral(dictionaryElements)
+          return dictionary.literalString
         }
       } else {
         return "_"
       }
     }
     return "(\(elementStrings.joined(separator: ", ")))"
+  }
+}
+
+/// An array value that can be used as a literal.
+public struct ArrayLiteral: LiteralValue {
+  let elements: [Literal]
+
+  /// Creates an array with the given elements.
+  /// - Parameter elements: The array elements.
+  public init(_ elements: [Literal]) {
+    self.elements = elements
+  }
+
+  /// The Swift type name for this array.
+  public var typeName: String {
+    if elements.isEmpty {
+      return "[Any]"
+    }
+    let elementType = elements.first?.typeName ?? "Any"
+    return "[\(elementType)]"
+  }
+
+  /// Renders this array as a Swift literal string.
+  public var literalString: String {
+    let elementStrings = elements.map { element in
+      switch element {
+      case .integer(let value): return String(value)
+      case .float(let value): return String(value)
+      case .string(let value): return "\"\(value)\""
+      case .boolean(let value): return value ? "true" : "false"
+      case .nil: return "nil"
+      case .ref(let value): return value
+      case .tuple(let tupleElements):
+        let tuple = TupleLiteral(tupleElements)
+        return tuple.literalString
+      case .array(let arrayElements):
+        let array = ArrayLiteral(arrayElements)
+        return array.literalString
+      case .dictionary(let dictionaryElements):
+        let dictionary = DictionaryLiteral(dictionaryElements)
+        return dictionary.literalString
+      }
+    }
+    return "[\(elementStrings.joined(separator: ", "))]"
+  }
+}
+
+/// A dictionary value that can be used as a literal.
+public struct DictionaryLiteral: LiteralValue {
+  let elements: [(Literal, Literal)]
+
+  /// Creates a dictionary with the given key-value pairs.
+  /// - Parameter elements: The dictionary key-value pairs.
+  public init(_ elements: [(Literal, Literal)]) {
+    self.elements = elements
+  }
+
+  /// The Swift type name for this dictionary.
+  public var typeName: String {
+    if elements.isEmpty {
+      return "[Any: Any]"
+    }
+    let keyType = elements.first?.0.typeName ?? "Any"
+    let valueType = elements.first?.1.typeName ?? "Any"
+    return "[\(keyType): \(valueType)]"
+  }
+
+  /// Renders this dictionary as a Swift literal string.
+  public var literalString: String {
+    let elementStrings = elements.map { key, value in
+      let keyString: String
+      let valueString: String
+
+      switch key {
+      case .integer(let key): keyString = String(key)
+      case .float(let key): keyString = String(key)
+      case .string(let key): keyString = "\"\(key)\""
+      case .boolean(let key): keyString = key ? "true" : "false"
+      case .nil: keyString = "nil"
+      case .ref(let key): keyString = key
+      case .tuple(let tupleElements):
+        let tuple = TupleLiteral(tupleElements)
+        keyString = tuple.literalString
+      case .array(let arrayElements):
+        let array = ArrayLiteral(arrayElements)
+        keyString = array.literalString
+      case .dictionary(let dictionaryElements):
+        let dictionary = DictionaryLiteral(dictionaryElements)
+        keyString = dictionary.literalString
+      }
+
+      switch value {
+      case .integer(let value): valueString = String(value)
+      case .float(let value): valueString = String(value)
+      case .string(let value): valueString = "\"\(value)\""
+      case .boolean(let value): valueString = value ? "true" : "false"
+      case .nil: valueString = "nil"
+      case .ref(let value): valueString = value
+      case .tuple(let tupleElements):
+        let tuple = TupleLiteral(tupleElements)
+        valueString = tuple.literalString
+      case .array(let arrayElements):
+        let array = ArrayLiteral(arrayElements)
+        valueString = array.literalString
+      case .dictionary(let dictionaryElements):
+        let dictionary = DictionaryLiteral(dictionaryElements)
+        valueString = dictionary.literalString
+      }
+
+      return "\(keyString): \(valueString)"
+    }
+    return "[\(elementStrings.joined(separator: ", "))]"
   }
 }
 

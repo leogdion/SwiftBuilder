@@ -100,11 +100,13 @@ import Testing
         })
 
       // Multiple optional bindings
-      Variable(.let, name: "possibleName", type: "String?", equals: Literal.string("John")).withExplicitType()
+      Variable(.let, name: "possibleName", type: "String?", equals: Literal.string("John"))
+        .withExplicitType()
         .comment {
           Line("Multiple optional bindings")
         }
-      Variable(.let, name: "possibleAge", type: "Int?", equals: Literal.integer(30)).withExplicitType()
+      Variable(.let, name: "possibleAge", type: "Int?", equals: Literal.integer(30))
+        .withExplicitType()
 
       If {
         Let("name", "possibleName")
@@ -163,7 +165,7 @@ import Testing
         SwitchCase(12..<100) {
           Assignment("naturalCount", Literal.string("dozens of"))
         }
-        SwitchCase(100..<1000) {
+        SwitchCase(100..<1_000) {
           Assignment("naturalCount", Literal.string("hundreds of"))
         }
         Default {
@@ -239,14 +241,14 @@ import Testing
           Line("MARK: - Fallthrough")
           Line("Using fallthrough in switch")
         }
-      Variable(.var, name: "description", type: "String", equals: "\"The number \\(integerToDescribe) is\"")
+      Variable(.var, name: "description", equals: "The number \\(integerToDescribe) is")
       Switch("integerToDescribe") {
         SwitchCase(2, 3, 5, 7, 11, 13, 17, 19) {
-          PlusAssign("description", "\" a prime number, and also\"")
+          PlusAssign("description", " a prime number, and also")
           Fallthrough()
         }
         Default {
-          PlusAssign("description", "\" an integer.\"")
+          PlusAssign("description", " an integer.")
         }
       }
       Call("print") {
@@ -262,46 +264,24 @@ import Testing
       Variable(.var, name: "board") {
         Init("[Int]") {
           ParameterExp(name: "repeating", value: Literal.integer(0))
-          ParameterExp(name: "count", value: Infix("+") {
-            VariableExp("finalSquare")
-            Literal.integer(1)
-          })
+          ParameterExp(
+            name: "count",
+            value: Infix("+") {
+              VariableExp("finalSquare")
+              Literal.integer(1)
+            })
         }
       }
-      
+
       // Board setup
-      Infix("+=") {
-        VariableExp("board[03]")
-        Literal.integer(8)
-      }
-      Infix("+=") {
-        VariableExp("board[06]")
-        Literal.integer(11)
-      }
-      Infix("+=") {
-        VariableExp("board[09]")
-        Literal.integer(9)
-      }
-      Infix("+=") {
-        VariableExp("board[10]")
-        Literal.integer(2)
-      }
-      Infix("-=") {
-        VariableExp("board[14]")
-        Literal.integer(10)
-      }
-      Infix("-=") {
-        VariableExp("board[19]")
-        Literal.integer(11)
-      }
-      Infix("-=") {
-        VariableExp("board[22]")
-        Literal.integer(2)
-      }
-      Infix("-=") {
-        VariableExp("board[24]")
-        Literal.integer(8)
-      }
+      Assignment("board[3]", 8)
+      Assignment("board[6]", 11)
+      Assignment("board[9]", 9)
+      Assignment("board[10]", 2)
+      Assignment("board[14]", -10)
+      Assignment("board[19]", -11)
+      Assignment("board[22]", -2)
+      Assignment("board[24]", -8)
 
       Variable(.var, name: "square", equals: Literal.integer(0))
       Variable(.var, name: "diceRoll", equals: Literal.integer(0))
@@ -311,7 +291,7 @@ import Testing
           VariableExp("finalSquare")
         }
       } then: {
-        Assignment("diceRoll", 1)
+        PlusAssign("diceRoll", 1)
         If {
           Infix("==") {
             VariableExp("diceRoll")
@@ -320,10 +300,12 @@ import Testing
         } then: {
           Assignment("diceRoll", 1)
         }
-        Switch(Infix("+") {
-          VariableExp("square")
-          VariableExp("diceRoll")
-        }) {
+        Switch(
+          Infix("+") {
+            VariableExp("square")
+            VariableExp("diceRoll")
+          }
+        ) {
           SwitchCase(VariableExp("finalSquare")) {
             Break()
           }
@@ -472,8 +454,14 @@ import Testing
       // Using labeled statements with break
       let finalSquare = 25
       var board = [Int](repeating: 0, count: finalSquare + 1)
-      board[03] = +08; board[06] = +11; board[09] = +09; board[10] = +02
-      board[14] = -10; board[19] = -11; board[22] = -02; board[24] = -08
+      board[3] = 8
+      board[6] = 11
+      board[9] = 9
+      board[10] = 2
+      board[14] = -10
+      board[19] = -11
+      board[22] = -2
+      board[24] = -8
 
       var square = 0
       var diceRoll = 0
@@ -482,7 +470,7 @@ import Testing
           if diceRoll == 7 { diceRoll = 1 }
           switch square + diceRoll {
           case finalSquare:
-              break 
+              break
           case let newSquare where newSquare > finalSquare:
               continue
           default:

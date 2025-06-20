@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftSyntax
 import Foundation
+import SwiftSyntax
 
 /// A Swift `let` or `var` declaration with an explicit type.
 public struct Variable: CodeBlock {
@@ -161,7 +161,21 @@ public struct Variable: CodeBlock {
     self.kind = kind
     self.name = name
     self.type = value.typeName
-    self.defaultValue = Literal.string(value.literalString)
+    if let literal = value as? Literal {
+      self.defaultValue = literal
+    } else if let tuple = value as? TupleLiteral {
+      self.defaultValue = Literal.tuple(tuple.elements)
+    } else if let array = value as? ArrayLiteral {
+      self.defaultValue = Literal.array(array.elements)
+    } else if let dict = value as? DictionaryLiteral {
+      self.defaultValue = Literal.dictionary(dict.elements)
+    } else if let array = value as? [String] {
+      self.defaultValue = Literal.array(array.map { .string($0) })
+    } else if let dict = value as? [Int: String] {
+      self.defaultValue = Literal.dictionary(dict.map { (.integer($0.key), .string($0.value)) })
+    } else {
+      fatalError("Variable: Only Literal types are supported for defaultValue. Got: \(T.self)")
+    }
     self.explicitType = false
   }
 

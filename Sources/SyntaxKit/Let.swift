@@ -63,7 +63,8 @@ public struct Let: CodeBlock {
                 pattern: IdentifierPatternSyntax(identifier: .identifier(name)),
                 initializer: InitializerClauseSyntax(
                   equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-                  value: value.syntax.as(ExprSyntax.self) ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
+                  value: value.syntax.as(ExprSyntax.self)
+                    ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
                 )
               )
             ])

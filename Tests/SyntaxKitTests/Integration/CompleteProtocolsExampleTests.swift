@@ -76,7 +76,7 @@ import Testing
 
       // MARK: - Concrete Types
       Struct("Car") {
-        Variable(.let, name: "numberOfWheels", type: "Int", equals: "4").withExplicitType()
+        Variable(.let, name: "numberOfWheels", type: "Int", equals: 4).withExplicitType()
         Variable(.let, name: "brand", type: "String").withExplicitType()
 
         Function("start") {
@@ -91,7 +91,7 @@ import Testing
       }
 
       Struct("ElectricCar") {
-        Variable(.let, name: "numberOfWheels", type: "Int", equals: "4").withExplicitType()
+        Variable(.let, name: "numberOfWheels", type: "Int", equals: 4).withExplicitType()
         Variable(.let, name: "brand", type: "String").withExplicitType()
         Variable(.var, name: "batteryLevel", type: "Double").withExplicitType()
 

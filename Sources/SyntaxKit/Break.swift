@@ -43,7 +43,7 @@ public struct Break: CodeBlock {
     let breakStmt = BreakStmtSyntax(
       breakKeyword: .keyword(.break, trailingTrivia: .newline)
     )
-    
+
     if let label = label {
       return StmtSyntax(
         breakStmt.with(
@@ -55,4 +55,4 @@ public struct Break: CodeBlock {
       return StmtSyntax(breakStmt)
     }
   }
-} 
+}
