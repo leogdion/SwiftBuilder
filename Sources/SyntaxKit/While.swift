@@ -66,7 +66,7 @@ public struct While: CodeBlock {
       fromProtocol: condition.syntax.as(ExprSyntax.self)
         ?? DeclReferenceExprSyntax(baseName: .identifier(""))
     )
-    
+
     let bodyBlock = CodeBlockSyntax(
       leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .newline),
       statements: CodeBlockItemListSyntax(
@@ -83,7 +83,7 @@ public struct While: CodeBlock {
         }),
       rightBrace: .rightBraceToken(leadingTrivia: .newline)
     )
-    
+
     return StmtSyntax(
       WhileStmtSyntax(
         whileKeyword: .keyword(.while, trailingTrivia: .space),
@@ -96,4 +96,4 @@ public struct While: CodeBlock {
       )
     )
   }
-} 
+}

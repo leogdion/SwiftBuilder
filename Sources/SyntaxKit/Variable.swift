@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftSyntax
 import Foundation
+import SwiftSyntax
 
 /// A Swift `let` or `var` declaration with an explicit type.
 public struct Variable: CodeBlock {

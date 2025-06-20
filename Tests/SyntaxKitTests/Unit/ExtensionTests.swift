@@ -47,7 +47,8 @@ internal struct ExtensionTests {
 
   @Test internal func testExtensionWithMultipleMembers() {
     let extensionDecl = Extension("Array") {
-      Variable(.let, name: "isEmpty", type: "Bool", equals: Literal.boolean(true)).withExplicitType()
+      Variable(.let, name: "isEmpty", type: "Bool", equals: Literal.boolean(true))
+        .withExplicitType()
       Variable(.let, name: "count", type: "Int", equals: Literal.integer(0)).withExplicitType()
     }
 
@@ -85,7 +86,8 @@ internal struct ExtensionTests {
 
   @Test internal func testExtensionWithoutInheritance() {
     let extensionDecl = Extension("MyType") {
-      Variable(.let, name: "constant", type: "String", equals: Literal.ref("value")).withExplicitType()
+      Variable(.let, name: "constant", type: "String", equals: Literal.ref("value"))
+        .withExplicitType()
     }
 
     let generated = extensionDecl.generateCode().normalize()
@@ -112,7 +114,7 @@ internal struct ExtensionTests {
     #expect(
       generated.contains("extension TestEnum: MappedValueRepresentable, MappedValueRepresented"))
     #expect(generated.contains("typealias MappedType = String"))
-    #expect(generated.contains("static let mappedValues: [String] = \"[\"a\", \"b\", \"c\"]\""))
+    #expect(generated.contains("static let mappedValues: [String] = [\"a\", \"b\", \"c\"]"))
     #expect(generated.contains("static let lookup: [Int: String]"))
     #expect(generated.contains("1: \"one\""))
     #expect(generated.contains("2: \"two\""))

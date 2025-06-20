@@ -100,11 +100,13 @@ import Testing
         })
 
       // Multiple optional bindings
-      Variable(.let, name: "possibleName", type: "String?", equals: Literal.string("John")).withExplicitType()
+      Variable(.let, name: "possibleName", type: "String?", equals: Literal.string("John"))
+        .withExplicitType()
         .comment {
           Line("Multiple optional bindings")
         }
-      Variable(.let, name: "possibleAge", type: "Int?", equals: Literal.integer(30)).withExplicitType()
+      Variable(.let, name: "possibleAge", type: "Int?", equals: Literal.integer(30))
+        .withExplicitType()
 
       If {
         Let("name", "possibleName")
@@ -163,7 +165,7 @@ import Testing
         SwitchCase(12..<100) {
           Assignment("naturalCount", Literal.string("dozens of"))
         }
-        SwitchCase(100..<1000) {
+        SwitchCase(100..<1_000) {
           Assignment("naturalCount", Literal.string("hundreds of"))
         }
         Default {
@@ -262,13 +264,15 @@ import Testing
       Variable(.var, name: "board") {
         Init("[Int]") {
           ParameterExp(name: "repeating", value: Literal.integer(0))
-          ParameterExp(name: "count", value: Infix("+") {
-            VariableExp("finalSquare")
-            Literal.integer(1)
-          })
+          ParameterExp(
+            name: "count",
+            value: Infix("+") {
+              VariableExp("finalSquare")
+              Literal.integer(1)
+            })
         }
       }
-      
+
       // Board setup
       Assignment("board[3]", 8)
       Assignment("board[6]", 11)
@@ -296,10 +300,12 @@ import Testing
         } then: {
           Assignment("diceRoll", 1)
         }
-        Switch(Infix("+") {
-          VariableExp("square")
-          VariableExp("diceRoll")
-        }) {
+        Switch(
+          Infix("+") {
+            VariableExp("square")
+            VariableExp("diceRoll")
+          }
+        ) {
           SwitchCase(VariableExp("finalSquare")) {
             Break()
           }
@@ -464,7 +470,7 @@ import Testing
           if diceRoll == 7 { diceRoll = 1 }
           switch square + diceRoll {
           case finalSquare:
-              break 
+              break
           case let newSquare where newSquare > finalSquare:
               continue
           default:

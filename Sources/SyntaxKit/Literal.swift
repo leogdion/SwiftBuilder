@@ -201,13 +201,14 @@ extension Literal: ExprCodeBlock {
   public var exprSyntax: ExprSyntax {
     switch self {
     case .string(let value):
-      return ExprSyntax(StringLiteralExprSyntax(
-        openingQuote: .stringQuoteToken(),
-        segments: .init([
-          .stringSegment(.init(content: .stringSegment(value)))
-        ]),
-        closingQuote: .stringQuoteToken()
-      ))
+      return ExprSyntax(
+        StringLiteralExprSyntax(
+          openingQuote: .stringQuoteToken(),
+          segments: .init([
+            .stringSegment(.init(content: .stringSegment(value)))
+          ]),
+          closingQuote: .stringQuoteToken()
+        ))
     case .float(let value):
       return ExprSyntax(FloatLiteralExprSyntax(literal: .floatLiteral(String(value))))
     case .integer(let value):
@@ -215,7 +216,8 @@ extension Literal: ExprCodeBlock {
     case .nil:
       return ExprSyntax(NilLiteralExprSyntax(nilKeyword: .keyword(.nil)))
     case .boolean(let value):
-      return ExprSyntax(BooleanLiteralExprSyntax(literal: value ? .keyword(.true) : .keyword(.false)))
+      return ExprSyntax(
+        BooleanLiteralExprSyntax(literal: value ? .keyword(.true) : .keyword(.false)))
     case .ref(let value):
       return ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
     case .tuple(let elements):
@@ -236,11 +238,12 @@ extension Literal: ExprCodeBlock {
           )
         }
       )
-      return ExprSyntax(TupleExprSyntax(
-        leftParen: .leftParenToken(),
-        elements: tupleElements,
-        rightParen: .rightParenToken()
-      ))
+      return ExprSyntax(
+        TupleExprSyntax(
+          leftParen: .leftParenToken(),
+          elements: tupleElements,
+          rightParen: .rightParenToken()
+        ))
     case .array(let elements):
       let arrayElements = ArrayElementListSyntax(
         elements.enumerated().map { index, element in
@@ -255,11 +258,12 @@ extension Literal: ExprCodeBlock {
     case .dictionary(let elements):
       if elements.isEmpty {
         // Empty dictionary should generate [:]
-        return ExprSyntax(DictionaryExprSyntax(
-          leftSquare: .leftSquareToken(),
-          content: .colon(.colonToken(leadingTrivia: .init(), trailingTrivia: .init())),
-          rightSquare: .rightSquareToken()
-        ))
+        return ExprSyntax(
+          DictionaryExprSyntax(
+            leftSquare: .leftSquareToken(),
+            content: .colon(.colonToken(leadingTrivia: .init(), trailingTrivia: .init())),
+            rightSquare: .rightSquareToken()
+          ))
       } else {
         let dictionaryElements = DictionaryElementListSyntax(
           elements.enumerated().map { index, keyValue in
@@ -410,14 +414,14 @@ public struct DictionaryLiteral: LiteralValue {
     let elementStrings = elements.map { key, value in
       let keyString: String
       let valueString: String
-      
+
       switch key {
-      case .integer(let k): keyString = String(k)
-      case .float(let k): keyString = String(k)
-      case .string(let k): keyString = "\"\(k)\""
-      case .boolean(let k): keyString = k ? "true" : "false"
+      case .integer(let key): keyString = String(key)
+      case .float(let key): keyString = String(key)
+      case .string(let key): keyString = "\"\(key)\""
+      case .boolean(let key): keyString = key ? "true" : "false"
       case .nil: keyString = "nil"
-      case .ref(let k): keyString = k
+      case .ref(let key): keyString = key
       case .tuple(let tupleElements):
         let tuple = TupleLiteral(tupleElements)
         keyString = tuple.literalString
@@ -428,14 +432,14 @@ public struct DictionaryLiteral: LiteralValue {
         let dictionary = DictionaryLiteral(dictionaryElements)
         keyString = dictionary.literalString
       }
-      
+
       switch value {
-      case .integer(let v): valueString = String(v)
-      case .float(let v): valueString = String(v)
-      case .string(let v): valueString = "\"\(v)\""
-      case .boolean(let v): valueString = v ? "true" : "false"
+      case .integer(let value): valueString = String(value)
+      case .float(let value): valueString = String(value)
+      case .string(let value): valueString = "\"\(value)\""
+      case .boolean(let value): valueString = value ? "true" : "false"
       case .nil: valueString = "nil"
-      case .ref(let v): valueString = v
+      case .ref(let value): valueString = value
       case .tuple(let tupleElements):
         let tuple = TupleLiteral(tupleElements)
         valueString = tuple.literalString
@@ -446,7 +450,7 @@ public struct DictionaryLiteral: LiteralValue {
         let dictionary = DictionaryLiteral(dictionaryElements)
         valueString = dictionary.literalString
       }
-      
+
       return "\(keyString): \(valueString)"
     }
     return "[\(elementStrings.joined(separator: ", "))]"

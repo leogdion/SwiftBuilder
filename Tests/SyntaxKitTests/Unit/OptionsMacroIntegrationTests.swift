@@ -174,7 +174,7 @@ internal struct OptionsMacroIntegrationTests {
       generated.contains(
         "extension EmptyDictEnum: MappedValueRepresentable, MappedValueRepresented"))
     #expect(generated.contains("typealias MappedType = String"))
-    #expect(generated.contains("static let mappedValues: [Int: String] = []"))
+    #expect(generated.contains("static let mappedValues: [Int: String] = [: ]"))
   }
 
   @Test internal func testSpecialCharactersInCaseNames() {

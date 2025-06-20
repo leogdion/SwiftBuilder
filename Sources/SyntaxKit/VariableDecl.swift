@@ -50,7 +50,7 @@ public struct VariableDecl: CodeBlock {
     let bindingKeyword = TokenSyntax.keyword(kind == .let ? .let : .var, trailingTrivia: .space)
     let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
     let initializer = value.map { value in
-      if value.hasPrefix("\"") && value.hasSuffix("\"") || value.contains("\\(") {
+      if value.hasPrefix("\"") && value.hasSuffix("\"") {
         return InitializerClauseSyntax(
           equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
           value: StringLiteralExprSyntax(
@@ -58,6 +58,18 @@ public struct VariableDecl: CodeBlock {
             segments: StringLiteralSegmentListSyntax([
               .stringSegment(
                 StringSegmentSyntax(content: .stringSegment(String(value.dropFirst().dropLast()))))
+            ]),
+            closingQuote: .stringQuoteToken()
+          )
+        )
+      } else if value.contains("\\(") {
+        return InitializerClauseSyntax(
+          equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+          value: StringLiteralExprSyntax(
+            openingQuote: .stringQuoteToken(),
+            segments: StringLiteralSegmentListSyntax([
+              .stringSegment(
+                StringSegmentSyntax(content: .stringSegment(value)))
             ]),
             closingQuote: .stringQuoteToken()
           )

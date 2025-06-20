@@ -5,7 +5,7 @@ import Testing
 internal struct StructTests {
   @Test internal func testGenericStruct() {
     let stackStruct = Struct("Stack") {
-      Variable(.var, name: "items", type: "[Element]", equals: "[]").withExplicitType()
+      Variable(.var, name: "items", type: "[Element]", equals: Literal.array([])).withExplicitType()
 
       Function("push") {
         Parameter(name: "item", type: "Element", isUnnamed: true)

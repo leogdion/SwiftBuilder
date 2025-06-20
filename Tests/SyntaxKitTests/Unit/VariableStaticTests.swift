@@ -35,7 +35,8 @@ internal struct VariableStaticTests {
   // MARK: - Static Variable Tests
 
   @Test internal func testStaticVariableWithStringLiteral() {
-    let variable = Variable(.let, name: "test", type: "String", equals: Literal.ref("hello")).withExplicitType()
+    let variable = Variable(.let, name: "test", type: "String", equals: Literal.ref("hello"))
+      .withExplicitType()
       .static()
     let generated = variable.generateCode().normalize()
 
@@ -62,7 +63,8 @@ internal struct VariableStaticTests {
   }
 
   @Test internal func testStaticVariableWithVar() {
-    let variable = Variable(.var, name: "counter", type: "Int", equals: Literal.integer(0)).withExplicitType()
+    let variable = Variable(.var, name: "counter", type: "Int", equals: Literal.integer(0))
+      .withExplicitType()
       .static()
     let generated = variable.generateCode().normalize()
 
@@ -94,7 +96,8 @@ internal struct VariableStaticTests {
   // MARK: - Static Method Tests
 
   @Test internal func testStaticMethodReturnsNewInstance() {
-    let original = Variable(.let, name: "test", type: "String", equals: Literal.ref("value")).withExplicitType()
+    let original = Variable(.let, name: "test", type: "String", equals: Literal.ref("value"))
+      .withExplicitType()
     let staticVersion = original.static()
 
     // Should be different instances
@@ -110,7 +113,8 @@ internal struct VariableStaticTests {
   }
 
   @Test internal func testStaticMethodPreservesOtherProperties() {
-    let original = Variable(.var, name: "test", type: "String", equals: Literal.ref("value")).withExplicitType()
+    let original = Variable(.var, name: "test", type: "String", equals: Literal.ref("value"))
+      .withExplicitType()
     let staticVersion = original.static()
 
     let originalGenerated = original.generateCode().normalize()
@@ -144,13 +148,14 @@ internal struct VariableStaticTests {
 
     let validOutputs = [
       "static let empty: [Int: String] = [:]",
-      "static let empty: [Int: String] = [: ]"
+      "static let empty: [Int: String] = [: ]",
     ]
     #expect(validOutputs.contains { generated.contains($0) })
   }
 
   @Test internal func testMultipleStaticCalls() {
-    let variable = Variable(.let, name: "test", type: "String", equals: Literal.ref("value")).withExplicitType()
+    let variable = Variable(.let, name: "test", type: "String", equals: Literal.ref("value"))
+      .withExplicitType()
       .static().static()
     let generated = variable.generateCode().normalize()
 

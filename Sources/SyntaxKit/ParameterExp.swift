@@ -66,12 +66,14 @@ public struct ParameterExp: CodeBlock {
 
   public var syntax: SyntaxProtocol {
     if name.isEmpty {
-      return value.syntax.as(ExprSyntax.self) ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
+      return value.syntax.as(ExprSyntax.self)
+        ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
     } else {
       return LabeledExprSyntax(
         label: .identifier(name),
         colon: .colonToken(),
-        expression: value.syntax.as(ExprSyntax.self) ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
+        expression: value.syntax.as(ExprSyntax.self)
+          ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
       )
     }
   }
