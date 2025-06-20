@@ -148,7 +148,34 @@ while square != finalSquare {
         square += board[square]
     }
 }
-print("Game over!")
+
+
+// MARK: - For Loops
+// For-in loop with range
+print("\n=== For-in with Range ===")
+for index in 1...5 {
+    print("Index: \(index)")
+}
+
+// For-in loop with enumerated() to get index and value
+print("\n=== For-in with Enumerated ===")
+for (index, name) in names.enumerated() {
+    print("\(index): \(name)")
+}
+
+// For-in loop with where clause
+print("\n=== For-in with Where Clause ===")
+let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+for number in numbers where number % 2 == 0 {
+    print("Even number: \(number)")
+}
+
+// For-in loop with pattern matching
+print("\n=== For-in with Pattern Matching ===")
+let mixedArray: [Any] = [1, "hello", 3.14, "world", 42, nil]
+for case let string as String in mixedArray {
+    print("Found string: \(string)")
+}
 
 // MARK: - Early Exit with Guard
 

@@ -193,3 +193,30 @@ While {
         }
     }
 }
+
+Call("print", "\n=== For-in with Enumerated ===")
+.comment {
+    Line("MARK: - For Loops")
+    Line("For-in loop with enumerated() to get index and value")
+}
+For {
+    Tuple.pattern([VariableExp("index"), VariableExp("name")])
+} in: {
+    VariableExp("names").call("enumerated")
+} then: {
+    Call("print", "Index: \\(index), Name: \\(name)")
+}
+
+Call("print", "\n=== For-in with Where Clause ===")
+.comment {
+    Line("For-in loop with where clause")
+}
+For {
+    VariableExp("numbers")
+} in: {
+    Literal.array([Literal.integer(1), Literal.integer(2), Literal.integer(3), Literal.integer(4), Literal.integer(5), Literal.integer(6), Literal.integer(7), Literal.integer(8), Literal.integer(9), Literal.integer(10)])
+} where: {
+    Infix("number", "%", 2)
+} then: {
+    Call("print", "Even number: \\(number)")
+}

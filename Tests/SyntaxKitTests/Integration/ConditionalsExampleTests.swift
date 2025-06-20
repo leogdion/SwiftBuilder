@@ -330,6 +330,45 @@ import Testing
           }
         }
       }
+
+      // MARK: - For Loops
+      Call("print") {
+        ParameterExp(name: "", value: "\n=== For-in with Enumerated ===")
+      }
+      .comment {
+        Line("MARK: - For Loops")
+        Line("For-in loop with enumerated() to get index and value")
+      }
+      For {
+        Tuple.pattern([VariableExp("index"), VariableExp("name")])
+      } in: {
+        VariableExp("names").call("enumerated")
+      } then: {
+        Call("print") {
+          ParameterExp(name: "", value: "Index: \\(" + "index" + "), Name: \\(" + "name" + ")")
+        }
+      }
+
+      Call("print") {
+        ParameterExp(name: "", value: "\n=== For-in with Where Clause ===")
+      }
+      .comment {
+        Line("For-in loop with where clause")
+      }
+      For {
+        VariableExp("number")
+      } in: {
+        Literal.array([Literal.integer(1), Literal.integer(2), Literal.integer(3), Literal.integer(4), Literal.integer(5), Literal.integer(6), Literal.integer(7), Literal.integer(8), Literal.integer(9), Literal.integer(10)])
+      } where: {
+        Infix("%") {
+          VariableExp("number")
+          Literal.integer(2)
+        }
+      } then: {
+        Call("print") {
+          ParameterExp(name: "", value: "Even number: \\(" + "number" + ")")
+        }
+      }
     }
 
     // Generate Swift from DSL
@@ -477,6 +516,16 @@ import Testing
               square += diceRoll
               square += board[square]
           }
+      }
+
+      // MARK: - For Loops
+      print("\n=== For-in with Enumerated ===")
+      for (index, name) in names.enumerated() {
+          print("Index: \(index), Name: \(name)")
+      }
+      print("\n=== For-in with Where Clause ===")
+      for number in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] where number % 2 == 0 {
+          print("Even number: \(number)")
       }
       """
       .normalize()

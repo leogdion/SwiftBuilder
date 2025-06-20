@@ -136,3 +136,19 @@ while square != finalSquare {
         square += board[square]
     }
 }
+
+// MARK: - For Loops
+// For-in loop with enumerated() to get index and value
+print("\n=== For-in with Enumerated ===")
+for (index, name) in names.enumerated() {
+    print("\(index): \(name)")
+}
+
+// For-in loop with where clause
+print("\n=== For-in with Where Clause ===")
+let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+for number in numbers where number % 2 == 0 {
+    print("Even number: \(number)")
+}
+
+
