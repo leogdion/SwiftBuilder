@@ -103,24 +103,24 @@ internal struct BlackjackTests {
             SwitchCase(".ace") {
               Return {
                 Init("Values") {
-                  Parameter(name: "first", type: "", defaultValue: "1")
-                  Parameter(name: "second", type: "", defaultValue: "11")
+                  ParameterExp(name: "first", value: "1")
+                  ParameterExp(name: "second", value: "11")
                 }
               }
             }
             SwitchCase(".jack", ".queen", ".king") {
               Return {
                 Init("Values") {
-                  Parameter(name: "first", type: "", defaultValue: "10")
-                  Parameter(name: "second", type: "", defaultValue: "nil")
+                  ParameterExp(name: "first", value: "10")
+                  ParameterExp(name: "second", value: "nil")
                 }
               }
             }
             Default {
               Return {
                 Init("Values") {
-                  Parameter(name: "first", type: "", defaultValue: "self.rawValue")
-                  Parameter(name: "second", type: "", defaultValue: "nil")
+                  ParameterExp(name: "first", value: "self.rawValue")
+                  ParameterExp(name: "second", value: "nil")
                 }
               }
             }

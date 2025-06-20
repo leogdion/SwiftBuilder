@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -28,13 +28,14 @@
 //
 
 import SwiftSyntax
+import Foundation
 
 /// A Swift `let` or `var` declaration with an explicit type.
 public struct Variable: CodeBlock {
   private let kind: VariableKind
   private let name: String
   private let type: String
-  private let defaultValue: String?
+  private let defaultValue: CodeBlock?
   private var isStatic: Bool = false
   private var attributes: [AttributeInfo] = []
   private var explicitType: Bool = false
@@ -44,21 +45,108 @@ public struct Variable: CodeBlock {
   ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
   ///   - name: The name of the variable.
   ///   - type: The type of the variable.
-  ///   - defaultValue: The initial value of the variable, if any.
+  ///   - equals: The initial value expression of the variable, if any.
   ///   - explicitType: Whether the variable has an explicit type.
   public init(
-    _ kind: VariableKind, name: String, type: String, equals defaultValue: String? = nil,
+    _ kind: VariableKind, name: String, type: String, equals defaultValue: CodeBlock? = nil,
     explicitType: Bool? = nil
   ) {
     self.kind = kind
     self.name = name
     self.type = type
     self.defaultValue = defaultValue
-    // If explicitType is provided, use it. Otherwise, default to true if no defaultValue, else false.
     if let explicitType = explicitType {
       self.explicitType = explicitType
     } else {
-      self.explicitType = (defaultValue == nil)
+      self.explicitType = defaultValue == nil
+    }
+  }
+
+  /// Creates a `let` or `var` declaration with an explicit type and string literal value.
+  /// - Parameters:
+  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
+  ///   - name: The name of the variable.
+  ///   - type: The type of the variable.
+  ///   - equals: A string literal value.
+  ///   - explicitType: Whether the variable has an explicit type.
+  public init(
+    _ kind: VariableKind, name: String, type: String, equals value: String,
+    explicitType: Bool? = nil
+  ) {
+    self.kind = kind
+    self.name = name
+    self.type = type
+    self.defaultValue = Literal.string(value)
+    if let explicitType = explicitType {
+      self.explicitType = explicitType
+    } else {
+      self.explicitType = true
+    }
+  }
+
+  /// Creates a `let` or `var` declaration with an explicit type and integer literal value.
+  /// - Parameters:
+  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
+  ///   - name: The name of the variable.
+  ///   - type: The type of the variable.
+  ///   - equals: An integer literal value.
+  ///   - explicitType: Whether the variable has an explicit type.
+  public init(
+    _ kind: VariableKind, name: String, type: String, equals value: Int,
+    explicitType: Bool? = nil
+  ) {
+    self.kind = kind
+    self.name = name
+    self.type = type
+    self.defaultValue = Literal.integer(value)
+    if let explicitType = explicitType {
+      self.explicitType = explicitType
+    } else {
+      self.explicitType = true
+    }
+  }
+
+  /// Creates a `let` or `var` declaration with an explicit type and boolean literal value.
+  /// - Parameters:
+  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
+  ///   - name: The name of the variable.
+  ///   - type: The type of the variable.
+  ///   - equals: A boolean literal value.
+  ///   - explicitType: Whether the variable has an explicit type.
+  public init(
+    _ kind: VariableKind, name: String, type: String, equals value: Bool,
+    explicitType: Bool? = nil
+  ) {
+    self.kind = kind
+    self.name = name
+    self.type = type
+    self.defaultValue = Literal.boolean(value)
+    if let explicitType = explicitType {
+      self.explicitType = explicitType
+    } else {
+      self.explicitType = true
+    }
+  }
+
+  /// Creates a `let` or `var` declaration with an explicit type and double literal value.
+  /// - Parameters:
+  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
+  ///   - name: The name of the variable.
+  ///   - type: The type of the variable.
+  ///   - equals: A double literal value.
+  ///   - explicitType: Whether the variable has an explicit type.
+  public init(
+    _ kind: VariableKind, name: String, type: String, equals value: Double,
+    explicitType: Bool? = nil
+  ) {
+    self.kind = kind
+    self.name = name
+    self.type = type
+    self.defaultValue = Literal.float(value)
+    if let explicitType = explicitType {
+      self.explicitType = explicitType
+    } else {
+      self.explicitType = true
     }
   }
 
@@ -66,16 +154,113 @@ public struct Variable: CodeBlock {
   /// - Parameters:
   ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
   ///   - name: The name of the variable.
-  ///   - value: A literal value that conforms to ``LiteralValue``.
-  ///   - explicitType: Whether the variable has an explicit type.
+  ///   - equals: A literal value that conforms to ``LiteralValue``.
   public init<T: LiteralValue>(
-    _ kind: VariableKind, name: String, equals value: T, explicitType: Bool = false
+    _ kind: VariableKind, name: String, equals value: T
   ) {
     self.kind = kind
     self.name = name
     self.type = value.typeName
-    self.defaultValue = value.literalString
-    self.explicitType = explicitType
+    self.defaultValue = Literal.string(value.literalString)
+    self.explicitType = false
+  }
+
+  /// Creates a `let` or `var` declaration with a string literal value.
+  /// - Parameters:
+  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
+  ///   - name: The name of the variable.
+  ///   - equals: A string literal value.
+  public init(
+    _ kind: VariableKind, name: String, equals value: String
+  ) {
+    self.kind = kind
+    self.name = name
+    self.type = "String"
+    self.defaultValue = Literal.string(value)
+    self.explicitType = false
+  }
+
+  /// Creates a `let` or `var` declaration with an integer literal value.
+  /// - Parameters:
+  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
+  ///   - name: The name of the variable.
+  ///   - equals: An integer literal value.
+  public init(
+    _ kind: VariableKind, name: String, equals value: Int
+  ) {
+    self.kind = kind
+    self.name = name
+    self.type = "Int"
+    self.defaultValue = Literal.integer(value)
+    self.explicitType = false
+  }
+
+  /// Creates a `let` or `var` declaration with a boolean literal value.
+  /// - Parameters:
+  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
+  ///   - name: The name of the variable.
+  ///   - equals: A boolean literal value.
+  public init(
+    _ kind: VariableKind, name: String, equals value: Bool
+  ) {
+    self.kind = kind
+    self.name = name
+    self.type = "Bool"
+    self.defaultValue = Literal.boolean(value)
+    self.explicitType = false
+  }
+
+  /// Creates a `let` or `var` declaration with a double literal value.
+  /// - Parameters:
+  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
+  ///   - name: The name of the variable.
+  ///   - equals: A double literal value.
+  public init(
+    _ kind: VariableKind, name: String, equals value: Double
+  ) {
+    self.kind = kind
+    self.name = name
+    self.type = "Double"
+    self.defaultValue = Literal.float(value)
+    self.explicitType = false
+  }
+
+  /// Creates a `let` or `var` declaration with a Literal value.
+  /// - Parameters:
+  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
+  ///   - name: The name of the variable.
+  ///   - equals: A Literal value.
+  public init(
+    _ kind: VariableKind, name: String, equals value: Literal
+  ) {
+    self.kind = kind
+    self.name = name
+    self.type = value.typeName
+    self.defaultValue = value
+    self.explicitType = false
+  }
+
+  /// Creates a `let` or `var` declaration with a value built from a CodeBlock builder closure.
+  /// - Parameters:
+  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
+  ///   - name: The name of the variable.
+  ///   - value: A builder closure that returns a CodeBlock for the initial value.
+  ///   - explicitType: Whether the variable has an explicit type.
+  public init(
+    _ kind: VariableKind,
+    name: String,
+    @CodeBlockBuilderResult value: () -> [CodeBlock],
+    explicitType: Bool? = nil
+  ) {
+    self.kind = kind
+    self.name = name
+    self.type = ""
+    self.defaultValue = value().first ?? EmptyCodeBlock()
+    if let explicitType = explicitType {
+      self.explicitType = explicitType
+    } else {
+      self.explicitType = false
+    }
   }
 
   /// Marks the variable as `static`.
@@ -113,9 +298,17 @@ public struct Variable: CodeBlock {
         type: IdentifierTypeSyntax(name: .identifier(type))
       ) : nil
     let initializer = defaultValue.map { value in
-      InitializerClauseSyntax(
+      let expr: ExprSyntax
+      if let exprBlock = value as? ExprCodeBlock {
+        expr = exprBlock.exprSyntax
+      } else if let exprSyntax = value.syntax.as(ExprSyntax.self) {
+        expr = exprSyntax
+      } else {
+        expr = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
+      }
+      return InitializerClauseSyntax(
         equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-        value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
+        value: expr
       )
     }
     var modifiers: DeclModifierListSyntax = []

@@ -75,7 +75,7 @@ public struct Guard: CodeBlock {
                 pattern: IdentifierPatternSyntax(identifier: .identifier(letCond.name)),
                 initializer: InitializerClauseSyntax(
                   equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-                  value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(letCond.value)))
+                  value: letCond.value.syntax.as(ExprSyntax.self) ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
                 )
               )
             )

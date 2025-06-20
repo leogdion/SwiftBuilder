@@ -36,7 +36,7 @@ internal struct FunctionTests {
     ) {
       Return {
         Init("MyType") {
-          Parameter(name: "value", type: "String")
+          ParameterExp(name: "value", value: "String")
         }
       }
     }.static()

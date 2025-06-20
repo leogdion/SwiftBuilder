@@ -30,22 +30,23 @@
 import SwiftSyntax
 
 /// An initializer expression.
-public struct Init: CodeBlock {
+public struct Init: CodeBlock, ExprCodeBlock {
   private let type: String
-  private let parameters: [Parameter]
+  private let parameters: [ParameterExp]
 
   /// Creates an initializer expression.
   /// - Parameters:
   ///   - type: The type to initialize.
-  ///   - params: A ``ParameterBuilder`` that provides the parameters for the initializer.
-  public init(_ type: String, @ParameterBuilderResult _ params: () -> [Parameter]) {
+  ///   - params: A ``ParameterExpBuilder`` that provides the parameters for the initializer.
+  public init(_ type: String, @ParameterExpBuilderResult _ params: () -> [ParameterExp]) {
     self.type = type
     self.parameters = params()
   }
-  public var syntax: SyntaxProtocol {
-    let args = TupleExprElementListSyntax(
+  
+  public var exprSyntax: ExprSyntax {
+    let args = LabeledExprListSyntax(
       parameters.enumerated().compactMap { index, param in
-        guard let element = param.syntax as? TupleExprElementSyntax else {
+        guard let element = param.syntax as? LabeledExprSyntax else {
           return nil
         }
         if index < parameters.count - 1 {
@@ -57,8 +58,12 @@ public struct Init: CodeBlock {
       FunctionCallExprSyntax(
         calledExpression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(type))),
         leftParen: .leftParenToken(),
-        argumentList: args,
+        arguments: args,
         rightParen: .rightParenToken()
       ))
+  }
+  
+  public var syntax: SyntaxProtocol {
+    exprSyntax
   }
 }

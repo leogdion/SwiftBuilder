@@ -1,5 +1,5 @@
 Group {
-    Variable(.let, "temperature", equals: 25)
+    Variable(.let, name: "temperature", equals: Literal.integer(25))
       .comment {
         Line("Simple if statement")
       }
@@ -8,7 +8,7 @@ Group {
     } then: {
         Call("print", "It's hot outside!")
     }
-    Variable(.let, "score", equals: 85)
+    Variable(.let, name: "score", equals: Literal.integer(85))
       .comment {
         Line("If-else statement")
       }
@@ -32,24 +32,24 @@ Group {
         }
     }
 
-    Variable(.let, "possibleNumber", equals: "123")
+    Variable(.let, name: "possibleNumber", equals: Literal.string("123"))
       .comment {
         Line("MARK: - Optional Binding with If")
         Line("Using if let for optional binding")
       }
     If(Let("actualNumber", Init("Int") {
-        Parameter(unlabeled: "possibleNumber")
+        ParameterExp(name: "", value: "possibleNumber")
     }), then: {
         Call("print", "The string \"\\(possibleNumber)\" has an integer value of \\(actualNumber)")
     }, else: {
         Call("print", "The string \"\\(possibleNumber)\" could not be converted to an integer")
     })
 
-    Variable(.let, "possibleName", type: "String?", equals: "John").withExplicitType()
+    Variable(.let, name: "possibleName", type: "String?", equals: Literal.string("John")).withExplicitType()
       .comment {
         Line("Multiple optional bindings")
       }
-    Variable(.let, "possibleAge", type: "Int?", equals: 30).withExplicitType()
+    Variable(.let, name: "possibleAge", type: "Int?", equals: Literal.integer(30)).withExplicitType()
     If {
         Let("name", "possibleName")
         Let("age", "possibleAge")
@@ -66,7 +66,7 @@ Group {
         Guard {
             Let("age", "person[\"age\"]")
             Let("ageInt", Init("Int") {
-                Parameter(unlabeled: "age")
+                ParameterExp(name: "", value: "age")
             })
         } else: {
             Call("print", "Invalid age provided")
@@ -77,13 +77,13 @@ Group {
     Line("MARK: - Guard Statements")
 }
 
-Variable(.let, "approximateCount", equals: 62)
+Variable(.let, name: "approximateCount", equals: Literal.integer(62))
   .comment {
     Line("MARK: - Switch Statements")
     Line("Switch with range matching")
   }
-Variable(.let, "countedThings", equals: "moons orbiting Saturn")
-Variable(.let, "naturalCount", type: "String").withExplicitType()
+Variable(.let, name: "countedThings", equals: Literal.string("moons orbiting Saturn"))
+Variable(.let, name: "naturalCount", type: "String").withExplicitType()
 Switch("approximateCount") {
     SwitchCase(0) {
         Assignment("naturalCount", Literal.string("no"))
@@ -105,7 +105,7 @@ Switch("approximateCount") {
     }
 }
 Call("print", "There are \\(naturalCount) \\(countedThings).")
-Variable(.let, "somePoint", equals: TupleLiteral([.int(1), .int(1)])).withExplicitType()
+Variable(.let, name: "somePoint", type: "(Int, Int)", equals: VariableExp("(1, 1)"), explicitType: true)
 .comment {
     Line("Switch with tuple matching")
 }
@@ -114,38 +114,38 @@ Switch("somePoint") {
         Call("print", "(0, 0) is at the origin")
     }
     SwitchCase(Tuple.pattern([nil, 0])) {
-        Call("print", "(\\(somePoint.0), 0) is on the x-axis")
+        Call("print", "(\(somePoint.0), 0) is on the x-axis")
     }
     SwitchCase(Tuple.pattern([0, nil])) {
-        Call("print", "(0, \\(somePoint.1)) is on the y-axis")
+        Call("print", "(0, \(somePoint.1)) is on the y-axis")
     }
     SwitchCase(Tuple.pattern([(-2...2), (-2...2)])) {
-        Call("print", "(\\(somePoint.0), \\(somePoint.1)) is inside the box")
+        Call("print", "(\(somePoint.0), \(somePoint.1)) is inside the box")
     }
     Default {
-        Call("print", "(\\(somePoint.0), \\(somePoint.1)) is outside of the box")
+        Call("print", "(\(somePoint.0), \(somePoint.1)) is outside of the box")
     }
 }
-Variable(.let, "anotherPoint", equals: TupleLiteral([.int(2), .int(0)])).withExplicitType()
+Variable(.let, name: "anotherPoint", type: "(Int, Int)", equals: VariableExp("(2, 0)"), explicitType: true)
 .comment {
     Line("Switch with value binding")
 }
 Switch("anotherPoint") {
     SwitchCase(Tuple.pattern([.let("x"), 0])) {
-        Call("print", "on the x-axis with an x value of \\(x)")
+        Call("print", "on the x-axis with an x value of \(x)")
         
     }
     SwitchCase(Tuple.pattern([0, .let("y")])) {
-        Call("print", "on the y-axis with a y value of \\(y)")
+        Call("print", "on the y-axis with a y value of \(y)")
      
     }
     SwitchCase(Tuple.pattern([.let("x"), .let("y")])) {
-        Call("print", "somewhere else at (\\(x), \\(y))")
+        Call("print", "somewhere else at (\(x), \(y))")
         
     }
 }
-Variable(.let, "integerToDescribe", equals: 5)
-Variable(.var, "description", equals: "The number \\(integerToDescribe) is")
+Variable(.let, name: "integerToDescribe", equals: 5)
+Variable(.var, name: "description", equals: "The number \(integerToDescribe) is")
 Switch("integerToDescribe") {
     SwitchCase(2, 3, 5, 7, 11, 13, 17, 19) {
         PlusAssign("description", "a prime number, and also")
@@ -157,10 +157,10 @@ Switch("integerToDescribe") {
 }
 Call("print", "description")
 
-Variable(.let, "finalSquare", equals: 25)
-Variable(.var, "board", equals: Init("[Int]") {
-    Parameter("repeating", 0)
-    Parameter("count", "finalSquare + 1")
+Variable(.let, name: "finalSquare", equals: 25)
+Variable(.var, name: "board", equals: Init("[Int]") {
+    ParameterExp(name: "repeating", value: Literal.integer(0))
+    ParameterExp(name: "count", value: Infix("finalSquare", "+", 1))
 })
 
 Infix("board[03]", "+=", 8)
@@ -172,8 +172,8 @@ Infix("board[19]", "-=", 11)
 Infix("board[22]", "-=", 2)
 Infix("board[24]", "-=", 8)
 
-Variable(.var, "square", equals: 0)
-Variable(.var, "diceRoll", equals: 0)
+Variable(.var, name: "square", equals: 0)
+Variable(.var, name: "diceRoll", equals: 0)
 While {
     Infix("square", "!=", "finalSquare")
 } then: {

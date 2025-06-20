@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -29,6 +29,30 @@
 
 import SwiftSyntax
 
+/// A value binding pattern for use in switch cases.
+public struct SwitchLet: PatternConvertible, CodeBlock {
+  internal let name: String
+
+  /// Creates a value binding pattern for a switch case.
+  /// - Parameter name: The name of the variable to bind.
+  public init(_ name: String) {
+    self.name = name
+  }
+
+  public var patternSyntax: PatternSyntax {
+    let identifier = IdentifierPatternSyntax(identifier: .identifier(name))
+    return PatternSyntax(ValueBindingPatternSyntax(
+      bindingSpecifier: .keyword(.let, trailingTrivia: .space),
+      pattern: identifier
+    ))
+  }
+
+  public var syntax: SyntaxProtocol {
+    // For CodeBlock conformance, return the pattern syntax
+    patternSyntax
+  }
+}
+
 /// A `case` in a `switch` statement.
 public struct SwitchCase: CodeBlock {
   private let patterns: [Any]
@@ -36,11 +60,21 @@ public struct SwitchCase: CodeBlock {
 
   /// Creates a `case` for a `switch` statement.
   /// - Parameters:
-  ///   - patterns: The patterns to match for the case. Can be `PatternConvertible` or `CodeBlock`.
+  ///   - patterns: The patterns to match for the case. Can be `PatternConvertible`, `CodeBlock`, or `SwitchLet` for value binding.
   ///   - content: A ``CodeBlockBuilder`` that provides the body of the case.
   public init(_ patterns: Any..., @CodeBlockBuilderResult content: () -> [CodeBlock])
   {
     self.patterns = patterns
+    self.body = content()
+  }
+
+  /// Creates a `case` for a `switch` statement with a builder closure for the conditional.
+  /// - Parameters:
+  ///   - conditional: A ``CodeBlockBuilder`` that provides the conditional patterns for the case.
+  ///   - content: A ``CodeBlockBuilder`` that provides the body of the case.
+  public init(@CodeBlockBuilderResult conditional: () -> [Any], @CodeBlockBuilderResult content: () -> [CodeBlock])
+  {
+    self.patterns = conditional()
     self.body = content()
   }
 
@@ -51,6 +85,9 @@ public struct SwitchCase: CodeBlock {
         
         if let patternConvertible = pattern as? PatternConvertible {
           patternSyntax = patternConvertible.patternSyntax
+        } else if let variableExp = pattern as? VariableExp {
+          // Handle VariableExp specially - convert to identifier pattern
+          patternSyntax = PatternSyntax(IdentifierPatternSyntax(identifier: .identifier(variableExp.name)))
         } else if let codeBlock = pattern as? CodeBlock {
           // Convert CodeBlock to expression pattern
           let expr = ExprSyntax(
@@ -68,6 +105,38 @@ public struct SwitchCase: CodeBlock {
         }
         return item
       })
+    
+    // Handle special case for multiple conditionals with let binding and where clause
+    var finalCaseItems = caseItems
+    if patterns.count >= 2 {
+      // Check if we have a let binding followed by an expression (where clause)
+      if let firstPattern = patterns.first as? SwitchLet,
+         let secondPattern = patterns[1] as? CodeBlock {
+        let letIdentifier = IdentifierPatternSyntax(identifier: .identifier(firstPattern.name))
+        let whereExpr = ExprSyntax(
+          fromProtocol: secondPattern.syntax.as(ExprSyntax.self)
+            ?? DeclReferenceExprSyntax(baseName: .identifier(""))
+        )
+        
+        let valueBindingPattern = ValueBindingPatternSyntax(
+          bindingSpecifier: .keyword(.let, trailingTrivia: .space),
+          pattern: letIdentifier
+        )
+        
+        let whereClause = WhereClauseSyntax(
+          whereKeyword: .keyword(.where, leadingTrivia: .space, trailingTrivia: .space),
+          condition: whereExpr
+        )
+        
+        // Create a case item with the value binding pattern and where clause
+        let caseItem = SwitchCaseItemSyntax(
+          pattern: PatternSyntax(valueBindingPattern),
+          whereClause: whereClause
+        )
+        finalCaseItems = SwitchCaseItemListSyntax([caseItem])
+      }
+    }
+    
     var statementItems = body.compactMap { block -> CodeBlockItemSyntax? in
       if let decl = block.syntax.as(DeclSyntax.self) {
         return CodeBlockItemSyntax(item: .decl(decl)).with(\.trailingTrivia, .newline)
@@ -86,7 +155,7 @@ public struct SwitchCase: CodeBlock {
     let statements = CodeBlockItemListSyntax(statementItems)
     let label = SwitchCaseLabelSyntax(
       caseKeyword: .keyword(.case, trailingTrivia: .space),
-      caseItems: caseItems,
+      caseItems: finalCaseItems,
       colon: .colonToken(trailingTrivia: .newline)
     )
     return SwitchCaseSyntax(

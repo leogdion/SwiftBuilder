@@ -10,7 +10,7 @@ import Testing
 
     let program = Group {
       // MARK: Basic If Statements
-      Variable(.let, name: "temperature", type: "Int", equals: "25")
+      Variable(.let, name: "temperature", equals: 25)
         .comment {
           Line("Simple if statement")
         }
@@ -27,7 +27,7 @@ import Testing
       }
 
       // If-else chain with else-if
-      Variable(.let, name: "score", type: "Int", equals: "85")
+      Variable(.let, name: "score", equals: 85)
         .comment {
           Line("If-else statement")
         }
@@ -72,7 +72,7 @@ import Testing
       }
 
       // MARK: Optional Binding with If
-      Variable(.let, name: "possibleNumber", type: "String", equals: "\"123\"")
+      Variable(.let, name: "possibleNumber", equals: Literal.string("123"))
         .comment {
           Line("MARK: - Optional Binding with If")
           Line("Using if let for optional binding")
@@ -100,11 +100,11 @@ import Testing
         })
 
       // Multiple optional bindings
-      Variable(.let, name: "possibleName", type: "String?", equals: "\"John\"").withExplicitType()
+      Variable(.let, name: "possibleName", type: "String?", equals: Literal.string("John")).withExplicitType()
         .comment {
           Line("Multiple optional bindings")
         }
-      Variable(.let, name: "possibleAge", type: "Int?", equals: "30").withExplicitType()
+      Variable(.let, name: "possibleAge", type: "Int?", equals: Literal.integer(30)).withExplicitType()
 
       If {
         Let("name", "possibleName")
@@ -116,12 +116,7 @@ import Testing
       }
 
       // MARK: - Guard Statements
-      Function(
-        "greet",
-        {
-          Parameter(name: "person", type: "[String: String]")
-        }
-      ) {
+      Function("greet", { Parameter(name: "person", type: "[String: String]") }) {
         Guard {
           Let("name", "person[\"name\"]")
         } else: {
@@ -148,17 +143,12 @@ import Testing
       }
 
       // MARK: - Switch Statements
-      Variable(.let, name: "approximateCount", type: "Int", equals: "62")
+      Variable(.let, name: "approximateCount", equals: Literal.integer(62))
         .comment {
           Line("MARK: - Switch Statements")
           Line("Switch with range matching")
         }
-      Variable(
-        .let,
-        name: "countedThings",
-        type: "String",
-        equals: "\"moons orbiting Saturn\""
-      )
+      Variable(.let, name: "countedThings", equals: Literal.string("moons orbiting Saturn"))
       Variable(.let, name: "naturalCount", type: "String").withExplicitType()
       Switch("approximateCount") {
         SwitchCase(0) {
@@ -173,7 +163,7 @@ import Testing
         SwitchCase(12..<100) {
           Assignment("naturalCount", Literal.string("dozens of"))
         }
-        SwitchCase(100..<1_000) {
+        SwitchCase(100..<1000) {
           Assignment("naturalCount", Literal.string("hundreds of"))
         }
         Default {
@@ -185,7 +175,7 @@ import Testing
       }
 
       // MARK: - Tuple literal and tuple pattern switch
-      Variable(.let, name: "somePoint", equals: TupleLiteral([.int(1), .int(1)]))
+      Variable(.let, name: "somePoint", equals: Literal.tuple([.integer(1), .integer(1)]))
         .comment {
           Line("Switch with tuple matching")
         }
@@ -220,7 +210,7 @@ import Testing
       }
 
       // MARK: - Switch with value binding
-      Variable(.let, name: "anotherPoint", equals: TupleLiteral([.int(2), .int(0)]))
+      Variable(.let, name: "anotherPoint", equals: Literal.tuple([.integer(2), .integer(0)]))
         .withExplicitType()
         .comment {
           Line("Switch with value binding")
@@ -244,7 +234,7 @@ import Testing
       }
 
       // MARK: - Fallthrough
-      Variable(.let, name: "integerToDescribe", type: "Int", equals: "5")
+      Variable(.let, name: "integerToDescribe", equals: Literal.integer(5))
         .comment {
           Line("MARK: - Fallthrough")
           Line("Using fallthrough in switch")
@@ -264,32 +254,64 @@ import Testing
       }
 
       // MARK: - Labeled Statements
-      Variable(.let, name: "finalSquare", type: "Int", equals: "25")
+      Variable(.let, name: "finalSquare", equals: Literal.integer(25))
         .comment {
           Line("MARK: - Labeled Statements")
           Line("Using labeled statements with break")
         }
-      Variable(.var, name: "board", type: "[Int]", equals: "[Int](repeating: 0, count: finalSquare + 1)")
+      Variable(.var, name: "board") {
+        Init("[Int]") {
+          ParameterExp(name: "repeating", value: Literal.integer(0))
+          ParameterExp(name: "count", value: Infix("+") {
+            VariableExp("finalSquare")
+            Literal.integer(1)
+          })
+        }
+      }
       
       // Board setup
-      Infix("board[03]", "+=", 8)
-      Infix("board[06]", "+=", 11)
-      Infix("board[09]", "+=", 9)
-      Infix("board[10]", "+=", 2)
-      Infix("board[14]", "-=", 10)
-      Infix("board[19]", "-=", 11)
-      Infix("board[22]", "-=", 2)
-      Infix("board[24]", "-=", 8)
+      Infix("+=") {
+        VariableExp("board[03]")
+        Literal.integer(8)
+      }
+      Infix("+=") {
+        VariableExp("board[06]")
+        Literal.integer(11)
+      }
+      Infix("+=") {
+        VariableExp("board[09]")
+        Literal.integer(9)
+      }
+      Infix("+=") {
+        VariableExp("board[10]")
+        Literal.integer(2)
+      }
+      Infix("-=") {
+        VariableExp("board[14]")
+        Literal.integer(10)
+      }
+      Infix("-=") {
+        VariableExp("board[19]")
+        Literal.integer(11)
+      }
+      Infix("-=") {
+        VariableExp("board[22]")
+        Literal.integer(2)
+      }
+      Infix("-=") {
+        VariableExp("board[24]")
+        Literal.integer(8)
+      }
 
-      Variable(.var, name: "square", type: "Int", equals: "0")
-      Variable(.var, name: "diceRoll", type: "Int", equals: "0")
+      Variable(.var, name: "square", equals: Literal.integer(0))
+      Variable(.var, name: "diceRoll", equals: Literal.integer(0))
       While {
         Infix("!=") {
           VariableExp("square")
           VariableExp("finalSquare")
         }
       } then: {
-        Assignment("diceRoll", "+", 1)
+        Assignment("diceRoll", 1)
         If {
           Infix("==") {
             VariableExp("diceRoll")
@@ -305,15 +327,24 @@ import Testing
           SwitchCase(VariableExp("finalSquare")) {
             Break()
           }
-          SwitchCase(Infix(">") {
-            VariableExp("newSquare")
-            VariableExp("finalSquare")
-          }) {
+          SwitchCase {
+            SwitchLet("newSquare")
+            Infix(">") {
+              VariableExp("newSquare")
+              VariableExp("finalSquare")
+            }
+          } content: {
             Continue()
           }
           Default {
-            Infix("square", "+=", "diceRoll")
-            Infix("square", "+=", "board[square]")
+            Infix("+=") {
+              VariableExp("square")
+              VariableExp("diceRoll")
+            }
+            Infix("+=") {
+              VariableExp("square")
+              VariableExp("board[square]")
+            }
           }
         }
       }

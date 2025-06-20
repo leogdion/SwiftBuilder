@@ -38,6 +38,12 @@ public protocol LiteralValue {
   var literalString: String { get }
 }
 
+/// A protocol for types that can be represented as an ExprSyntax node.
+public protocol ExprCodeBlock {
+  /// The SwiftSyntax expression representation of the code block.
+  var exprSyntax: ExprSyntax { get }
+}
+
 /// A literal value.
 public enum Literal: CodeBlock {
   /// A string literal.
@@ -54,6 +60,35 @@ public enum Literal: CodeBlock {
   case ref(String)
   /// A tuple literal.
   case tuple([Literal?])
+
+  /// The Swift type name for this literal.
+  public var typeName: String {
+    switch self {
+    case .string: return "String"
+    case .float: return "Double"
+    case .integer: return "Int"
+    case .nil: return "Any?"
+    case .boolean: return "Bool"
+    case .ref: return "Any"
+    case .tuple(let elements):
+      let elementTypes = elements.map { element in
+        if let element = element {
+          switch element {
+          case .integer: return "Int"
+          case .float: return "Double"
+          case .string: return "String"
+          case .boolean: return "Bool"
+          case .nil: return "Any?"
+          case .ref: return "Any"
+          case .tuple: return "Any"
+          }
+        } else {
+          return "Any"
+        }
+      }
+      return "(\(elementTypes.joined(separator: ", ")))"
+    }
+  }
 
   /// The SwiftSyntax representation of this literal.
   public var syntax: SyntaxProtocol {
@@ -102,6 +137,56 @@ public enum Literal: CodeBlock {
         elements: tupleElements,
         rightParen: .rightParenToken()
       )
+    }
+  }
+}
+
+// MARK: - ExprCodeBlock conformance
+
+extension Literal: ExprCodeBlock {
+  public var exprSyntax: ExprSyntax {
+    switch self {
+    case .string(let value):
+      return ExprSyntax(StringLiteralExprSyntax(
+        openingQuote: .stringQuoteToken(),
+        segments: .init([
+          .stringSegment(.init(content: .stringSegment(value)))
+        ]),
+        closingQuote: .stringQuoteToken()
+      ))
+    case .float(let value):
+      return ExprSyntax(FloatLiteralExprSyntax(literal: .floatLiteral(String(value))))
+    case .integer(let value):
+      return ExprSyntax(IntegerLiteralExprSyntax(digits: .integerLiteral(String(value))))
+    case .nil:
+      return ExprSyntax(NilLiteralExprSyntax(nilKeyword: .keyword(.nil)))
+    case .boolean(let value):
+      return ExprSyntax(BooleanLiteralExprSyntax(literal: value ? .keyword(.true) : .keyword(.false)))
+    case .ref(let value):
+      return ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
+    case .tuple(let elements):
+      let tupleElements = TupleExprElementListSyntax(
+        elements.enumerated().map { index, element in
+          let elementExpr: ExprSyntax
+          if let element = element {
+            elementExpr = element.exprSyntax
+          } else {
+            // Wildcard pattern - use underscore
+            elementExpr = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("_")))
+          }
+          return TupleExprElementSyntax(
+            label: nil,
+            colon: nil,
+            expression: elementExpr,
+            trailingComma: index < elements.count - 1 ? .commaToken(trailingTrivia: .space) : nil
+          )
+        }
+      )
+      return ExprSyntax(TupleExprSyntax(
+        leftParen: .leftParenToken(),
+        elements: tupleElements,
+        rightParen: .rightParenToken()
+      ))
     }
   }
 }
