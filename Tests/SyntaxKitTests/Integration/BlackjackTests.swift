@@ -70,9 +70,7 @@ internal struct BlackjackTests {
     #expect(normalizedGenerated == normalizedExpected)
   }
 
-  // swiftlint:disable:next function_body_length
   @Test internal func testFullBlackjackCardExample() throws {
-    // swiftlint:disable:next closure_body_length
     let syntax = Struct("BlackjackCard") {
       Enum("Suit") {
         EnumCase("spades").equals("♠")

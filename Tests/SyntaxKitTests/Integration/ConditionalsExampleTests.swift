@@ -4,11 +4,10 @@ import Testing
 @testable import SyntaxKit
 
 @Suite internal struct ConditionalsExampleTests {
-  // swiftlint:disable function_body_length
   @Test("Completed conditionals DSL generates expected Swift code")
   internal func testCompletedConditionalsExample() throws {
     // Build DSL equivalent of Examples/Completed/conditionals/dsl.swift
-    // swiftlint:disable:next closure_body_length
+
     let program = Group {
       // MARK: Basic If Statements
       Variable(.let, name: "temperature", type: "Int", equals: "25")
@@ -354,5 +353,4 @@ import Testing
 
     #expect(generated == expected)
   }
-  // swiftlint:enable function_body_length
 }

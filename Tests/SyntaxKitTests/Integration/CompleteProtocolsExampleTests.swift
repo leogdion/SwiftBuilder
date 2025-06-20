@@ -31,12 +31,10 @@ import Foundation
 import SyntaxKit
 import Testing
 
-// swiftlint:disable function_body_length
 @Suite internal struct CompleteProtocolsExampleTests {
   // MARK: - Helper Functions
 
   private func createProtocolsDSL() -> Group {
-    // swiftlint:disable:next closure_body_length
     Group {
       // MARK: - Protocol Definition
       Protocol("Vehicle") {
@@ -297,4 +295,3 @@ import Testing
     #expect(normalizedCode == normalizedGenerated)
   }
 }
-// swiftlint:enable function_body_length

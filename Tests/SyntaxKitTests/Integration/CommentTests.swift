@@ -3,9 +3,7 @@ import Testing
 @testable import SyntaxKit
 
 internal struct CommentTests {
-  // swiftlint:disable:next function_body_length
   @Test internal func testCommentInjection() {
-    // swiftlint:disable:next closure_body_length
     let syntax = Group {
       Struct("Card") {
         Variable(.let, name: "rank", type: "Rank")
