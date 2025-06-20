@@ -1,5 +1,5 @@
 //
-//  Continue.swift
+//  Literal+Convenience.swift
 //  SyntaxKit
 //
 //  Created by Leo Dion.
@@ -27,32 +27,28 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftSyntax
+import Foundation
 
-/// A `continue` statement.
-public struct Continue: CodeBlock {
-  private let label: String?
+// MARK: - Convenience Methods
 
-  /// Creates a `continue` statement.
-  /// - Parameter label: An optional label to continue to a specific loop.
-  public init(_ label: String? = nil) {
-    self.label = label
+extension Literal {
+  /// Creates a tuple literal from an array of optional literals (for patterns with wildcards).
+  public static func tuplePattern(_ elements: [Literal?]) -> Literal {
+    .tuple(elements)
   }
 
-  public var syntax: SyntaxProtocol {
-    let continueStmt = ContinueStmtSyntax(
-      continueKeyword: .keyword(.continue, trailingTrivia: .newline)
-    )
+  /// Creates an integer literal.
+  public static func int(_ value: Int) -> Literal {
+    .integer(value)
+  }
 
-    if let label = label {
-      return StmtSyntax(
-        continueStmt.with(
-          \.label,
-          .identifier(label)
-        )
-      )
-    } else {
-      return StmtSyntax(continueStmt)
+  /// Converts a Literal.tuple to a TupleLiteral for use in Variable declarations.
+  public var asTupleLiteral: TupleLiteral? {
+    switch self {
+    case .tuple(let elements):
+      return TupleLiteral(elements)
+    default:
+      return nil
     }
   }
 }
