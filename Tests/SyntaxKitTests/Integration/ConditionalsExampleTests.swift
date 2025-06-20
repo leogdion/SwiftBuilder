@@ -239,14 +239,14 @@ import Testing
           Line("MARK: - Fallthrough")
           Line("Using fallthrough in switch")
         }
-      Variable(.var, name: "description", type: "String", equals: "\"The number \\(integerToDescribe) is\"")
+      Variable(.var, name: "description", equals: "The number \\(integerToDescribe) is")
       Switch("integerToDescribe") {
         SwitchCase(2, 3, 5, 7, 11, 13, 17, 19) {
-          PlusAssign("description", "\" a prime number, and also\"")
+          PlusAssign("description", " a prime number, and also")
           Fallthrough()
         }
         Default {
-          PlusAssign("description", "\" an integer.\"")
+          PlusAssign("description", " an integer.")
         }
       }
       Call("print") {
@@ -270,38 +270,14 @@ import Testing
       }
       
       // Board setup
-      Infix("+=") {
-        VariableExp("board[03]")
-        Literal.integer(8)
-      }
-      Infix("+=") {
-        VariableExp("board[06]")
-        Literal.integer(11)
-      }
-      Infix("+=") {
-        VariableExp("board[09]")
-        Literal.integer(9)
-      }
-      Infix("+=") {
-        VariableExp("board[10]")
-        Literal.integer(2)
-      }
-      Infix("-=") {
-        VariableExp("board[14]")
-        Literal.integer(10)
-      }
-      Infix("-=") {
-        VariableExp("board[19]")
-        Literal.integer(11)
-      }
-      Infix("-=") {
-        VariableExp("board[22]")
-        Literal.integer(2)
-      }
-      Infix("-=") {
-        VariableExp("board[24]")
-        Literal.integer(8)
-      }
+      Assignment("board[3]", 8)
+      Assignment("board[6]", 11)
+      Assignment("board[9]", 9)
+      Assignment("board[10]", 2)
+      Assignment("board[14]", -10)
+      Assignment("board[19]", -11)
+      Assignment("board[22]", -2)
+      Assignment("board[24]", -8)
 
       Variable(.var, name: "square", equals: Literal.integer(0))
       Variable(.var, name: "diceRoll", equals: Literal.integer(0))
@@ -311,7 +287,7 @@ import Testing
           VariableExp("finalSquare")
         }
       } then: {
-        Assignment("diceRoll", 1)
+        PlusAssign("diceRoll", 1)
         If {
           Infix("==") {
             VariableExp("diceRoll")
@@ -472,8 +448,14 @@ import Testing
       // Using labeled statements with break
       let finalSquare = 25
       var board = [Int](repeating: 0, count: finalSquare + 1)
-      board[03] = +08; board[06] = +11; board[09] = +09; board[10] = +02
-      board[14] = -10; board[19] = -11; board[22] = -02; board[24] = -08
+      board[3] = 8
+      board[6] = 11
+      board[9] = 9
+      board[10] = 2
+      board[14] = -10
+      board[19] = -11
+      board[22] = -2
+      board[24] = -8
 
       var square = 0
       var diceRoll = 0

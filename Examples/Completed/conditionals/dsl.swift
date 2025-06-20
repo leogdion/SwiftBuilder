@@ -158,10 +158,7 @@ Switch("integerToDescribe") {
 Call("print", "description")
 
 Variable(.let, name: "finalSquare", equals: 25)
-Variable(.var, name: "board", equals: Init("[Int]") {
-    ParameterExp(name: "repeating", value: Literal.integer(0))
-    ParameterExp(name: "count", value: Infix("finalSquare", "+", 1))
-})
+Variable(.var, name: "board", equals: Literal.array(Array(repeating: Literal.integer(0), count: 26)))
 
 Infix("board[03]", "+=", 8)
 Infix("board[06]", "+=", 11)

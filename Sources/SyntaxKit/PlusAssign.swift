@@ -32,33 +32,39 @@ import SwiftSyntax
 /// A `+=` expression.
 public struct PlusAssign: CodeBlock {
   private let target: String
-  private let value: String
+  private let valueExpr: ExprSyntax
 
-  /// Creates a `+=` expression.
-  /// - Parameters:
-  ///   - target: The variable to assign to.
-  ///   - value: The value to add and assign.
-  public init(_ target: String, _ value: String) {
+  /// Creates a `+=` expression with a literal value.
+  public init(_ target: String, _ literal: Literal) {
     self.target = target
-    self.value = value
+    guard let expr = literal.syntax.as(ExprSyntax.self) else {
+      fatalError("Literal.syntax did not produce ExprSyntax")
+    }
+    self.valueExpr = expr
+  }
+
+  /// Creates a `+=` expression with an integer literal value.
+  public init(_ target: String, _ value: Int) {
+    self.init(target, .integer(value))
+  }
+
+  /// Creates a `+=` expression with a string literal value.
+  public init(_ target: String, _ value: String) {
+    self.init(target, .string(value))
+  }
+
+  /// Creates a `+=` expression with a boolean literal value.
+  public init(_ target: String, _ value: Bool) {
+    self.init(target, .boolean(value))
+  }
+
+  /// Creates a `+=` expression with a double literal value.
+  public init(_ target: String, _ value: Double) {
+    self.init(target, .float(value))
   }
 
   public var syntax: SyntaxProtocol {
     let left = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(target)))
-    let right: ExprSyntax
-    if value.hasPrefix("\"") && value.hasSuffix("\"") || value.contains("\\(") {
-      right = ExprSyntax(
-        StringLiteralExprSyntax(
-          openingQuote: .stringQuoteToken(),
-          segments: StringLiteralSegmentListSyntax([
-            .stringSegment(
-              StringSegmentSyntax(content: .stringSegment(String(value.dropFirst().dropLast()))))
-          ]),
-          closingQuote: .stringQuoteToken()
-        ))
-    } else {
-      right = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
-    }
     let assign = ExprSyntax(
       BinaryOperatorExprSyntax(
         operator: .binaryOperator("+=", leadingTrivia: .space, trailingTrivia: .space)))
@@ -66,7 +72,7 @@ public struct PlusAssign: CodeBlock {
       elements: ExprListSyntax([
         left,
         assign,
-        right,
+        valueExpr,
       ])
     )
   }
