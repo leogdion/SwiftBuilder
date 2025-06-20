@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -39,6 +39,27 @@ public struct Variable: CodeBlock {
   var isStatic: Bool = false
   var attributes: [AttributeInfo] = []
   var explicitType: Bool = false
+
+  /// Internal initializer used by extension initializers to reduce code duplication.
+  /// - Parameters:
+  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
+  ///   - name: The name of the variable.
+  ///   - type: The type of the variable.
+  ///   - defaultValue: The initial value expression of the variable, if any.
+  ///   - explicitType: Whether the variable has an explicit type.
+  internal init(
+    kind: VariableKind,
+    name: String,
+    type: String,
+    defaultValue: CodeBlock? = nil,
+    explicitType: Bool = false
+  ) {
+    self.kind = kind
+    self.name = name
+    self.type = type
+    self.defaultValue = defaultValue
+    self.explicitType = explicitType
+  }
 
   /// Marks the variable as `static`.
   /// - Returns: A copy of the variable marked as `static`.
