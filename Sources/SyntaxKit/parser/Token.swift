@@ -1,5 +1,5 @@
 //
-//  LiteralValue.swift
+//  Token.swift
 //  SyntaxKit
 //
 //  Created by Leo Dion.
@@ -29,11 +29,26 @@
 
 import Foundation
 
-/// A protocol for types that can be represented as literal values in Swift code.
-public protocol LiteralValue {
-  /// The Swift type name for this literal value.
-  var typeName: String { get }
+internal struct Token: Codable, Equatable {
+  internal let kind: String
+  internal var leadingTrivia: String
+  internal var trailingTrivia: String
 
-  /// Renders this value as a Swift literal string.
-  var literalString: String { get }
+  init(kind: String, leadingTrivia: String, trailingTrivia: String) {
+    self.kind = kind.escapeHTML()
+    self.leadingTrivia = leadingTrivia
+    self.trailingTrivia = trailingTrivia
+  }
 }
+
+extension Token: CustomStringConvertible {
+  var description: String {
+    """
+    {
+      kind: \(kind)
+      leadingTrivia: \(leadingTrivia)
+      trailingTrivia: \(trailingTrivia)
+    }
+    """
+  }
+} 

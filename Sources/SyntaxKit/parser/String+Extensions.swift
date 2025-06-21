@@ -1,5 +1,5 @@
 //
-//  LiteralValue.swift
+//  String+Extensions.swift
 //  SyntaxKit
 //
 //  Created by Leo Dion.
@@ -29,11 +29,10 @@
 
 import Foundation
 
-/// A protocol for types that can be represented as literal values in Swift code.
-public protocol LiteralValue {
-  /// The Swift type name for this literal value.
-  var typeName: String { get }
-
-  /// Renders this value as a Swift literal string.
-  var literalString: String { get }
-}
+extension String {
+  internal func replaceHTMLWhitespacesToSymbols() -> String {
+    self
+      .replacingOccurrences(of: "&nbsp;", with: "<span class='whitespace'>␣</span>")
+      .replacingOccurrences(of: "<br>", with: "<span class='newline'>↲</span>")
+  }
+} 

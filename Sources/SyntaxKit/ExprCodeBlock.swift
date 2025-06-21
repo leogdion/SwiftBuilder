@@ -1,5 +1,5 @@
 //
-//  LiteralValue.swift
+//  ExprCodeBlock.swift
 //  SyntaxKit
 //
 //  Created by Leo Dion.
@@ -27,13 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+import SwiftSyntax
 
-/// A protocol for types that can be represented as literal values in Swift code.
-public protocol LiteralValue {
-  /// The Swift type name for this literal value.
-  var typeName: String { get }
-
-  /// Renders this value as a Swift literal string.
-  var literalString: String { get }
-}
+/// A protocol for types that can be represented as an ExprSyntax node.
+public protocol ExprCodeBlock {
+  /// The SwiftSyntax expression representation of the code block.
+  var exprSyntax: ExprSyntax { get }
+} 

@@ -1,5 +1,5 @@
 //
-//  LiteralValue.swift
+//  StructureProperty.swift
 //  SyntaxKit
 //
 //  Created by Leo Dion.
@@ -29,11 +29,26 @@
 
 import Foundation
 
-/// A protocol for types that can be represented as literal values in Swift code.
-public protocol LiteralValue {
-  /// The Swift type name for this literal value.
-  var typeName: String { get }
+internal struct StructureProperty: Codable, Equatable {
+  internal let name: String
+  internal let value: StructureValue?
+  internal let ref: String?
 
-  /// Renders this value as a Swift literal string.
-  var literalString: String { get }
+  init(name: String, value: StructureValue? = nil, ref: String? = nil) {
+    self.name = name.escapeHTML()
+    self.value = value
+    self.ref = ref?.escapeHTML()
+  }
 }
+
+extension StructureProperty: CustomStringConvertible {
+  var description: String {
+    """
+    {
+      name: \(name)
+      value: \(String(describing: value))
+      ref: \(String(describing: ref))
+    }
+    """
+  }
+} 

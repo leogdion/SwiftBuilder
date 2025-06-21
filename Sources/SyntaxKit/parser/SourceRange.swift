@@ -1,5 +1,5 @@
 //
-//  LiteralValue.swift
+//  SourceRange.swift
 //  SyntaxKit
 //
 //  Created by Leo Dion.
@@ -29,11 +29,22 @@
 
 import Foundation
 
-/// A protocol for types that can be represented as literal values in Swift code.
-public protocol LiteralValue {
-  /// The Swift type name for this literal value.
-  var typeName: String { get }
-
-  /// Renders this value as a Swift literal string.
-  var literalString: String { get }
+internal struct SourceRange: Codable, Equatable {
+  internal let startRow: Int
+  internal let startColumn: Int
+  internal let endRow: Int
+  internal let endColumn: Int
 }
+
+extension SourceRange: CustomStringConvertible {
+  var description: String {
+    """
+    {
+      startRow: \(startRow)
+      startColumn: \(startColumn)
+      endRow: \(endRow)
+      endColumn: \(endColumn)
+    }
+    """
+  }
+} 
