@@ -64,18 +64,21 @@ import Testing
 
       For(
         VariableExp("number"), in: VariableExp("numbers"),
-        where: Infix("==") {
-          Infix("%") {
-            VariableExp("number")
-            Literal.integer(2)
+        where: {
+          Infix("==") {
+            Infix("%") {
+              VariableExp("number")
+              Literal.integer(2)
+            }
+            Literal.integer(0)
           }
-          Literal.integer(0)
         },
         then: {
           Call("print") {
             ParameterExp(unlabeled: "\"Even number: \\(number)\"")
           }
-        })
+        }
+      )
 
       // MARK: - For-in with Dictionary
       Call("print") {

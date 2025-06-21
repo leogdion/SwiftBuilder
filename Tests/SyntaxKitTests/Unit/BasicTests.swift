@@ -57,9 +57,11 @@ final class ForLoopTests {
     let forLoop = For(
       VariableExp("number"),
       in: VariableExp("numbers"),
-      where: Infix("%") {
-        VariableExp("number")
-        Literal.integer(2)
+      where: {
+        Infix("%") {
+          VariableExp("number")
+          Literal.integer(2)
+        }
       },
       then: {
         Call("print") {

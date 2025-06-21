@@ -40,17 +40,18 @@ public struct For: CodeBlock {
   /// - Parameters:
   ///   - pattern: A `CodeBlock` that also conforms to `PatternConvertible` for the loop variable(s).
   ///   - sequence: A `CodeBlock` that produces the sequence to iterate over.
-  ///   - whereClause: An optional `CodeBlock` that produces the where clause condition.
+  ///   - whereClause: An optional `CodeBlockBuilder` that produces the where clause condition.
   ///   - then: A ``CodeBlockBuilder`` that provides the body of the loop.
   public init(
     _ pattern: any CodeBlock & PatternConvertible,
     in sequence: CodeBlock,
-    where whereClause: CodeBlock? = nil,
+    @CodeBlockBuilderResult where whereClause: () -> [CodeBlock] = { [] },
     @CodeBlockBuilderResult then: () -> [CodeBlock]
   ) {
     self.pattern = pattern
     self.sequence = sequence
-    self.whereClause = whereClause
+    let whereBlocks = whereClause()
+    self.whereClause = whereBlocks.isEmpty ? nil : whereBlocks[0]
     self.body = then()
   }
 
