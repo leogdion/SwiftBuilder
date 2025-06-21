@@ -16,12 +16,12 @@ internal struct BlackjackCardTests {
 
     let expected = """
       struct BlackjackCard {
-          enum Suit: Character {
-              case spades = "♠"
-              case hearts = "♡"
-              case diamonds = "♢"
-              case clubs = "♣"
-          }
+        enum Suit: Character {
+          case spades = "♠"
+          case hearts = "♡"
+          case diamonds = "♢"
+          case clubs = "♣"
+        }
       }
       """
 

@@ -34,27 +34,27 @@ internal struct StructTests {
 
     let expectedCode = """
       struct Stack<Element> {
-          var items: [Element] = []
+        var items: [Element] = []
 
-          mutating func push(_ item: Element) {
-              items.append(item)
-          }
+        mutating func push(_ item: Element) {
+          items.append(item)
+        }
 
-          mutating func pop() -> Element? {
-              return items.popLast()
-          }
+        mutating func pop() -> Element? {
+          return items.popLast()
+        }
 
-          func peek() -> Element? {
-              return items.last
-          }
+        func peek() -> Element? {
+          return items.last
+        }
 
-          var isEmpty: Bool {
-              return items.isEmpty
-          }
+        var isEmpty: Bool {
+          return items.isEmpty
+        }
 
-          var count: Int {
-              return items.count
-          }
+        var count: Int {
+          return items.count
+        }
       }
       """
 
@@ -70,7 +70,7 @@ internal struct StructTests {
 
     let expectedCode = """
       struct Container<T>: Equatable {
-          var value: T
+        var value: T
       }
       """
 
@@ -87,8 +87,8 @@ internal struct StructTests {
 
     let expectedCode = """
       struct Point {
-          var x: Double
-          var y: Double
+        var x: Double
+        var y: Double
       }
       """
 

@@ -52,10 +52,10 @@ internal struct AssertionMigrationTests {
 
     let expected = """
       struct Card {
-          enum Suit: Character {
-              case hearts = "♡"
-              case spades = "♠"
-          }
+        enum Suit: Character {
+          case hearts = "♡"
+          case spades = "♠"
+        }
       }
       """
 

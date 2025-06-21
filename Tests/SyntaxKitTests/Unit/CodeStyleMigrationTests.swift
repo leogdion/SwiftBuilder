@@ -50,8 +50,8 @@ internal struct CodeStyleMigrationTests {
   @Test func testMultilineStringFormatting() {
     let expected = """
       struct TestStruct {
-          let value: String
-          var count: Int
+        let value: String
+        var count: Int
       }
       """
 

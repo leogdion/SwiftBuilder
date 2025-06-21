@@ -14,11 +14,11 @@ internal struct ProtocolTests {
 
     let expected = """
       protocol Vehicle {
-          var numberOfWheels: Int { get }
-          var brand: String { get set }
-          func start()
-          func stop()
-          func speed() -> Int
+        var numberOfWheels: Int { get }
+        var brand: String { get set }
+        func start()
+        func stop()
+        func speed() -> Int
       }
       """
 
@@ -47,7 +47,7 @@ internal struct ProtocolTests {
 
     let expected = """
       protocol MyProtocol: Equatable, Hashable {
-          var value: String { get set }
+        var value: String { get set }
       }
       """
 
@@ -66,7 +66,7 @@ internal struct ProtocolTests {
 
     let expected = """
       protocol Calculator {
-          func add(a: Int, b: Int) -> Int
+        func add(a: Int, b: Int) -> Int
       }
       """
 
@@ -82,7 +82,7 @@ internal struct ProtocolTests {
 
     let expected = """
       protocol Factory {
-          static func create() -> Self
+        static func create() -> Self
       }
       """
 
@@ -98,7 +98,7 @@ internal struct ProtocolTests {
 
     let expected = """
       protocol Resettable {
-          mutating func reset()
+        mutating func reset()
       }
       """
 
@@ -115,7 +115,7 @@ internal struct ProtocolTests {
 
     let expected = """
       protocol TestProtocol {
-          var readOnlyProperty: String { get }
+        var readOnlyProperty: String { get }
       }
       """
 
@@ -132,7 +132,7 @@ internal struct ProtocolTests {
 
     let expected = """
       protocol TestProtocol {
-          var readWriteProperty: Int { get set }
+        var readWriteProperty: Int { get set }
       }
       """
 
@@ -152,7 +152,7 @@ internal struct ProtocolTests {
 
     let expected = """
       protocol TestProtocol {
-          func process(input: String, options: ProcessingOptions = ProcessingOptions()) -> String
+        func process(input: String, options: ProcessingOptions = ProcessingOptions()) -> String
       }
       """
 
@@ -174,11 +174,11 @@ internal struct ProtocolTests {
 
     let expected = """
       protocol ComplexProtocol: Identifiable {
-          var id: UUID { get }
-          var name: String { get set }
-          mutating func initialize()
-          func process(input: Data) -> Result
-          static func factory() -> Self
+        var id: UUID { get }
+        var name: String { get set }
+        mutating func initialize()
+        func process(input: Data) -> Result
+        static func factory() -> Self
       }
       """
 

@@ -15,7 +15,7 @@ internal struct FunctionTests {
 
     let expected = """
       func calculateSum(a: Int, b: Int) -> Int {
-          return a + b
+        return a + b
       }
       """
 
@@ -43,7 +43,7 @@ internal struct FunctionTests {
 
     let expected = """
       static func createInstance(value: String) -> MyType {
-          return MyType(value: value)
+        return MyType(value: value)
       }
       """
 
@@ -67,7 +67,7 @@ internal struct FunctionTests {
 
     let expected = """
       mutating func updateValue(newValue: String) {
-          value = newValue
+        value = newValue
       }
       """
 

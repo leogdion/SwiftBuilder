@@ -11,8 +11,8 @@ internal struct ClassTests {
 
     let expected = """
       class Car: Vehicle {
-          var brand: String
-          var numberOfWheels: Int
+        var brand: String
+        var numberOfWheels: Int
       }
       """
 
@@ -41,7 +41,7 @@ internal struct ClassTests {
 
     let expected = """
       class Container<T> {
-          var value: T
+        var value: T
       }
       """
 
@@ -58,8 +58,8 @@ internal struct ClassTests {
 
     let expected = """
       class Pair<T, U> {
-          var first: T
-          var second: U
+        var first: T
+        var second: U
       }
       """
 
@@ -75,7 +75,7 @@ internal struct ClassTests {
 
     let expected = """
       final class FinalClass {
-          var value: String
+        var value: String
       }
       """
 
@@ -91,7 +91,7 @@ internal struct ClassTests {
 
     let expected = """
       class AdvancedVehicle: Vehicle {
-          var speed: Int
+        var speed: Int
       }
       """
 
@@ -107,7 +107,7 @@ internal struct ClassTests {
 
     let expected = """
       class GenericContainer<T>: Collection {
-          var items: [T]
+        var items: [T]
       }
       """
 
@@ -123,7 +123,7 @@ internal struct ClassTests {
 
     let expected = """
       final class FinalGenericClass<T>: BaseClass {
-          var value: T
+        var value: T
       }
       """
 
@@ -146,9 +146,9 @@ internal struct ClassTests {
 
     let expected = """
       class Calculator {
-          func add(a: Int, b: Int) -> Int {
-              return a + b
-          }
+        func add(a: Int, b: Int) -> Int {
+          return a + b
+        }
       }
       """
 

@@ -36,29 +36,29 @@ internal struct BlackjackTests {
 
     let expected = """
       struct BlackjackCard {
-          enum Suit: Character {
-              case spades = "♠"
-              case hearts = "♡"
-              case diamonds = "♢"
-              case clubs = "♣"
-          }
-          enum Rank: Int {
-              case two = 2
-              case three
-              case four
-              case five
-              case six
-              case seven
-              case eight
-              case nine
-              case ten
-              case jack
-              case queen
-              case king
-              case ace
-          }
-          let rank: Rank
-          let suit: Suit
+        enum Suit: Character {
+          case spades = "♠"
+          case hearts = "♡"
+          case diamonds = "♢"
+          case clubs = "♣"
+        }
+        enum Rank: Int {
+          case two = 2
+          case three
+          case four
+          case five
+          case six
+          case seven
+          case eight
+          case nine
+          case ten
+          case jack
+          case queen
+          case king
+          case ace
+        }
+        let rank: Rank
+        let suit: Suit
       }
       """
 
@@ -149,10 +149,10 @@ internal struct BlackjackTests {
     let expected = """
       struct BlackjackCard {
         enum Suit: Character {
-          case spades = \"♠\"
-          case hearts = \"♡\"
-          case diamonds = \"♢\"
-          case clubs = \"♣\"
+          case spades = "♠"
+          case hearts = "♡"
+          case diamonds = "♢"
+          case clubs = "♣"
         }
 
         enum Rank: Int {
