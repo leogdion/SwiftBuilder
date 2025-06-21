@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the "Software"), to deal in the Software without
+//  files (the “Software”), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -31,16 +31,34 @@ import SwiftSyntax
 
 /// A `for-in` loop statement.
 public struct For: CodeBlock {
-  private let pattern: CodeBlock
+  private let pattern: any CodeBlock & PatternConvertible
   private let sequence: CodeBlock
   private let whereClause: CodeBlock?
   private let body: [CodeBlock]
 
   /// Creates a `for-in` loop statement.
   /// - Parameters:
-  ///   - pattern: A `CodeBlock` that produces the pattern for the loop variable(s).
+  ///   - pattern: A `CodeBlock` that also conforms to `PatternConvertible` for the loop variable(s).
   ///   - sequence: A `CodeBlock` that produces the sequence to iterate over.
   ///   - whereClause: An optional `CodeBlock` that produces the where clause condition.
+  ///   - then: A ``CodeBlockBuilder`` that provides the body of the loop.
+  public init(
+    _ pattern: any CodeBlock & PatternConvertible,
+    in sequence: CodeBlock,
+    where whereClause: CodeBlock? = nil,
+    @CodeBlockBuilderResult then: () -> [CodeBlock]
+  ) {
+    self.pattern = pattern
+    self.sequence = sequence
+    self.whereClause = whereClause
+    self.body = then()
+  }
+
+  /// Creates a `for-in` loop statement with a closure-based pattern.
+  /// - Parameters:
+  ///   - pattern: A `CodeBlockBuilder` that produces the pattern for the loop variable(s).
+  ///   - sequence: A `CodeBlock` that produces the sequence to iterate over.
+  ///   - whereClause: An optional `CodeBlockBuilder` that produces the where clause condition.
   ///   - then: A ``CodeBlockBuilder`` that provides the body of the loop.
   public init(
     @CodeBlockBuilderResult _ pattern: () -> [CodeBlock],
@@ -52,42 +70,19 @@ public struct For: CodeBlock {
     guard patterns.count == 1 else {
       fatalError("For requires exactly one pattern CodeBlock")
     }
-    self.pattern = patterns[0]
+    guard let patternBlock = patterns[0] as? (any CodeBlock & PatternConvertible) else {
+      fatalError("For pattern must implement both CodeBlock and PatternConvertible protocols")
+    }
+    self.pattern = patternBlock
     self.sequence = sequence
     let whereBlocks = whereClause()
     self.whereClause = whereBlocks.isEmpty ? nil : whereBlocks[0]
     self.body = then()
   }
 
-  /// Convenience initializer that accepts a single pattern directly.
-  /// - Parameters:
-  ///   - pattern: The pattern for the loop variable(s).
-  ///   - sequence: The sequence to iterate over.
-  ///   - whereClause: An optional where clause condition.
-  ///   - then: A ``CodeBlockBuilder`` that provides the body of the loop.
-  public init(
-    _ pattern: CodeBlock,
-    in sequence: CodeBlock,
-    where whereClause: CodeBlock? = nil,
-    @CodeBlockBuilderResult then: () -> [CodeBlock]
-  ) {
-    self.pattern = pattern
-    self.sequence = sequence
-    self.whereClause = whereClause
-    self.body = then()
-  }
-
   public var syntax: SyntaxProtocol {
-    // Build the pattern
-    let patternSyntax: PatternSyntax
-    if let patternBlock = pattern as? PatternConvertible {
-      patternSyntax = patternBlock.patternSyntax
-    } else if let expr = pattern.syntax.as(ExprSyntax.self) {
-      patternSyntax = PatternSyntax(ExpressionPatternSyntax(expression: expr))
-    } else {
-      // Default to identifier pattern if we can't determine the type
-      patternSyntax = PatternSyntax(IdentifierPatternSyntax(identifier: .identifier("item")))
-    }
+    // Build the pattern using the PatternConvertible protocol
+    let patternSyntax = pattern.patternSyntax
 
     // Build the sequence expression
     let sequenceExpr = ExprSyntax(
@@ -141,4 +136,4 @@ public struct For: CodeBlock {
       )
     )
   }
-} 
+}

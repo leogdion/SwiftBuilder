@@ -9,37 +9,29 @@ Group {
         Line("Simple for-in loop over an array")
       }
     
-    For {
-        VariableExp("name")
-    } in: {
-        VariableExp("names")
-    } then: {
+    For(VariableExp("name"), in: VariableExp("names"), then: {
         Call("print") {
-            ParameterExp(name: "", value: "\"Hello, \\(name)!\"")
+            ParameterExp(unlabeled: "\"Hello, \\(name)!\"")
         }
-    }
+    })
 
     // MARK: - For-in with Enumerated
     Call("print") {
-        ParameterExp(name: "", value: "\"\\n=== For-in with Enumerated ===\"")
+        ParameterExp(unlabeled: "\"\\n=== For-in with Enumerated ===\"")
     }
       .comment {
         Line("MARK: - For-in with Enumerated")
         Line("For-in loop with enumerated() to get index and value")
       }
-    For {
-        Tuple.pattern([VariableExp("index"), VariableExp("name")])
-    } in: {
-        VariableExp("names").call("enumerated")
-    } then: {
+    For(Tuple.patternCodeBlock([VariableExp("index"), VariableExp("name")]), in: VariableExp("names").call("enumerated"), then: {
         Call("print") {
-            ParameterExp(name: "", value: "\"Index: \\(index), Name: \\(name)\"")
+            ParameterExp(unlabeled: "\"Index: \\(index), Name: \\(name)\"")
         }
-    }
+    })
 
     // MARK: - For-in with Where Clause
     Call("print") {
-        ParameterExp(name: "", value: "\"\\n=== For-in with Where Clause ===\"")
+        ParameterExp(unlabeled: "\"\\n=== For-in with Where Clause ===\"")
     }
       .comment {
         Line("MARK: - For-in with Where Clause")
@@ -47,24 +39,21 @@ Group {
       }
     Variable(.let, name: "numbers", equals: Literal.array([Literal.integer(1), Literal.integer(2), Literal.integer(3), Literal.integer(4), Literal.integer(5), Literal.integer(6), Literal.integer(7), Literal.integer(8), Literal.integer(9), Literal.integer(10)]))
     
-    For {
-        VariableExp("number")
-    } in: {
-        VariableExp("numbers")
-    } where: {
+    For(VariableExp("number"), in: VariableExp("numbers"), where: Infix("==") {
         Infix("%") {
             VariableExp("number")
             Literal.integer(2)
         }
-    } then: {
+        Literal.integer(0)
+    }, then: {
         Call("print") {
-            ParameterExp(name: "", value: "\"Even number: \\(number)\"")
+            ParameterExp(unlabeled: "\"Even number: \\(number)\"")
         }
-    }
+    })
 
     // MARK: - For-in with Dictionary
     Call("print") {
-        ParameterExp(name: "", value: "\"\\n=== For-in with Dictionary ===\"")
+        ParameterExp(unlabeled: "\"\\n=== For-in with Dictionary ===\"")
     }
       .comment {
         Line("MARK: - For-in with Dictionary")
@@ -72,13 +61,9 @@ Group {
       }
     Variable(.let, name: "scores", equals: Literal.dictionary([(Literal.string("Alice"), Literal.integer(95)), (Literal.string("Bob"), Literal.integer(87)), (Literal.string("Charlie"), Literal.integer(92))]))
     
-    For {
-        Tuple.pattern([VariableExp("name"), VariableExp("score")])
-    } in: {
-        VariableExp("scores")
-    } then: {
+    For(Tuple.patternCodeBlock([VariableExp("name"), VariableExp("score")]), in: VariableExp("scores"), then: {
         Call("print") {
-            ParameterExp(name: "", value: "\"\\(name): \\(score)\"")
+            ParameterExp(unlabeled: "\"\\(name): \\(score)\"")
         }
-    }
+    })
 } 

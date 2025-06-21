@@ -35,40 +35,40 @@ internal struct BasicTests {
 
 @Suite
 final class ForLoopTests {
-    @Test
-    func testSimpleForInLoop() {
-        let forLoop = For(
-            VariableExp("item"),
-            in: VariableExp("items"),
-            then: {
-                Call("print") {
-                    ParameterExp(name: "", value: "item")
-                }
-            }
-        )
-        let generated = forLoop.syntax.description
-        let expected = "for item in items {\n    print(item)\n}"
-        #expect(generated.contains("for item in items"))
-        #expect(generated.contains("print(item)"))
-    }
+  @Test
+  func testSimpleForInLoop() {
+    let forLoop = For(
+      VariableExp("item"),
+      in: VariableExp("items"),
+      then: {
+        Call("print") {
+          ParameterExp(name: "", value: "item")
+        }
+      }
+    )
+    let generated = forLoop.syntax.description
+    let expected = "for item in items {\n    print(item)\n}"
+    #expect(generated.contains("for item in items"))
+    #expect(generated.contains("print(item)"))
+  }
 
-    @Test
-    func testForInWithWhereClause() {
-        let forLoop = For(
-            VariableExp("number"),
-            in: VariableExp("numbers"),
-            where: Infix("%") {
-                VariableExp("number")
-                Literal.integer(2)
-            },
-            then: {
-                Call("print") {
-                    ParameterExp(name: "", value: "number")
-                }
-            }
-        )
-        let generated = forLoop.syntax.description
-        #expect(generated.contains("for number in numbers where number % 2"))
-        #expect(generated.contains("print(number)"))
-    }
+  @Test
+  func testForInWithWhereClause() {
+    let forLoop = For(
+      VariableExp("number"),
+      in: VariableExp("numbers"),
+      where: Infix("%") {
+        VariableExp("number")
+        Literal.integer(2)
+      },
+      then: {
+        Call("print") {
+          ParameterExp(name: "", value: "number")
+        }
+      }
+    )
+    let generated = forLoop.syntax.description
+    #expect(generated.contains("for number in numbers where number % 2"))
+    #expect(generated.contains("print(number)"))
+  }
 }

@@ -30,7 +30,7 @@
 import SwiftSyntax
 
 /// An expression that refers to a variable.
-public struct VariableExp: CodeBlock {
+public struct VariableExp: CodeBlock, PatternConvertible {
   internal let name: String
 
   /// Creates a variable expression.
@@ -66,6 +66,10 @@ public struct VariableExp: CodeBlock {
 
   public var syntax: SyntaxProtocol {
     ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(name)))
+  }
+
+  public var patternSyntax: PatternSyntax {
+    PatternSyntax(IdentifierPatternSyntax(identifier: .identifier(name)))
   }
 }
 

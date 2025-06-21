@@ -47,6 +47,12 @@ public struct Tuple: CodeBlock {
     TuplePattern(elements: elements)
   }
 
+  /// Creates a tuple pattern that can be used as a CodeBlock.
+  /// - Parameter elements: Array of pattern elements, where `nil` represents a wildcard pattern.
+  public static func patternCodeBlock(_ elements: [PatternConvertible?]) -> TuplePatternCodeBlock {
+    TuplePatternCodeBlock(elements: elements)
+  }
+
   public var syntax: SyntaxProtocol {
     guard !elements.isEmpty else {
       fatalError("Tuple must contain at least one element.")
@@ -115,5 +121,53 @@ public struct TuplePattern: PatternConvertible {
         rightParen: .rightParenToken()
       )
     )
+  }
+}
+
+/// A tuple pattern that can be used as a CodeBlock for for-in loops.
+public struct TuplePatternCodeBlock: CodeBlock, PatternConvertible {
+  private let elements: [PatternConvertible?]
+
+  internal init(elements: [PatternConvertible?]) {
+    self.elements = elements
+  }
+
+  public var patternSyntax: PatternSyntax {
+    let patternElements = TuplePatternElementListSyntax(
+      elements.enumerated().map { index, element in
+        let patternElement: TuplePatternElementSyntax
+        if let element = element {
+          patternElement = TuplePatternElementSyntax(
+            label: nil,
+            colon: nil,
+            pattern: element.patternSyntax,
+            trailingComma: index < elements.count - 1 ? .commaToken(trailingTrivia: .space) : nil
+          )
+        } else {
+          // Wildcard pattern
+          patternElement = TuplePatternElementSyntax(
+            label: nil,
+            colon: nil,
+            pattern: PatternSyntax(WildcardPatternSyntax(wildcard: .wildcardToken())),
+            trailingComma: index < elements.count - 1 ? .commaToken(trailingTrivia: .space) : nil
+          )
+        }
+        return patternElement
+      }
+    )
+
+    return PatternSyntax(
+      TuplePatternSyntax(
+        leftParen: .leftParenToken(),
+        elements: patternElements,
+        rightParen: .rightParenToken()
+      )
+    )
+  }
+
+  public var syntax: SyntaxProtocol {
+    // For CodeBlock conformance, we return the pattern syntax as an expression
+    // This is a bit of a hack, but it allows us to use TuplePatternCodeBlock in For loops
+    patternSyntax
   }
 }
