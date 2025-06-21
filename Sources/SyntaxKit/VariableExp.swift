@@ -42,7 +42,7 @@ public struct VariableExp: CodeBlock, PatternConvertible {
   /// Accesses a property on the variable.
   /// - Parameter propertyName: The name of the property to access.
   /// - Returns: A ``PropertyAccessExp`` that represents the property access.
-  public func property(_ propertyName: String) -> CodeBlock {
+  public func property(_ propertyName: String) -> PropertyAccessExp {
     PropertyAccessExp(baseName: name, propertyName: propertyName)
   }
 
@@ -87,6 +87,12 @@ public struct PropertyAccessExp: CodeBlock {
     self.propertyName = propertyName
   }
 
+  /// Negates the property access expression.
+  /// - Returns: A negated property access expression.
+  public func not() -> CodeBlock {
+    NegatedPropertyAccessExp(baseName: baseName, propertyName: propertyName)
+  }
+
   public var syntax: SyntaxProtocol {
     let base = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(baseName)))
     let property = TokenSyntax.identifier(propertyName)
@@ -96,6 +102,38 @@ public struct PropertyAccessExp: CodeBlock {
         dot: .periodToken(),
         name: property
       ))
+  }
+}
+
+/// An expression that negates a property access.
+public struct NegatedPropertyAccessExp: CodeBlock {
+  internal let baseName: String
+  internal let propertyName: String
+
+  /// Creates a negated property access expression.
+  /// - Parameters:
+  ///  - baseName: The name of the base variable.
+  ///  - propertyName: The name of the property to access.
+  public init(baseName: String, propertyName: String) {
+    self.baseName = baseName
+    self.propertyName = propertyName
+  }
+
+  public var syntax: SyntaxProtocol {
+    let base = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(baseName)))
+    let property = TokenSyntax.identifier(propertyName)
+    let memberAccess = ExprSyntax(
+      MemberAccessExprSyntax(
+        base: base,
+        dot: .periodToken(),
+        name: property
+      ))
+    return ExprSyntax(
+      PrefixOperatorExprSyntax(
+        operator: .prefixOperator("!", leadingTrivia: [], trailingTrivia: []),
+        expression: memberAccess
+      )
+    )
   }
 }
 

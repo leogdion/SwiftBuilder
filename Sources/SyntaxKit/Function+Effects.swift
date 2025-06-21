@@ -34,17 +34,25 @@ extension Function {
   internal enum Effect {
     case none
     /// synchronous effect specifier: throws or rethrows
-    case `throws`(isRethrows: Bool)
+    case `throws`(isRethrows: Bool, errorType: String?)
     case async
     /// combined async and throws/rethrows
-    case asyncThrows(isRethrows: Bool)
+    case asyncThrows(isRethrows: Bool, errorType: String?)
   }
 
   /// Marks the function as `throws` or `rethrows`.
   /// - Parameter rethrows: Pass `true` to emit `rethrows` instead of `throws`.
   public func `throws`(isRethrows: Bool = false) -> Self {
     var copy = self
-    copy.effect = .throws(isRethrows: isRethrows)
+    copy.effect = .throws(isRethrows: isRethrows, errorType: nil)
+    return copy
+  }
+
+  /// Marks the function as `throws` with a specific error type.
+  /// - Parameter errorType: The error type to specify in the throws clause.
+  public func `throws`(_ errorType: String) -> Self {
+    var copy = self
+    copy.effect = .throws(isRethrows: false, errorType: errorType)
     return copy
   }
 
@@ -59,7 +67,15 @@ extension Function {
   /// - Parameter rethrows: Pass `true` to emit `async rethrows`.
   public func asyncThrows(isRethrows: Bool = false) -> Self {
     var copy = self
-    copy.effect = .asyncThrows(isRethrows: isRethrows)
+    copy.effect = .asyncThrows(isRethrows: isRethrows, errorType: nil)
+    return copy
+  }
+
+  /// Marks the function as `async throws` with a specific error type.
+  /// - Parameter errorType: The error type to specify in the throws clause.
+  public func asyncThrows(_ errorType: String) -> Self {
+    var copy = self
+    copy.effect = .asyncThrows(isRethrows: false, errorType: errorType)
     return copy
   }
 }

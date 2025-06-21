@@ -13,3 +13,11 @@ do {
 } catch {
     print("Unexpected error: \(error).")
 }
+
+func summarize(_ ratings: [Int]) throws(StatisticsError) {
+    guard !ratings.isEmpty else { throw .noRatings }
+}
+
+async let data = fetchUserData(id: 1)
+async let posts = fetchUserPosts(id: 1)
+let (fetchedData, fetchedPosts) = try await (data, posts)

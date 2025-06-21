@@ -68,4 +68,83 @@ import Testing
     print("Generated code:")
     print(generated)
   }
+
+  @Test("Do-catch with specific error cases generates correct syntax")
+  internal func testDoCatchWithSpecificErrorCases() throws {
+    let doCatch = Do {
+      Call("buyFavoriteSnack") {
+        ParameterExp(name: "person", value: Literal.string("Alice"))
+        ParameterExp(name: "vendingMachine", value: Literal.ref("vendingMachine"))
+      }.throwing()
+      Call("print") {
+        ParameterExp(unlabeled: Literal.string("Success! Yum."))
+      }
+    } catch: {
+      Catch(EnumCase("VendingMachineError.invalidSelection")) {
+        Call("print") {
+          ParameterExp(unlabeled: Literal.string("Invalid Selection."))
+        }
+      }
+      Catch(EnumCase("VendingMachineError.outOfStock")) {
+        Call("print") {
+          ParameterExp(unlabeled: Literal.string("Out of Stock."))
+        }
+      }
+      Catch(
+        EnumCase("VendingMachineError.insufficientFunds").associatedValue(
+          "coinsNeeded", type: "Int")
+      ) {
+        Call("print") {
+          ParameterExp(
+            unlabeled: Literal.string(
+              "Insufficient funds. Please insert an additional \\(coinsNeeded) coins."))
+        }
+      }
+      Catch {
+        Call("print") {
+          ParameterExp(unlabeled: Literal.string("Unexpected error: \\(error)."))
+        }
+      }
+    }
+
+    let generated = doCatch.generateCode()
+    let expected = """
+      do {
+        try buyFavoriteSnack(person: "Alice", vendingMachine: vendingMachine)
+        print("Success! Yum.")
+      } catch VendingMachineError.invalidSelection {
+        print("Invalid Selection.")
+      } catch VendingMachineError.outOfStock {
+        print("Out of Stock.")
+      } catch VendingMachineError.insufficientFunds(let coinsNeeded) {
+        print("Insufficient funds. Please insert an additional \\(coinsNeeded) coins.")
+      } catch {
+        print("Unexpected error: \\(error).")
+      }
+      """
+
+    #expect(generated.normalize() == expected.normalize())
+  }
+
+  @Test("Function with throws clause and unlabeled parameter generates correct syntax")
+  internal func testFunctionWithThrowsClauseAndUnlabeledParameter() throws {
+    let function = Function("summarize") {
+      Parameter(unlabeled: "ratings", type: "[Int]")
+    } _: {
+      Guard {
+        VariableExp("ratings").property("isEmpty").not()
+      } else: {
+        Throw(EnumCase("noRatings"))
+      }
+    }.throws("StatisticsError")
+
+    let generated = function.generateCode()
+    let expected = """
+      func summarize(_ ratings: [Int]) throws(StatisticsError) {
+        guard !ratings.isEmpty else { throw .noRatings }
+      }
+      """
+
+    #expect(generated.normalize() == expected.normalize())
+  }
 }

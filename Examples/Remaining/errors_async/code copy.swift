@@ -14,34 +14,8 @@ do {
     print("Unexpected error: \(error).")
 }
 
-func nonThrowingFunction() throws(Never) {
-  // ...
-}
-
 func summarize(_ ratings: [Int]) throws(StatisticsError) {
     guard !ratings.isEmpty else { throw .noRatings }
-
-
-    var counts = [1: 0, 2: 0, 3: 0]
-    for rating in ratings {
-        guard rating > 0 && rating <= 3 else { throw .invalidRating(rating) }
-        counts[rating]! += 1
-    }
-
-
-    print("*", counts[1]!, "-- **", counts[2]!, "-- ***", counts[3]!)
-}
-
-let ratings = []
-do throws(StatisticsError) {
-    try summarize(ratings)
-} catch {
-    switch error {
-    case .noRatings:
-        print("No ratings available")
-    case .invalidRating(let rating):
-        print("Invalid rating: \(rating)")
-    }
 }
 
 // MARK: - Task Groups
@@ -76,4 +50,9 @@ Task {
 
 Task { @MainActor [unowned self] in
     _ = try await fetchUserData(id: 1)
+}
+
+
+func nonThrowingFunction() throws(Never) {
+    
 }

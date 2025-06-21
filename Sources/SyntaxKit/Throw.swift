@@ -37,9 +37,14 @@ public struct Throw: CodeBlock {
   }
 
   public var syntax: SyntaxProtocol {
-    let expression =
-      expr.syntax.as(ExprSyntax.self)
-      ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
+    let expression: ExprSyntax
+    if let enumCase = expr as? EnumCase {
+      expression = enumCase.asExpressionSyntax
+    } else {
+      expression =
+        expr.syntax.as(ExprSyntax.self)
+        ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
+    }
     return StmtSyntax(
       ThrowStmtSyntax(
         throwKeyword: .keyword(.throw, trailingTrivia: .space),

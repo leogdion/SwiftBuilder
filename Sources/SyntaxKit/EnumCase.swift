@@ -90,6 +90,47 @@ public struct EnumCase: CodeBlock {
     self.equals(.float(value))
   }
 
+  /// Returns a SwiftSyntax expression for this enum case (for use in throw/return/etc).
+  public var asExpressionSyntax: ExprSyntax {
+    // Support qualified (Type.case) and unqualified (.case) forms
+    let parts = name.split(separator: ".", maxSplits: 1)
+    let base: ExprSyntax? =
+      parts.count == 2
+      ? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(String(parts[0])))) : nil
+    let caseName = parts.count == 2 ? String(parts[1]) : name
+
+    let memberAccess = MemberAccessExprSyntax(
+      base: base,
+      dot: .periodToken(),
+      name: .identifier(caseName)
+    )
+
+    if let associated = associatedValue {
+      // .caseName(associated)
+      let tuple = TupleExprSyntax(
+        leftParen: .leftParenToken(),
+        elements: TupleExprElementListSyntax([
+          TupleExprElementSyntax(
+            label: nil,
+            colon: nil,
+            expression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(associated.name))),
+            trailingComma: nil
+          )
+        ]),
+        rightParen: .rightParenToken()
+      )
+      return ExprSyntax(
+        FunctionCallExprSyntax(
+          calledExpression: ExprSyntax(memberAccess),
+          leftParen: tuple.leftParen,
+          arguments: tuple.elements,
+          rightParen: tuple.rightParen
+        ))
+    } else {
+      return ExprSyntax(memberAccess)
+    }
+  }
+
   public var syntax: SyntaxProtocol {
     let caseKeyword = TokenSyntax.keyword(.case, trailingTrivia: .space)
     let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)

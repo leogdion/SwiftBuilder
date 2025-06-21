@@ -1,28 +1,50 @@
-Variable(.var, "vendingMachine", equals: Init("VendingMachine"))
+Variable(.var, name: "vendingMachine", equals: Init("VendingMachine"))
 Assignment("vendingMachine.coinsDeposited", Literal.integer(8))
-Do{
-    Call("buyFavoriteSnack"){
-        ParameterExp("person", Literal.string("Alice"))
-        ParameterExp("vendingMachine", Literal.ref("vendingMachine"))
+Do {
+    Call("buyFavoriteSnack") {
+        ParameterExp(name: "person", value: Literal.string("Alice"))
+        ParameterExp(name: "vendingMachine", value: Literal.ref("vendingMachine"))
     }.throwing()
-    Call("print", Literal.string("Success! Yum."))
+    Call("print") {
+        ParameterExp(unlabeled: Literal.string("Success! Yum."))
     }
-} catch: {
+    } catch: {
     Catch(EnumCase("VendingMachineError.invalidSelection")) {
-        Call("print", Literal.string("Invalid Selection."))
+        Call("print") {
+        ParameterExp(unlabeled: Literal.string("Invalid Selection."))
+        }
     }
     Catch(EnumCase("VendingMachineError.outOfStock")) {
-        Call("print",  Literal.string("Out of Stock."))
+        Call("print") {
+        ParameterExp(unlabeled: Literal.string("Out of Stock."))
+        }
     }
-    Catch(EnumCase("VendingMachineError.insufficientFunds").associatedValue("coinsNeeded", type: "Int")) {
-        Call("print", Literal.string("Insufficient funds. Please insert an additional \\(coinsNeeded) coins."))
+    Catch(
+        EnumCase("VendingMachineError.insufficientFunds").associatedValue(
+        "coinsNeeded", type: "Int")
+    ) {
+        Call("print") {
+        ParameterExp(
+            unlabeled: Literal.string(
+            "Insufficient funds. Please insert an additional \\(coinsNeeded) coins."))
+        }
     }
     Catch {
-        Call("print", Literal.string("Unexpected error: \\(error)."))
+        Call("print") {
+        ParameterExp(unlabeled: Literal.string("Unexpected error: \\(error)."))
+        }
     }
 }
 
-
+Function("summarize") {
+    Parameter(name: "ratings", type: "[Int]")
+} _: {
+    Guard{
+        (VariableExp("ratings").property("isEmpty") as! PropertyAccessExp).not()
+    } else: {
+        Throw(EnumCase("noRatings"))
+    }
+}.throws("StatisticsError")
 
 
 

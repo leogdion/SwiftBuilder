@@ -71,4 +71,20 @@ public struct Function: CodeBlock {
     self.returnType = returnType
     self.body = content()
   }
+
+  /// Creates a `func` declaration with parameters and body using the DSL syntax.
+  /// - Parameters:
+  ///   - name: The name of the function.
+  ///   - params: A ``ParameterBuilder`` that provides the parameters of the function.
+  ///   - body: A ``CodeBlockBuilder`` that provides the body of the function.
+  public init(
+    _ name: String,
+    @ParameterBuilderResult _ params: () -> [Parameter],
+    @CodeBlockBuilderResult _ body: () -> [CodeBlock]
+  ) {
+    self.name = name
+    self.parameters = params()
+    self.returnType = nil
+    self.body = body()
+  }
 }
