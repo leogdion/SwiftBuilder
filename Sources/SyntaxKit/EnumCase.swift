@@ -35,6 +35,12 @@ public struct EnumCase: CodeBlock {
   private var literalValue: Literal?
   private var associatedValue: (name: String, type: String)?
 
+  /// The name of the enum case.
+  public var caseName: String { name }
+
+  /// The associated value for the enum case, if any.
+  public var caseAssociatedValue: (name: String, type: String)? { associatedValue }
+
   /// Creates a `case` declaration.
   /// - Parameter name: The name of the case.
   public init(_ name: String) {

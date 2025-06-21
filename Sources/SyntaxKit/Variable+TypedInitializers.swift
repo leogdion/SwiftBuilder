@@ -32,6 +32,25 @@ import Foundation
 // MARK: - Variable Typed Initializers
 
 extension Variable {
+  /// Creates a `let` or `var` declaration with an Init value, inferring the type from the Init.
+  /// - Parameters:
+  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
+  ///   - name: The name of the variable.
+  ///   - equals: An Init expression.
+  ///   - explicitType: Whether the variable has an explicit type.
+  public init(
+    _ kind: VariableKind, name: String, equals defaultValue: Init,
+    explicitType: Bool? = nil
+  ) {
+    self.init(
+      kind: kind,
+      name: name,
+      type: nil, // Will be inferred from Init
+      defaultValue: defaultValue,
+      explicitType: explicitType ?? false
+    )
+  }
+
   /// Creates a `let` or `var` declaration with an explicit type.
   /// - Parameters:
   ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
