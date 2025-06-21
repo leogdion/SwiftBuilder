@@ -37,6 +37,7 @@ public struct Variable: CodeBlock {
   let type: String
   let defaultValue: CodeBlock?
   var isStatic: Bool = false
+  var isAsync: Bool = false
   var attributes: [AttributeInfo] = []
   var explicitType: Bool = false
 
@@ -75,6 +76,14 @@ public struct Variable: CodeBlock {
   public func `static`() -> Self {
     var copy = self
     copy.isStatic = true
+    return copy
+  }
+
+  /// Marks the variable as `async`.
+  /// - Returns: A copy of the variable marked as `async`.
+  public func async() -> Self {
+    var copy = self
+    copy.isAsync = true
     return copy
   }
 
@@ -123,6 +132,13 @@ public struct Variable: CodeBlock {
       modifiers = DeclModifierListSyntax([
         DeclModifierSyntax(name: .keyword(.static, trailingTrivia: .space))
       ])
+    }
+    if isAsync {
+      modifiers = DeclModifierListSyntax(
+        modifiers + [
+          DeclModifierSyntax(name: .keyword(.async, trailingTrivia: .space))
+        ]
+      )
     }
     return VariableDeclSyntax(
       attributes: buildAttributeList(from: attributes),

@@ -40,13 +40,27 @@ Function("summarize") {
     Parameter(name: "ratings", type: "[Int]")
 } _: {
     Guard{
-        (VariableExp("ratings").property("isEmpty") as! PropertyAccessExp).not()
+        VariableExp("ratings").property("isEmpty").not()
     } else: {
         Throw(EnumCase("noRatings"))
     }
 }.throws("StatisticsError")
 
 
+Variable(.let, name: "data") {
+    Call("fetchUserData") {
+        ParameterExp(name: "id", value: Literal.integer(1))
+    }
+}.async()
+Variable(.let, name: "posts") {
+    Call("fetchUserPosts") {
+        ParameterExp(name: "id", value: Literal.integer(1))
+    }
+}.async()
+TupleAssignment(["fetchedData", "fetchedPosts"], equals: Tuple {
+    VariableExp("data")
+    VariableExp("posts")
+}).async().throwing()
 
 
 

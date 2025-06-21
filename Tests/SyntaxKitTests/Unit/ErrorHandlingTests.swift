@@ -147,4 +147,36 @@ import Testing
 
     #expect(generated.normalize() == expected.normalize())
   }
+
+  @Test("Async functionality generates correct syntax")
+  internal func testAsyncFunctionality() throws {
+    let asyncCode = Group {
+      Variable(.let, name: "data") {
+        Call("fetchUserData") {
+          ParameterExp(name: "id", value: Literal.integer(1))
+        }
+      }.async()
+      Variable(.let, name: "posts") {
+        Call("fetchUserPosts") {
+          ParameterExp(name: "id", value: Literal.integer(1))
+        }
+      }.async()
+      TupleAssignment(
+        ["fetchedData", "fetchedPosts"],
+        equals: Tuple {
+          VariableExp("data")
+          VariableExp("posts")
+        }
+      ).async().throwing()
+    }
+
+    let generated = asyncCode.generateCode()
+    let expected = """
+      async let data = fetchUserData(id: 1)
+      async let posts = fetchUserPosts(id: 1)
+      let (fetchedData, fetchedPosts) = try await (data, posts)
+      """
+
+    #expect(generated.normalize() == expected.normalize())
+  }
 }
