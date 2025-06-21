@@ -51,7 +51,8 @@ package enum SyntaxParser {
 
     let tree = visitor.tree
     let encoder = JSONEncoder()
-    let json = String(decoding: try encoder.encode(tree), as: UTF8.self)
+    let data = try encoder.encode(tree)
+    let json = String(decoding: data, as: UTF8.self)
 
     return SyntaxResponse(syntaxJSON: json)
   }

@@ -33,28 +33,45 @@ import SwiftSyntax
 public struct Struct: CodeBlock {
   private let name: String
   private let members: [CodeBlock]
-  private var inheritance: String?
   private var genericParameter: String?
+  private var inheritance: [String] = []
+  private var attributes: [AttributeInfo] = []
 
   /// Creates a `struct` declaration.
   /// - Parameters:
   ///   - name: The name of the struct.
-  ///   - generic: A generic parameter for the struct, if any.
   ///   - content: A ``CodeBlockBuilder`` that provides the members of the struct.
-  public init(
-    _ name: String, generic: String? = nil, @CodeBlockBuilderResult _ content: () -> [CodeBlock]
-  ) {
+  public init(_ name: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
     self.name = name
     self.members = content()
-    self.genericParameter = generic
+  }
+
+  /// Sets the generic parameter for the struct.
+  /// - Parameter generic: The generic parameter name.
+  /// - Returns: A copy of the struct with the generic parameter set.
+  public func generic(_ generic: String) -> Self {
+    var copy = self
+    copy.genericParameter = generic
+    return copy
   }
 
   /// Sets the inheritance for the struct.
-  /// - Parameter type: The type to inherit from.
+  /// - Parameter inheritance: The types to inherit from.
   /// - Returns: A copy of the struct with the inheritance set.
-  public func inherits(_ type: String) -> Self {
+  public func inherits(_ inheritance: String...) -> Self {
     var copy = self
-    copy.inheritance = type
+    copy.inheritance = inheritance
+    return copy
+  }
+
+  /// Adds an attribute to the struct declaration.
+  /// - Parameters:
+  ///   - attribute: The attribute name (without the @ symbol).
+  ///   - arguments: The arguments for the attribute, if any.
+  /// - Returns: A copy of the struct with the attribute added.
+  public func attribute(_ attribute: String, arguments: [String] = []) -> Self {
+    var copy = self
+    copy.attributes.append(AttributeInfo(name: attribute, arguments: arguments))
     return copy
   }
 
@@ -76,11 +93,26 @@ public struct Struct: CodeBlock {
     }
 
     var inheritanceClause: InheritanceClauseSyntax?
-    if let inheritance = inheritance {
-      let inheritedType = InheritedTypeSyntax(
-        type: IdentifierTypeSyntax(name: .identifier(inheritance)))
+    if !inheritance.isEmpty {
+      let inheritedTypes = inheritance.map { type in
+        InheritedTypeSyntax(
+          type: IdentifierTypeSyntax(name: .identifier(type)))
+      }
       inheritanceClause = InheritanceClauseSyntax(
-        colon: .colonToken(), inheritedTypes: InheritedTypeListSyntax([inheritedType]))
+        colon: .colonToken(),
+        inheritedTypes: InheritedTypeListSyntax(
+          inheritedTypes.enumerated().map { idx, inherited in
+            var inheritedType = inherited
+            if idx < inheritedTypes.count - 1 {
+              inheritedType = inheritedType.with(
+                \.trailingComma,
+                TokenSyntax.commaToken(trailingTrivia: .space)
+              )
+            }
+            return inheritedType
+          }
+        )
+      )
     }
 
     let memberBlock = MemberBlockSyntax(
@@ -94,11 +126,57 @@ public struct Struct: CodeBlock {
     )
 
     return StructDeclSyntax(
+      attributes: buildAttributeList(from: attributes),
       structKeyword: structKeyword,
       name: identifier,
       genericParameterClause: genericParameterClause,
       inheritanceClause: inheritanceClause,
       memberBlock: memberBlock
     )
+  }
+
+  private func buildAttributeList(from attributes: [AttributeInfo]) -> AttributeListSyntax {
+    if attributes.isEmpty {
+      return AttributeListSyntax([])
+    }
+    let attributeElements = attributes.map { attributeInfo in
+      let arguments = attributeInfo.arguments
+
+      var leftParen: TokenSyntax?
+      var rightParen: TokenSyntax?
+      var argumentsSyntax: AttributeSyntax.Arguments?
+
+      if !arguments.isEmpty {
+        leftParen = .leftParenToken()
+        rightParen = .rightParenToken()
+
+        let argumentList = arguments.map { argument in
+          DeclReferenceExprSyntax(baseName: .identifier(argument))
+        }
+
+        argumentsSyntax = .argumentList(
+          LabeledExprListSyntax(
+            argumentList.enumerated().map { index, expr in
+              var element = LabeledExprSyntax(expression: ExprSyntax(expr))
+              if index < argumentList.count - 1 {
+                element = element.with(\.trailingComma, .commaToken(trailingTrivia: .space))
+              }
+              return element
+            }
+          )
+        )
+      }
+
+      return AttributeListSyntax.Element(
+        AttributeSyntax(
+          atSign: .atSignToken(),
+          attributeName: IdentifierTypeSyntax(name: .identifier(attributeInfo.name)),
+          leftParen: leftParen,
+          arguments: argumentsSyntax,
+          rightParen: rightParen
+        )
+      )
+    }
+    return AttributeListSyntax(attributeElements)
   }
 }

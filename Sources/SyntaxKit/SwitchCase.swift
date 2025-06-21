@@ -31,44 +31,110 @@ import SwiftSyntax
 
 /// A `case` in a `switch` statement.
 public struct SwitchCase: CodeBlock {
-  private let patterns: [String]
+  private let patterns: [Any]
   private let body: [CodeBlock]
 
   /// Creates a `case` for a `switch` statement.
   /// - Parameters:
-  ///   - patterns: The patterns to match for the case.
+  ///   - patterns: The patterns to match for the case. Can be `PatternConvertible`, `CodeBlock`, or `SwitchLet` for value binding.
   ///   - content: A ``CodeBlockBuilder`` that provides the body of the case.
-  public init(_ patterns: String..., @CodeBlockBuilderResult content: () -> [CodeBlock]) {
+  public init(_ patterns: Any..., @CodeBlockBuilderResult content: () -> [CodeBlock]) {
     self.patterns = patterns
+    self.body = content()
+  }
+
+  /// Creates a `case` for a `switch` statement with a builder closure for the conditional.
+  /// - Parameters:
+  ///   - conditional: A ``CodeBlockBuilder`` that provides the conditional patterns for the case.
+  ///   - content: A ``CodeBlockBuilder`` that provides the body of the case.
+  public init(
+    @CodeBlockBuilderResult conditional: () -> [Any],
+    @CodeBlockBuilderResult content: () -> [CodeBlock]
+  ) {
+    self.patterns = conditional()
     self.body = content()
   }
 
   public var switchCaseSyntax: SwitchCaseSyntax {
     let caseItems = SwitchCaseItemListSyntax(
-      patterns.enumerated().map { index, pattern in
-        var item = SwitchCaseItemSyntax(
-          pattern: PatternSyntax(IdentifierPatternSyntax(identifier: .identifier(pattern)))
-        )
+      patterns.enumerated().compactMap { index, pattern -> SwitchCaseItemSyntax? in
+        let patternSyntax: PatternSyntax
+
+        if let patternConvertible = pattern as? PatternConvertible {
+          patternSyntax = patternConvertible.patternSyntax
+        } else if let variableExp = pattern as? VariableExp {
+          // Handle VariableExp specially - convert to identifier pattern
+          patternSyntax = PatternSyntax(
+            IdentifierPatternSyntax(identifier: .identifier(variableExp.name)))
+        } else if let codeBlock = pattern as? CodeBlock {
+          // Convert CodeBlock to expression pattern
+          let expr = ExprSyntax(
+            fromProtocol: codeBlock.syntax.as(ExprSyntax.self)
+              ?? DeclReferenceExprSyntax(baseName: .identifier(""))
+          )
+          patternSyntax = PatternSyntax(ExpressionPatternSyntax(expression: expr))
+        } else {
+          return nil
+        }
+
+        var item = SwitchCaseItemSyntax(pattern: patternSyntax)
         if index < patterns.count - 1 {
           item = item.with(\.trailingComma, .commaToken(trailingTrivia: .space))
         }
         return item
       })
-    let statements = CodeBlockItemListSyntax(
-      body.compactMap {
-        var item: CodeBlockItemSyntax?
-        if let decl = $0.syntax.as(DeclSyntax.self) {
-          item = CodeBlockItemSyntax(item: .decl(decl))
-        } else if let expr = $0.syntax.as(ExprSyntax.self) {
-          item = CodeBlockItemSyntax(item: .expr(expr))
-        } else if let stmt = $0.syntax.as(StmtSyntax.self) {
-          item = CodeBlockItemSyntax(item: .stmt(stmt))
-        }
-        return item?.with(\.trailingTrivia, .newline)
-      })
+
+    // Handle special case for multiple conditionals with let binding and where clause
+    var finalCaseItems = caseItems
+    if patterns.count >= 2 {
+      // Check if we have a let binding followed by an expression (where clause)
+      if let firstPattern = patterns.first as? SwitchLet,
+        let secondPattern = patterns[1] as? CodeBlock
+      {
+        let letIdentifier = IdentifierPatternSyntax(identifier: .identifier(firstPattern.name))
+        let whereExpr = ExprSyntax(
+          fromProtocol: secondPattern.syntax.as(ExprSyntax.self)
+            ?? DeclReferenceExprSyntax(baseName: .identifier(""))
+        )
+
+        let valueBindingPattern = ValueBindingPatternSyntax(
+          bindingSpecifier: .keyword(.let, trailingTrivia: .space),
+          pattern: letIdentifier
+        )
+
+        let whereClause = WhereClauseSyntax(
+          whereKeyword: .keyword(.where, leadingTrivia: .space, trailingTrivia: .space),
+          condition: whereExpr
+        )
+
+        // Create a case item with the value binding pattern and where clause
+        let caseItem = SwitchCaseItemSyntax(
+          pattern: PatternSyntax(valueBindingPattern),
+          whereClause: whereClause
+        )
+        finalCaseItems = SwitchCaseItemListSyntax([caseItem])
+      }
+    }
+
+    var statementItems = body.compactMap { block -> CodeBlockItemSyntax? in
+      if let decl = block.syntax.as(DeclSyntax.self) {
+        return CodeBlockItemSyntax(item: .decl(decl)).with(\.trailingTrivia, .newline)
+      } else if let expr = block.syntax.as(ExprSyntax.self) {
+        return CodeBlockItemSyntax(item: .expr(expr)).with(\.trailingTrivia, .newline)
+      } else if let stmt = block.syntax.as(StmtSyntax.self) {
+        return CodeBlockItemSyntax(item: .stmt(stmt)).with(\.trailingTrivia, .newline)
+      }
+      return nil
+    }
+    if statementItems.isEmpty {
+      // Add a break statement if the case body is empty
+      let breakStmt = BreakStmtSyntax(breakKeyword: .keyword(.break, trailingTrivia: .newline))
+      statementItems = [CodeBlockItemSyntax(item: .stmt(StmtSyntax(breakStmt)))]
+    }
+    let statements = CodeBlockItemListSyntax(statementItems)
     let label = SwitchCaseLabelSyntax(
       caseKeyword: .keyword(.case, trailingTrivia: .space),
-      caseItems: caseItems,
+      caseItems: finalCaseItems,
       colon: .colonToken(trailingTrivia: .newline)
     )
     return SwitchCaseSyntax(

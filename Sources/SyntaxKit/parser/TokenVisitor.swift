@@ -30,9 +30,9 @@
 import Foundation
 @_spi(RawSyntax) import SwiftSyntax
 
-final class TokenVisitor: SyntaxRewriter {
+internal final class TokenVisitor: SyntaxRewriter {
   // var list = [String]()
-  var tree = [TreeNode]()
+  internal var tree = [TreeNode]()
 
   private var current: TreeNode!
   private var index = 0
@@ -40,14 +40,14 @@ final class TokenVisitor: SyntaxRewriter {
   private let locationConverter: SourceLocationConverter
   private let showMissingTokens: Bool
 
-  init(locationConverter: SourceLocationConverter, showMissingTokens: Bool) {
+  internal init(locationConverter: SourceLocationConverter, showMissingTokens: Bool) {
     self.locationConverter = locationConverter
     self.showMissingTokens = showMissingTokens
     super.init(viewMode: showMissingTokens ? .all : .sourceAccurate)
   }
 
   // swiftlint:disable:next cyclomatic_complexity function_body_length
-  override func visitPre(_ node: Syntax) {
+  override internal func visitPre(_ node: Syntax) {
     let syntaxNodeType = node.syntaxNodeType
 
     let className: String
@@ -94,7 +94,7 @@ final class TokenVisitor: SyntaxRewriter {
     let treeNode = TreeNode(
       id: index,
       text: className,
-      range: Range(
+      range: SourceRange(
         startRow: start.line,
         startColumn: start.column,
         endRow: end.line,
@@ -177,7 +177,7 @@ final class TokenVisitor: SyntaxRewriter {
     current = treeNode
   }
 
-  override func visit(_ token: TokenSyntax) -> TokenSyntax {
+  override internal func visit(_ token: TokenSyntax) -> TokenSyntax {
     current.text = token
       .text
       .escapeHTML()
@@ -186,12 +186,12 @@ final class TokenVisitor: SyntaxRewriter {
 
     current.token = Token(kind: "\(token.tokenKind)", leadingTrivia: "", trailingTrivia: "")
 
-    token.leadingTrivia.forEach { piece in
+    for piece in token.leadingTrivia {
       let trivia = processTriviaPiece(piece)
       current.token?.leadingTrivia += trivia.replaceHTMLWhitespacesWithSymbols()
     }
     processToken(token)
-    token.trailingTrivia.forEach { piece in
+    for piece in token.trailingTrivia {
       let trivia = processTriviaPiece(piece)
       current.token?.trailingTrivia += trivia.replaceHTMLWhitespacesWithSymbols()
     }
@@ -199,7 +199,7 @@ final class TokenVisitor: SyntaxRewriter {
     return token
   }
 
-  override func visitPost(_ node: Syntax) {
+  override internal func visitPost(_ node: Syntax) {
     if let parent = current.parent {
       current = tree[parent]
     } else {

@@ -33,7 +33,8 @@ import SwiftSyntax
 public struct Enum: CodeBlock {
   private let name: String
   private let members: [CodeBlock]
-  private var inheritance: String?
+  private var inheritance: [String] = []
+  private var attributes: [AttributeInfo] = []
 
   /// Creates an `enum` declaration.
   /// - Parameters:
@@ -45,11 +46,22 @@ public struct Enum: CodeBlock {
   }
 
   /// Sets the inheritance for the enum.
-  /// - Parameter type: The type to inherit from.
+  /// - Parameter inheritance: The types to inherit from.
   /// - Returns: A copy of the enum with the inheritance set.
-  public func inherits(_ type: String) -> Self {
+  public func inherits(_ inheritance: String...) -> Self {
     var copy = self
-    copy.inheritance = type
+    copy.inheritance = inheritance
+    return copy
+  }
+
+  /// Adds an attribute to the enum declaration.
+  /// - Parameters:
+  ///   - attribute: The attribute name (without the @ symbol).
+  ///   - arguments: The arguments for the attribute, if any.
+  /// - Returns: A copy of the enum with the attribute added.
+  public func attribute(_ attribute: String, arguments: [String] = []) -> Self {
+    var copy = self
+    copy.attributes.append(AttributeInfo(name: attribute, arguments: arguments))
     return copy
   }
 
@@ -58,11 +70,26 @@ public struct Enum: CodeBlock {
     let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
 
     var inheritanceClause: InheritanceClauseSyntax?
-    if let inheritance = inheritance {
-      let inheritedType = InheritedTypeSyntax(
-        type: IdentifierTypeSyntax(name: .identifier(inheritance)))
+    if !inheritance.isEmpty {
+      let inheritedTypes = inheritance.map { type in
+        InheritedTypeSyntax(
+          type: IdentifierTypeSyntax(name: .identifier(type)))
+      }
       inheritanceClause = InheritanceClauseSyntax(
-        colon: .colonToken(), inheritedTypes: InheritedTypeListSyntax([inheritedType]))
+        colon: .colonToken(),
+        inheritedTypes: InheritedTypeListSyntax(
+          inheritedTypes.enumerated().map { idx, inherited in
+            var inheritedType = inherited
+            if idx < inheritedTypes.count - 1 {
+              inheritedType = inheritedType.with(
+                \.trailingComma,
+                TokenSyntax.commaToken(trailingTrivia: .space)
+              )
+            }
+            return inheritedType
+          }
+        )
+      )
     }
 
     let memberBlock = MemberBlockSyntax(
@@ -76,85 +103,56 @@ public struct Enum: CodeBlock {
     )
 
     return EnumDeclSyntax(
+      attributes: buildAttributeList(from: attributes),
       enumKeyword: enumKeyword,
       name: identifier,
       inheritanceClause: inheritanceClause,
       memberBlock: memberBlock
     )
   }
-}
 
-/// A Swift `case` declaration inside an `enum`.
-public struct EnumCase: CodeBlock {
-  private let name: String
-  private var value: String?
-  private var intValue: Int?
+  private func buildAttributeList(from attributes: [AttributeInfo]) -> AttributeListSyntax {
+    if attributes.isEmpty {
+      return AttributeListSyntax([])
+    }
+    let attributeElements = attributes.map { attributeInfo in
+      let arguments = attributeInfo.arguments
 
-  /// Creates a `case` declaration.
-  /// - Parameter name: The name of the case.
-  public init(_ name: String) {
-    self.name = name
-  }
+      var leftParen: TokenSyntax?
+      var rightParen: TokenSyntax?
+      var argumentsSyntax: AttributeSyntax.Arguments?
 
-  /// Sets the raw value of the case to a string.
-  /// - Parameter value: The string value.
-  /// - Returns: A copy of the case with the raw value set.
-  public func equals(_ value: String) -> Self {
-    var copy = self
-    copy.value = value
-    copy.intValue = nil
-    return copy
-  }
+      if !arguments.isEmpty {
+        leftParen = .leftParenToken()
+        rightParen = .rightParenToken()
 
-  /// Sets the raw value of the case to an integer.
-  /// - Parameter value: The integer value.
-  /// - Returns: A copy of the case with the raw value set.
-  public func equals(_ value: Int) -> Self {
-    var copy = self
-    copy.value = nil
-    copy.intValue = value
-    return copy
-  }
+        let argumentList = arguments.map { argument in
+          DeclReferenceExprSyntax(baseName: .identifier(argument))
+        }
 
-  public var syntax: SyntaxProtocol {
-    let caseKeyword = TokenSyntax.keyword(.case, trailingTrivia: .space)
-    let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
-
-    var initializer: InitializerClauseSyntax?
-    if let value = value {
-      initializer = InitializerClauseSyntax(
-        equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-        value: StringLiteralExprSyntax(
-          openingQuote: .stringQuoteToken(),
-          segments: StringLiteralSegmentListSyntax([
-            .stringSegment(StringSegmentSyntax(content: .stringSegment(value)))
-          ]),
-          closingQuote: .stringQuoteToken()
+        argumentsSyntax = .argumentList(
+          LabeledExprListSyntax(
+            argumentList.enumerated().map { index, expr in
+              var element = LabeledExprSyntax(expression: ExprSyntax(expr))
+              if index < argumentList.count - 1 {
+                element = element.with(\.trailingComma, .commaToken(trailingTrivia: .space))
+              }
+              return element
+            }
+          )
         )
-      )
-    } else if let intValue = intValue {
-      initializer = InitializerClauseSyntax(
-        equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-        value: IntegerLiteralExprSyntax(digits: .integerLiteral(String(intValue)))
+      }
+
+      return AttributeListSyntax.Element(
+        AttributeSyntax(
+          atSign: .atSignToken(),
+          attributeName: IdentifierTypeSyntax(name: .identifier(attributeInfo.name)),
+          leftParen: leftParen,
+          arguments: argumentsSyntax,
+          rightParen: rightParen
+        )
       )
     }
-
-    return EnumCaseDeclSyntax(
-      caseKeyword: caseKeyword,
-      elements: EnumCaseElementListSyntax([
-        EnumCaseElementSyntax(
-          leadingTrivia: .space,
-          _: nil,
-          name: identifier,
-          _: nil,
-          parameterClause: nil,
-          _: nil,
-          rawValue: initializer,
-          _: nil,
-          trailingComma: nil,
-          trailingTrivia: .newline
-        )
-      ])
-    )
+    return AttributeListSyntax(attributeElements)
   }
 }

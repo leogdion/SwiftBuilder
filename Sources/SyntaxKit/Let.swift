@@ -31,17 +31,27 @@ import SwiftSyntax
 
 /// A Swift `let` declaration for use in an `if` statement.
 public struct Let: CodeBlock {
-  let name: String
-  let value: String
+  internal let name: String
+  internal let value: CodeBlock
 
   /// Creates a `let` declaration for an `if` statement.
   /// - Parameters:
   ///   - name: The name of the constant.
   ///   - value: The value to assign to the constant.
-  public init(_ name: String, _ value: String) {
+  public init(_ name: String, _ value: CodeBlock) {
     self.name = name
     self.value = value
   }
+
+  /// Creates a `let` declaration for an `if` statement with a string value.
+  /// - Parameters:
+  ///   - name: The name of the constant.
+  ///   - value: The string value to assign to the constant.
+  public init(_ name: String, _ value: String) {
+    self.name = name
+    self.value = VariableExp(value)
+  }
+
   public var syntax: SyntaxProtocol {
     CodeBlockItemSyntax(
       item: .decl(
@@ -53,7 +63,8 @@ public struct Let: CodeBlock {
                 pattern: IdentifierPatternSyntax(identifier: .identifier(name)),
                 initializer: InitializerClauseSyntax(
                   equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-                  value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
+                  value: value.syntax.as(ExprSyntax.self)
+                    ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
                 )
               )
             ])

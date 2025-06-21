@@ -33,10 +33,10 @@ import SwiftSyntax
 // MARK: - Wrapper `CodeBlock` that injects leading trivia
 
 internal struct CommentedCodeBlock: CodeBlock {
-  let base: CodeBlock
-  let lines: [Line]
+  internal let base: CodeBlock
+  internal let lines: [Line]
 
-  var syntax: SyntaxProtocol {
+  internal var syntax: SyntaxProtocol {
     // Shortcut if there are no comment lines
     guard !lines.isEmpty else { return base.syntax }
 

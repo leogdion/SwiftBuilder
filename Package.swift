@@ -3,6 +3,7 @@
 
 import PackageDescription
 
+// swiftlint:disable:next explicit_top_level_acl explicit_acl
 let package = Package(
   name: "SyntaxKit",
   platforms: [

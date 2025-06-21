@@ -29,18 +29,18 @@
 
 import Foundation
 
-final class TreeNode: Codable {
-  let id: Int
-  var parent: Int?
+internal final class TreeNode: Codable {
+  internal let id: Int
+  internal var parent: Int?
 
-  var text: String
-  var range = Range(
+  internal var text: String
+  internal var range = SourceRange(
     startRow: 0, startColumn: 0, endRow: 0, endColumn: 0)
-  var structure = [StructureProperty]()
-  var type: SyntaxType
-  var token: Token?
+  internal var structure = [StructureProperty]()
+  internal var type: SyntaxType
+  internal var token: Token?
 
-  init(id: Int, text: String, range: Range, type: SyntaxType) {
+  init(id: Int, text: String, range: SourceRange, type: SyntaxType) {
     self.id = id
     self.text = text.escapeHTML()
     self.range = range
@@ -68,111 +68,5 @@ extension TreeNode: CustomStringConvertible {
       token: \(String(describing: token))
     }
     """
-  }
-}
-
-struct Range: Codable, Equatable {
-  let startRow: Int
-  let startColumn: Int
-  let endRow: Int
-  let endColumn: Int
-}
-
-extension Range: CustomStringConvertible {
-  var description: String {
-    """
-    {
-      startRow: \(startRow)
-      startColumn: \(startColumn)
-      endRow: \(endRow)
-      endColumn: \(endColumn)
-    }
-    """
-  }
-}
-
-struct StructureProperty: Codable, Equatable {
-  let name: String
-  let value: StructureValue?
-  let ref: String?
-
-  init(name: String, value: StructureValue? = nil, ref: String? = nil) {
-    self.name = name.escapeHTML()
-    self.value = value
-    self.ref = ref?.escapeHTML()
-  }
-}
-
-extension StructureProperty: CustomStringConvertible {
-  var description: String {
-    """
-    {
-      name: \(name)
-      value: \(String(describing: value))
-      ref: \(String(describing: ref))
-    }
-    """
-  }
-}
-
-struct StructureValue: Codable, Equatable {
-  let text: String
-  let kind: String?
-
-  init(text: String, kind: String? = nil) {
-    self.text = text.escapeHTML().replaceHTMLWhitespacesToSymbols()
-    self.kind = kind?.escapeHTML()
-  }
-}
-
-extension StructureValue: CustomStringConvertible {
-  var description: String {
-    """
-    {
-      text: \(text)
-      kind: \(String(describing: kind))
-    }
-    """
-  }
-}
-
-enum SyntaxType: String, Codable {
-  case decl
-  case expr
-  case pattern
-  case type
-  case collection
-  case other
-}
-
-struct Token: Codable, Equatable {
-  let kind: String
-  var leadingTrivia: String
-  var trailingTrivia: String
-
-  init(kind: String, leadingTrivia: String, trailingTrivia: String) {
-    self.kind = kind.escapeHTML()
-    self.leadingTrivia = leadingTrivia
-    self.trailingTrivia = trailingTrivia
-  }
-}
-
-extension Token: CustomStringConvertible {
-  var description: String {
-    """
-    {
-      kind: \(kind)
-      leadingTrivia: \(leadingTrivia)
-      trailingTrivia: \(trailingTrivia)
-    }
-    """
-  }
-}
-
-extension String {
-  fileprivate func replaceHTMLWhitespacesToSymbols() -> String {
-    self
-      .replacingOccurrences(of: "&nbsp;", with: "<span class='whitespace'>␣</span>")
-      .replacingOccurrences(of: "<br>", with: "<span class='newline'>↲</span>")
   }
 }

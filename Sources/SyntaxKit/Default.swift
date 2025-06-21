@@ -52,8 +52,8 @@ public struct Default: CodeBlock {
         return item?.with(\.trailingTrivia, .newline)
       })
     let label = SwitchDefaultLabelSyntax(
-      defaultKeyword: .keyword(.default, trailingTrivia: .space),
-      colon: .colonToken()
+      defaultKeyword: .keyword(.default),
+      colon: .colonToken(trailingTrivia: .newline)
     )
     return SwitchCaseSyntax(
       label: .default(label),
