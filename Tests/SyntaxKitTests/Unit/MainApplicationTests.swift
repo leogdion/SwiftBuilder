@@ -74,10 +74,10 @@ internal struct MainApplicationTests {
     for index in 1...50 {
       largeCode += """
         struct Struct\(index) {
-            let property\(index): String
-            func method\(index)() -> String {
-                return "value\(index)"
-            }
+          let property\(index): String
+          func method\(index)() -> String {
+            return "value\(index)"
+          }
         }
 
         """
@@ -146,16 +146,16 @@ internal struct MainApplicationTests {
   internal func testMainApplicationIntegrationWithComplexSwiftCode() throws {
     let code = """
       @objc class MyClass: NSObject {
-          @Published var property: String = "default"
+        @Published var property: String = "default"
 
-          func method(@escaping completion: @escaping (String) -> Void) {
-              completion("result")
-          }
+        func method(@escaping completion: @escaping (String) -> Void) {
+          completion("result")
+        }
 
-          enum NestedEnum: Int {
-              case first = 1
-              case second = 2
-          }
+        enum NestedEnum: Int {
+          case first = 1
+          case second = 2
+        }
       }
       """
 
