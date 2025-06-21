@@ -45,7 +45,7 @@ extension Variable {
     self.init(
       kind: kind,
       name: name,
-      type: nil, // Will be inferred from Init
+      type: nil,  // Will be inferred from Init
       defaultValue: defaultValue,
       explicitType: explicitType ?? false
     )

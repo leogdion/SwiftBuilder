@@ -56,7 +56,7 @@ public struct Variable: CodeBlock {
   ) {
     self.kind = kind
     self.name = name
-    
+
     // If type is provided, use it; otherwise try to infer from defaultValue
     if let providedType = type {
       self.type = providedType
@@ -65,7 +65,7 @@ public struct Variable: CodeBlock {
     } else {
       self.type = ""
     }
-    
+
     self.defaultValue = defaultValue
     self.explicitType = explicitType
   }

@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the "Software"), to deal in the Software without
+//  files (the “Software”), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -69,17 +69,19 @@ public struct Catch: CodeBlock {
     var catchItems: CatchItemListSyntax?
     if let pattern = pattern {
       let patternSyntax: PatternSyntax
-      
+
       if let enumCase = pattern as? EnumCase {
         if let associated = enumCase.caseAssociatedValue {
           // Handle EnumCase with associated value
           // Split the case name into type and case if needed
           let baseName = enumCase.caseName
           let baseParts = baseName.split(separator: ".")
-          let (typeName, caseName) = baseParts.count == 2 ? (String(baseParts[0]), String(baseParts[1])) : ("", baseName)
+          let (typeName, caseName) =
+            baseParts.count == 2 ? (String(baseParts[0]), String(baseParts[1])) : ("", baseName)
           // Build the pattern: Type.caseName(let associatedName)
           let memberAccess = MemberAccessExprSyntax(
-            base: typeName.isEmpty ? nil : ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(typeName))),
+            base: typeName.isEmpty
+              ? nil : ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(typeName))),
             dot: .periodToken(),
             name: .identifier(caseName)
           )
@@ -91,7 +93,8 @@ public struct Catch: CodeBlock {
                 pattern: PatternSyntax(
                   ValueBindingPatternSyntax(
                     bindingSpecifier: .keyword(.let, trailingTrivia: .space),
-                    pattern: PatternSyntax(IdentifierPatternSyntax(identifier: .identifier(associated.name)))
+                    pattern: PatternSyntax(
+                      IdentifierPatternSyntax(identifier: .identifier(associated.name)))
                   )
                 ),
                 trailingComma: nil
@@ -103,7 +106,8 @@ public struct Catch: CodeBlock {
           let enumPattern = ExpressionPatternSyntax(
             expression: ExprSyntax(
               MemberAccessExprSyntax(
-                base: typeName.isEmpty ? nil : ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(typeName))),
+                base: typeName.isEmpty
+                  ? nil : ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(typeName))),
                 dot: .periodToken(),
                 name: .identifier(caseName)
               )
@@ -118,7 +122,8 @@ public struct Catch: CodeBlock {
                   pattern: PatternSyntax(
                     ValueBindingPatternSyntax(
                       bindingSpecifier: .keyword(.let, trailingTrivia: .space),
-                      pattern: PatternSyntax(IdentifierPatternSyntax(identifier: .identifier(associated.name)))
+                      pattern: PatternSyntax(
+                        IdentifierPatternSyntax(identifier: .identifier(associated.name)))
                     )
                   ),
                   trailingComma: nil
@@ -143,7 +148,8 @@ public struct Catch: CodeBlock {
                           pattern: PatternSyntax(
                             ValueBindingPatternSyntax(
                               bindingSpecifier: .keyword(.let, trailingTrivia: .space),
-                              pattern: PatternSyntax(IdentifierPatternSyntax(identifier: .identifier(associated.name)))
+                              pattern: PatternSyntax(
+                                IdentifierPatternSyntax(identifier: .identifier(associated.name)))
                             )
                           )
                         )
@@ -174,7 +180,7 @@ public struct Catch: CodeBlock {
           )
         )
       }
-      
+
       catchItems = CatchItemListSyntax([
         CatchItemSyntax(pattern: patternSyntax)
       ])
@@ -208,4 +214,4 @@ public struct Catch: CodeBlock {
   public var syntax: SyntaxProtocol {
     catchClauseSyntax
   }
-} 
+}
