@@ -200,7 +200,7 @@ internal struct EdgeCaseTests {
     }
 
     let generated = function.generateCode()
-    #expect(generated.contains("func greet(name: String = \"World\")"))
+    #expect(generated.contains("func greet(name : String = \"World\")"))
   }
 
   // MARK: - Enum Case Tests

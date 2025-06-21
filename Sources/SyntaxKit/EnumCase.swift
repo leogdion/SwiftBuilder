@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -33,12 +33,25 @@ import SwiftSyntax
 public struct EnumCase: CodeBlock {
   private let name: String
   private var literalValue: Literal?
+  private var associatedValue: (name: String, type: String)?
 
   /// Creates a `case` declaration.
   /// - Parameter name: The name of the case.
   public init(_ name: String) {
     self.name = name
     self.literalValue = nil
+    self.associatedValue = nil
+  }
+
+  /// Sets the associated value for the case.
+  /// - Parameters:
+  ///   - name: The name of the associated value.
+  ///   - type: The type of the associated value.
+  /// - Returns: A copy of the case with the associated value set.
+  public func associatedValue(_ name: String, type: String) -> Self {
+    var copy = self
+    copy.associatedValue = (name: name, type: type)
+    return copy
   }
 
   /// Sets the raw value of the case to a Literal.
@@ -74,6 +87,21 @@ public struct EnumCase: CodeBlock {
   public var syntax: SyntaxProtocol {
     let caseKeyword = TokenSyntax.keyword(.case, trailingTrivia: .space)
     let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
+
+    var parameterClause: EnumCaseParameterClauseSyntax?
+    if let associated = associatedValue {
+      let parameter = EnumCaseParameterSyntax(
+        firstName: .identifier(associated.name),
+        secondName: .identifier(associated.name),
+        colon: .colonToken(leadingTrivia: .space, trailingTrivia: .space),
+        type: TypeSyntax(IdentifierTypeSyntax(name: .identifier(associated.type)))
+      )
+      parameterClause = EnumCaseParameterClauseSyntax(
+        leftParen: .leftParenToken(),
+        parameters: EnumCaseParameterListSyntax([parameter]),
+        rightParen: .rightParenToken()
+      )
+    }
 
     var initializer: InitializerClauseSyntax?
     if let literal = literalValue {
@@ -131,7 +159,7 @@ public struct EnumCase: CodeBlock {
           _: nil,
           name: identifier,
           _: nil,
-          parameterClause: nil,
+          parameterClause: parameterClause,
           _: nil,
           rawValue: initializer,
           _: nil,

@@ -154,8 +154,13 @@ extension Variable {
       defaultValue = Literal.array(array.map { .string($0) })
     } else if let dict = value as? [Int: String] {
       defaultValue = Literal.dictionary(dict.map { (.integer($0.key), .string($0.value)) })
+    } else if let dictExpr = value as? DictionaryExpr {
+      defaultValue = dictExpr
+    } else if let initExpr = value as? Init {
+      defaultValue = initExpr
     } else {
-      fatalError("Variable: Only Literal types are supported for defaultValue. Got: \(T.self)")
+      // For any other LiteralValue type, use it directly as a CodeBlock
+      defaultValue = value as! CodeBlock
     }
 
     self.init(

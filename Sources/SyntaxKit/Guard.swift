@@ -107,13 +107,16 @@ public struct Guard: CodeBlock {
     }
 
     // Automatically append a bare `return` if the user didn't provide a terminating statement.
-    let containsReturn = elseItems.contains { item in
+    let containsTerminatingStatement = elseItems.contains { item in
       if case .stmt(let stmt) = item.item {
-        return stmt.is(ReturnStmtSyntax.self)
+        return stmt.is(ReturnStmtSyntax.self) || 
+               stmt.is(ThrowStmtSyntax.self) || 
+               stmt.is(BreakStmtSyntax.self) || 
+               stmt.is(ContinueStmtSyntax.self)
       }
       return false
     }
-    if !containsReturn {
+    if !containsTerminatingStatement {
       let retStmt = ReturnStmtSyntax(returnKeyword: .keyword(.return))
       elseItems.append(
         CodeBlockItemSyntax(item: .stmt(StmtSyntax(retStmt))).with(\.trailingTrivia, .newline)

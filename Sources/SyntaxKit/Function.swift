@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -37,7 +37,18 @@ public struct Function: CodeBlock {
   private let body: [CodeBlock]
   private var isStatic: Bool = false
   private var isMutating: Bool = false
+  private var effect: Effect = .none
   private var attributes: [AttributeInfo] = []
+
+  /// Function effect specifiers (async/throws combinations)
+  private enum Effect {
+    case none
+    /// synchronous effect specifier: throws or rethrows
+    case `throws`(isRethrows: Bool)
+    case async
+    /// combined async and throws/rethrows
+    case asyncThrows(isRethrows: Bool)
+  }
 
   /// Creates a `func` declaration.
   /// - Parameters:
@@ -87,6 +98,29 @@ public struct Function: CodeBlock {
     return copy
   }
 
+  /// Marks the function as `throws` or `rethrows`.
+  /// - Parameter rethrows: Pass `true` to emit `rethrows` instead of `throws`.
+  public func `throws`(isRethrows: Bool = false) -> Self {
+    var copy = self
+    copy.effect = .throws(isRethrows: isRethrows)
+    return copy
+  }
+
+  /// Marks the function as `async`.
+  public func async() -> Self {
+    var copy = self
+    copy.effect = .async
+    return copy
+  }
+
+  /// Marks the function as `async throws` or `async rethrows`.
+  /// - Parameter rethrows: Pass `true` to emit `async rethrows`.
+  public func asyncThrows(isRethrows: Bool = false) -> Self {
+    var copy = self
+    copy.effect = .asyncThrows(isRethrows: isRethrows)
+    return copy
+  }
+
   /// Adds an attribute to the function declaration.
   /// - Parameters:
   ///   - attribute: The attribute name (without the @ symbol).
@@ -103,41 +137,49 @@ public struct Function: CodeBlock {
     let identifier = TokenSyntax.identifier(name)
 
     // Build parameter list
-    let paramList: FunctionParameterListSyntax
-    if parameters.isEmpty {
-      paramList = FunctionParameterListSyntax([])
-    } else {
-      paramList = FunctionParameterListSyntax(
-        parameters.enumerated().compactMap { index, param in
-          guard !param.name.isEmpty, !param.type.isEmpty else { return nil }
+    let paramList: FunctionParameterListSyntax = FunctionParameterListSyntax(
+      parameters.enumerated().compactMap { index, param in
+        // Skip empty placeholders (possible in some builder scenarios)
+        guard !param.name.isEmpty || param.defaultValue != nil else { return nil }
 
-          // Build parameter attributes
-          let paramAttributes = buildAttributeList(from: param.attributes)
+        // Attributes for parameter
+        let paramAttributes = buildAttributeList(from: param.attributes)
 
-          // Determine spacing for firstName based on whether attributes are present
-          let firstNameLeadingTrivia: Trivia = paramAttributes.isEmpty ? [] : .space
+        let firstNameLeading: Trivia = paramAttributes.isEmpty ? [] : .space
 
-          var paramSyntax = FunctionParameterSyntax(
-            attributes: paramAttributes,
-            firstName: param.isUnnamed
-              ? .wildcardToken(leadingTrivia: firstNameLeadingTrivia, trailingTrivia: .space)
-              : .identifier(param.name, leadingTrivia: firstNameLeadingTrivia),
-            secondName: param.isUnnamed ? .identifier(param.name) : nil,
-            colon: .colonToken(trailingTrivia: .space),
-            type: IdentifierTypeSyntax(name: .identifier(param.type)),
-            defaultValue: param.defaultValue.map {
-              InitializerClauseSyntax(
-                equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-                value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier($0)))
-              )
-            }
-          )
-          if index < parameters.count - 1 {
-            paramSyntax = paramSyntax.with(\.trailingComma, .commaToken(trailingTrivia: .space))
+        // Determine first & second names
+        let firstNameToken: TokenSyntax
+        let secondNameToken: TokenSyntax?
+
+        if param.isUnnamed {
+          firstNameToken = .wildcardToken(leadingTrivia: firstNameLeading, trailingTrivia: .space)
+          secondNameToken = .identifier(param.name)
+        } else if let label = param.label {
+          firstNameToken = .identifier(label, leadingTrivia: firstNameLeading, trailingTrivia: .space)
+          secondNameToken = .identifier(param.name)
+        } else {
+          firstNameToken = .identifier(param.name, leadingTrivia: firstNameLeading, trailingTrivia: .space)
+          secondNameToken = nil
+        }
+
+        var paramSyntax = FunctionParameterSyntax(
+          attributes: paramAttributes,
+          firstName: firstNameToken,
+          secondName: secondNameToken,
+          colon: .colonToken(trailingTrivia: .space),
+          type: IdentifierTypeSyntax(name: .identifier(param.type)),
+          defaultValue: param.defaultValue.map {
+            InitializerClauseSyntax(
+              equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+              value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier($0)))
+            )
           }
-          return paramSyntax
-        })
-    }
+        )
+        if index < parameters.count - 1 {
+          paramSyntax = paramSyntax.with(\.trailingComma, .commaToken(trailingTrivia: .space))
+        }
+        return paramSyntax
+      })
 
     // Build return type if specified
     var returnClause: ReturnClauseSyntax?
@@ -166,6 +208,29 @@ public struct Function: CodeBlock {
       rightBrace: .rightBraceToken(leadingTrivia: .newline)
     )
 
+    // Build effect specifiers (async / throws)
+    let effectSpecifiers: FunctionEffectSpecifiersSyntax? = {
+      switch effect {
+      case .none:
+        return nil
+      case .throws(let isRethrows):
+        return FunctionEffectSpecifiersSyntax(
+          asyncSpecifier: nil,
+          throwsSpecifier: .keyword(isRethrows ? .rethrows : .throws, leadingTrivia: .space, trailingTrivia: .space)
+        )
+      case .async:
+        return FunctionEffectSpecifiersSyntax(
+          asyncSpecifier: .keyword(.async, leadingTrivia: .space, trailingTrivia: .space),
+          throwsSpecifier: nil
+        )
+      case .asyncThrows(let isRethrows):
+        return FunctionEffectSpecifiersSyntax(
+          asyncSpecifier: .keyword(.async, leadingTrivia: .space, trailingTrivia: .space),
+          throwsSpecifier: .keyword(isRethrows ? .rethrows : .throws, leadingTrivia: .space, trailingTrivia: .space)
+        )
+      }
+    }()
+
     // Build modifiers
     var modifiers: DeclModifierListSyntax = []
     if isStatic {
@@ -192,7 +257,7 @@ public struct Function: CodeBlock {
           parameters: paramList,
           rightParen: .rightParenToken()
         ),
-        effectSpecifiers: nil,
+        effectSpecifiers: effectSpecifiers,
         returnClause: returnClause
       ),
       genericWhereClause: nil,
