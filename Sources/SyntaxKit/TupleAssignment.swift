@@ -1,5 +1,5 @@
 //
-//  Tuple.swift
+//  TupleAssignment.swift
 //  SyntaxKit
 //
 //  Created by Leo Dion.
@@ -29,50 +29,32 @@
 
 import SwiftSyntax
 
-/// A tuple expression, e.g. `(a, b, c)`.
-public struct Tuple: CodeBlock {
-  private let elements: [CodeBlock]
+/// A tuple destructuring pattern for variable declarations.
+public struct TupleAssignment: CodeBlock {
+  private let elements: [String]
+  private let value: CodeBlock
   private var isAsync: Bool = false
   private var isThrowing: Bool = false
 
-  /// Creates a tuple expression comprising the supplied elements.
-  /// - Parameter content: A ``CodeBlockBuilder`` producing the tuple elements **in order**.
-  /// Elements may be any `CodeBlock` that can be represented as an expression (see
-  /// `CodeBlock.expr`).
-  public init(@CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
-    self.elements = content()
+  /// Creates a tuple destructuring declaration.
+  /// - Parameters:
+  ///   - elements: The names of the variables to destructure into.
+  ///   - value: The expression to destructure.
+  public init(_ elements: [String], equals value: CodeBlock) {
+    self.elements = elements
+    self.value = value
   }
 
-  /// Creates a tuple pattern for switch cases.
-  /// - Parameter elements: Array of pattern elements, where `nil` represents a wildcard pattern.
-  public static func pattern(_ elements: [PatternConvertible?]) -> TuplePattern {
-    TuplePattern(elements: elements)
-  }
-
-  /// Creates a tuple pattern that can be used as a CodeBlock.
-  /// - Parameter elements: Array of pattern elements, where `nil` represents a wildcard pattern.
-  public static func patternCodeBlock(_ elements: [PatternConvertible?]) -> TuplePatternCodeBlock {
-    TuplePatternCodeBlock(elements: elements)
-  }
-
-  /// Marks this tuple as async.
-  /// - Returns: A copy of the tuple marked as async.
+  /// Marks this destructuring as async.
+  /// - Returns: A copy of the destructuring marked as async.
   public func async() -> Self {
     var copy = self
     copy.isAsync = true
     return copy
   }
 
-  /// Marks this tuple as await.
-  /// - Returns: A copy of the tuple marked as await.
-  public func await() -> Self {
-    var copy = self
-    copy.isAsync = true
-    return copy
-  }
-
-  /// Marks this tuple as throwing.
-  /// - Returns: A copy of the tuple marked as throwing.
+  /// Marks this destructuring as throwing.
+  /// - Returns: A copy of the destructuring marked as throwing.
   public func throwing() -> Self {
     var copy = self
     copy.isThrowing = true
@@ -80,51 +62,69 @@ public struct Tuple: CodeBlock {
   }
 
   public var syntax: SyntaxProtocol {
-    guard !elements.isEmpty else {
-      fatalError("Tuple must contain at least one element.")
-    }
-
-    let list = TupleExprElementListSyntax(
-      elements.enumerated().map { index, block in
-        let elementExpr = block.expr
-        return TupleExprElementSyntax(
+    // Build the tuple pattern
+    let patternElements = TuplePatternElementListSyntax(
+      elements.enumerated().map { index, element in
+        TuplePatternElementSyntax(
           label: nil,
           colon: nil,
-          expression: elementExpr,
+          pattern: PatternSyntax(IdentifierPatternSyntax(identifier: .identifier(element))),
           trailingComma: index < elements.count - 1 ? .commaToken(trailingTrivia: .space) : nil
         )
       }
     )
 
-    let tupleExpr = ExprSyntax(
-      TupleExprSyntax(
+    let tuplePattern = PatternSyntax(
+      TuplePatternSyntax(
         leftParen: .leftParenToken(),
-        elements: list,
+        elements: patternElements,
         rightParen: .rightParenToken()
       )
     )
 
+    // Build the value expression
+    let valueExpr: ExprSyntax
     if isThrowing {
-      return ExprSyntax(
+      valueExpr = ExprSyntax(
         TryExprSyntax(
           tryKeyword: .keyword(.try, trailingTrivia: .space),
           expression: isAsync
             ? ExprSyntax(
               AwaitExprSyntax(
                 awaitKeyword: .keyword(.await, trailingTrivia: .space),
-                expression: tupleExpr
-              )) : tupleExpr
+                expression: value.syntax.as(ExprSyntax.self)
+                  ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
+              ))
+            : value.syntax.as(ExprSyntax.self)
+              ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
         )
       )
     } else if isAsync {
-      return ExprSyntax(
+      valueExpr = ExprSyntax(
         AwaitExprSyntax(
           awaitKeyword: .keyword(.await, trailingTrivia: .space),
-          expression: tupleExpr
+          expression: value.syntax.as(ExprSyntax.self)
+            ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
         )
       )
     } else {
-      return tupleExpr
+      valueExpr =
+        value.syntax.as(ExprSyntax.self)
+        ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
     }
+
+    // Build the variable declaration
+    return VariableDeclSyntax(
+      bindingSpecifier: .keyword(.let, trailingTrivia: .space),
+      bindings: PatternBindingListSyntax([
+        PatternBindingSyntax(
+          pattern: tuplePattern,
+          initializer: InitializerClauseSyntax(
+            equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
+            value: valueExpr
+          )
+        )
+      ])
+    )
   }
 }

@@ -33,12 +33,31 @@ import SwiftSyntax
 public struct EnumCase: CodeBlock {
   private let name: String
   private var literalValue: Literal?
+  private var associatedValue: (name: String, type: String)?
+
+  /// The name of the enum case.
+  public var caseName: String { name }
+
+  /// The associated value for the enum case, if any.
+  public var caseAssociatedValue: (name: String, type: String)? { associatedValue }
 
   /// Creates a `case` declaration.
   /// - Parameter name: The name of the case.
   public init(_ name: String) {
     self.name = name
     self.literalValue = nil
+    self.associatedValue = nil
+  }
+
+  /// Sets the associated value for the case.
+  /// - Parameters:
+  ///   - name: The name of the associated value.
+  ///   - type: The type of the associated value.
+  /// - Returns: A copy of the case with the associated value set.
+  public func associatedValue(_ name: String, type: String) -> Self {
+    var copy = self
+    copy.associatedValue = (name: name, type: type)
+    return copy
   }
 
   /// Sets the raw value of the case to a Literal.
@@ -71,9 +90,65 @@ public struct EnumCase: CodeBlock {
     self.equals(.float(value))
   }
 
+  /// Returns a SwiftSyntax expression for this enum case (for use in throw/return/etc).
+  public var asExpressionSyntax: ExprSyntax {
+    // Support qualified (Type.case) and unqualified (.case) forms
+    let parts = name.split(separator: ".", maxSplits: 1)
+    let base: ExprSyntax? =
+      parts.count == 2
+      ? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(String(parts[0])))) : nil
+    let caseName = parts.count == 2 ? String(parts[1]) : name
+
+    let memberAccess = MemberAccessExprSyntax(
+      base: base,
+      dot: .periodToken(),
+      name: .identifier(caseName)
+    )
+
+    if let associated = associatedValue {
+      // .caseName(associated)
+      let tuple = TupleExprSyntax(
+        leftParen: .leftParenToken(),
+        elements: TupleExprElementListSyntax([
+          TupleExprElementSyntax(
+            label: nil,
+            colon: nil,
+            expression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(associated.name))),
+            trailingComma: nil
+          )
+        ]),
+        rightParen: .rightParenToken()
+      )
+      return ExprSyntax(
+        FunctionCallExprSyntax(
+          calledExpression: ExprSyntax(memberAccess),
+          leftParen: tuple.leftParen,
+          arguments: tuple.elements,
+          rightParen: tuple.rightParen
+        ))
+    } else {
+      return ExprSyntax(memberAccess)
+    }
+  }
+
   public var syntax: SyntaxProtocol {
     let caseKeyword = TokenSyntax.keyword(.case, trailingTrivia: .space)
     let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
+
+    var parameterClause: EnumCaseParameterClauseSyntax?
+    if let associated = associatedValue {
+      let parameter = EnumCaseParameterSyntax(
+        firstName: .identifier(associated.name),
+        secondName: .identifier(associated.name),
+        colon: .colonToken(leadingTrivia: .space, trailingTrivia: .space),
+        type: TypeSyntax(IdentifierTypeSyntax(name: .identifier(associated.type)))
+      )
+      parameterClause = EnumCaseParameterClauseSyntax(
+        leftParen: .leftParenToken(),
+        parameters: EnumCaseParameterListSyntax([parameter]),
+        rightParen: .rightParenToken()
+      )
+    }
 
     var initializer: InitializerClauseSyntax?
     if let literal = literalValue {
@@ -131,7 +206,7 @@ public struct EnumCase: CodeBlock {
           _: nil,
           name: identifier,
           _: nil,
-          parameterClause: nil,
+          parameterClause: parameterClause,
           _: nil,
           rawValue: initializer,
           _: nil,
