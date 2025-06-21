@@ -130,3 +130,4 @@ disabled_rules:
     - closure_parameter_position
     - trailing_comma
     - opening_brace
+    - optional_data_string_conversion

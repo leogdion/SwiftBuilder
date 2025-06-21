@@ -27,41 +27,38 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import Foundation
 import SwiftSyntax
 
 /// A Swift `let` or `var` declaration with an explicit type.
 public struct Variable: CodeBlock {
-  private let kind: VariableKind
-  private let name: String
-  private let type: String
-  private let defaultValue: String?
-  private var isStatic: Bool = false
-  private var attributes: [AttributeInfo] = []
+  let kind: VariableKind
+  let name: String
+  let type: String
+  let defaultValue: CodeBlock?
+  var isStatic: Bool = false
+  var attributes: [AttributeInfo] = []
+  var explicitType: Bool = false
 
-  /// Creates a `let` or `var` declaration with an explicit type.
+  /// Internal initializer used by extension initializers to reduce code duplication.
   /// - Parameters:
   ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
   ///   - name: The name of the variable.
   ///   - type: The type of the variable.
-  ///   - defaultValue: The initial value of the variable, if any.
-  public init(_ kind: VariableKind, name: String, type: String, equals defaultValue: String? = nil)
-  {
+  ///   - defaultValue: The initial value expression of the variable, if any.
+  ///   - explicitType: Whether the variable has an explicit type.
+  internal init(
+    kind: VariableKind,
+    name: String,
+    type: String,
+    defaultValue: CodeBlock? = nil,
+    explicitType: Bool = false
+  ) {
     self.kind = kind
     self.name = name
     self.type = type
     self.defaultValue = defaultValue
-  }
-
-  /// Creates a `let` or `var` declaration with a literal value.
-  /// - Parameters:
-  ///   - kind: The kind of variable, either ``VariableKind/let`` or ``VariableKind/var``.
-  ///   - name: The name of the variable.
-  ///   - value: A literal value that conforms to ``LiteralValue``.
-  public init<T: LiteralValue>(_ kind: VariableKind, name: String, equals value: T) {
-    self.kind = kind
-    self.name = name
-    self.type = value.typeName
-    self.defaultValue = value.literalString
+    self.explicitType = explicitType
   }
 
   /// Marks the variable as `static`.
@@ -83,28 +80,41 @@ public struct Variable: CodeBlock {
     return copy
   }
 
+  public func withExplicitType() -> Self {
+    var copy = self
+    copy.explicitType = true
+    return copy
+  }
+
   public var syntax: SyntaxProtocol {
     let bindingKeyword = TokenSyntax.keyword(kind == .let ? .let : .var, trailingTrivia: .space)
     let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
-    let typeAnnotation = TypeAnnotationSyntax(
-      colon: .colonToken(leadingTrivia: .space, trailingTrivia: .space),
-      type: IdentifierTypeSyntax(name: .identifier(type))
-    )
-
+    let typeAnnotation: TypeAnnotationSyntax? =
+      (explicitType && !type.isEmpty)
+      ? TypeAnnotationSyntax(
+        colon: .colonToken(leadingTrivia: .space, trailingTrivia: .space),
+        type: IdentifierTypeSyntax(name: .identifier(type))
+      ) : nil
     let initializer = defaultValue.map { value in
-      InitializerClauseSyntax(
+      let expr: ExprSyntax
+      if let exprBlock = value as? ExprCodeBlock {
+        expr = exprBlock.exprSyntax
+      } else if let exprSyntax = value.syntax.as(ExprSyntax.self) {
+        expr = exprSyntax
+      } else {
+        expr = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
+      }
+      return InitializerClauseSyntax(
         equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-        value: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(value)))
+        value: expr
       )
     }
-
     var modifiers: DeclModifierListSyntax = []
     if isStatic {
       modifiers = DeclModifierListSyntax([
         DeclModifierSyntax(name: .keyword(.static, trailingTrivia: .space))
       ])
     }
-
     return VariableDeclSyntax(
       attributes: buildAttributeList(from: attributes),
       modifiers: modifiers,

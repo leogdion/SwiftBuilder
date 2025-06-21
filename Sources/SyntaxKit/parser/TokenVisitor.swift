@@ -94,7 +94,7 @@ internal final class TokenVisitor: SyntaxRewriter {
     let treeNode = TreeNode(
       id: index,
       text: className,
-      range: Range(
+      range: SourceRange(
         startRow: start.line,
         startColumn: start.column,
         endRow: end.line,
@@ -186,12 +186,12 @@ internal final class TokenVisitor: SyntaxRewriter {
 
     current.token = Token(kind: "\(token.tokenKind)", leadingTrivia: "", trailingTrivia: "")
 
-    token.leadingTrivia.forEach { piece in
+    for piece in token.leadingTrivia {
       let trivia = processTriviaPiece(piece)
       current.token?.leadingTrivia += trivia.replaceHTMLWhitespacesWithSymbols()
     }
     processToken(token)
-    token.trailingTrivia.forEach { piece in
+    for piece in token.trailingTrivia {
       let trivia = processTriviaPiece(piece)
       current.token?.trailingTrivia += trivia.replaceHTMLWhitespacesWithSymbols()
     }

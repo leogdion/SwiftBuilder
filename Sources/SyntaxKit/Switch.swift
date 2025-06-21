@@ -31,21 +31,34 @@ import SwiftSyntax
 
 /// A `switch` statement.
 public struct Switch: CodeBlock {
-  private let expression: String
+  private let expression: CodeBlock
   private let cases: [CodeBlock]
 
   /// Creates a `switch` statement.
   /// - Parameters:
   ///   - expression: The expression to switch on.
   ///   - content: A ``CodeBlockBuilder`` that provides the cases for the switch.
-  public init(_ expression: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
+  public init(_ expression: CodeBlock, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
     self.expression = expression
     self.cases = content()
   }
 
+  /// Convenience initializer that accepts a string expression.
+  /// - Parameters:
+  ///   - expression: The string expression to switch on.
+  ///   - content: A ``CodeBlockBuilder`` that provides the cases for the switch.
+  public init(_ expression: String, @CodeBlockBuilderResult _ content: () -> [CodeBlock]) {
+    self.expression = VariableExp(expression)
+    self.cases = content()
+  }
+
   public var syntax: SyntaxProtocol {
-    let expr = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(expression)))
+    let expr = ExprSyntax(
+      fromProtocol: expression.syntax.as(ExprSyntax.self)
+        ?? DeclReferenceExprSyntax(baseName: .identifier(""))
+    )
     let casesArr: [SwitchCaseSyntax] = self.cases.compactMap {
+      if let tupleCase = $0 as? Case { return tupleCase.switchCaseSyntax }
       if let switchCase = $0 as? SwitchCase { return switchCase.switchCaseSyntax }
       if let switchDefault = $0 as? Default { return switchDefault.switchCaseSyntax }
       return nil

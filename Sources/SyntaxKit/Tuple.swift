@@ -41,6 +41,18 @@ public struct Tuple: CodeBlock {
     self.elements = content()
   }
 
+  /// Creates a tuple pattern for switch cases.
+  /// - Parameter elements: Array of pattern elements, where `nil` represents a wildcard pattern.
+  public static func pattern(_ elements: [PatternConvertible?]) -> TuplePattern {
+    TuplePattern(elements: elements)
+  }
+
+  /// Creates a tuple pattern that can be used as a CodeBlock.
+  /// - Parameter elements: Array of pattern elements, where `nil` represents a wildcard pattern.
+  public static func patternCodeBlock(_ elements: [PatternConvertible?]) -> TuplePatternCodeBlock {
+    TuplePatternCodeBlock(elements: elements)
+  }
+
   public var syntax: SyntaxProtocol {
     guard !elements.isEmpty else {
       fatalError("Tuple must contain at least one element.")

@@ -29,15 +29,6 @@
 
 import SwiftSyntax
 
-/// A protocol for types that can be represented as literal values in Swift code.
-public protocol LiteralValue {
-  /// The Swift type name for this literal value.
-  var typeName: String { get }
-
-  /// Renders this value as a Swift literal string.
-  var literalString: String { get }
-}
-
 /// A literal value.
 public enum Literal: CodeBlock {
   /// A string literal.
@@ -50,7 +41,60 @@ public enum Literal: CodeBlock {
   case `nil`
   /// A boolean literal.
   case boolean(Bool)
+  /// A reference to a variable or identifier (outputs without quotes).
+  case ref(String)
+  /// A tuple literal.
+  case tuple([Literal?])
+  /// An array literal.
+  case array([Literal])
+  /// A dictionary literal.
+  case dictionary([(Literal, Literal)])
 
+  /// The Swift type name for this literal.
+  public var typeName: String {
+    switch self {
+    case .string: return "String"
+    case .float: return "Double"
+    case .integer: return "Int"
+    case .nil: return "Any?"
+    case .boolean: return "Bool"
+    case .ref: return "Any"
+    case .tuple(let elements):
+      let elementTypes = elements.map { element in
+        if let element = element {
+          switch element {
+          case .integer: return "Int"
+          case .float: return "Double"
+          case .string: return "String"
+          case .boolean: return "Bool"
+          case .nil: return "Any?"
+          case .ref: return "Any"
+          case .tuple: return "Any"
+          case .array: return "Any"
+          case .dictionary: return "Any"
+          }
+        } else {
+          return "Any"
+        }
+      }
+      return "(\(elementTypes.joined(separator: ", ")))"
+    case .array(let elements):
+      if elements.isEmpty {
+        return "[Any]"
+      }
+      let elementType = elements.first?.typeName ?? "Any"
+      return "[\(elementType)]"
+    case .dictionary(let elements):
+      if elements.isEmpty {
+        return "[Any: Any]"
+      }
+      let keyType = elements.first?.0.typeName ?? "Any"
+      let valueType = elements.first?.1.typeName ?? "Any"
+      return "[\(keyType): \(valueType)]"
+    }
+  }
+
+  /// The SwiftSyntax representation of this literal.
   public var syntax: SyntaxProtocol {
     switch self {
     case .string(let value):
@@ -70,46 +114,68 @@ public enum Literal: CodeBlock {
       return NilLiteralExprSyntax(nilKeyword: .keyword(.nil))
     case .boolean(let value):
       return BooleanLiteralExprSyntax(literal: value ? .keyword(.true) : .keyword(.false))
+    case .ref(let value):
+      return DeclReferenceExprSyntax(baseName: .identifier(value))
+    case .tuple(let elements):
+      let tupleElements = TupleExprElementListSyntax(
+        elements.enumerated().map { index, element in
+          let elementExpr: ExprSyntax
+          if let element = element {
+            elementExpr =
+              element.syntax.as(ExprSyntax.self)
+              ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
+          } else {
+            // Wildcard pattern - use underscore
+            elementExpr = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("_")))
+          }
+          return TupleExprElementSyntax(
+            label: nil,
+            colon: nil,
+            expression: elementExpr,
+            trailingComma: index < elements.count - 1 ? .commaToken(trailingTrivia: .space) : nil
+          )
+        }
+      )
+      return TupleExprSyntax(
+        leftParen: .leftParenToken(),
+        elements: tupleElements,
+        rightParen: .rightParenToken()
+      )
+    case .array(let elements):
+      let arrayElements = ArrayElementListSyntax(
+        elements.enumerated().map { index, element in
+          ArrayElementSyntax(
+            expression: element.syntax.as(ExprSyntax.self)
+              ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(""))),
+            trailingComma: index < elements.count - 1 ? .commaToken(trailingTrivia: .space) : nil
+          )
+        }
+      )
+      return ArrayExprSyntax(elements: arrayElements)
+    case .dictionary(let elements):
+      if elements.isEmpty {
+        // Empty dictionary should generate [:]
+        return DictionaryExprSyntax(
+          leftSquare: .leftSquareToken(),
+          content: .colon(.colonToken(leadingTrivia: .init(), trailingTrivia: .init())),
+          rightSquare: .rightSquareToken()
+        )
+      } else {
+        let dictionaryElements = DictionaryElementListSyntax(
+          elements.enumerated().map { index, keyValue in
+            let (key, value) = keyValue
+            return DictionaryElementSyntax(
+              keyExpression: key.syntax.as(ExprSyntax.self)
+                ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(""))),
+              colon: .colonToken(),
+              valueExpression: value.syntax.as(ExprSyntax.self)
+                ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(""))),
+              trailingComma: index < elements.count - 1 ? .commaToken(trailingTrivia: .space) : nil
+            )
+          }
+        )
+        return DictionaryExprSyntax(content: .elements(dictionaryElements))
+      }
     }
-  }
-}
-
-// MARK: - LiteralValue Implementations
-
-extension Array: LiteralValue where Element == String {
-  public var typeName: String { "[String]" }
-
-  public var literalString: String {
-    let elements = self.map { element in
-      // Escape quotes and newlines
-      let escaped =
-        element
-        .replacingOccurrences(of: "\\", with: "\\\\")
-        .replacingOccurrences(of: "\"", with: "\\\"")
-        .replacingOccurrences(of: "\n", with: "\\n")
-        .replacingOccurrences(of: "\r", with: "\\r")
-        .replacingOccurrences(of: "\t", with: "\\t")
-      return "\"\(escaped)\""
-    }.joined(separator: ", ")
-    return "[\(elements)]"
-  }
-}
-
-extension Dictionary: LiteralValue where Key == Int, Value == String {
-  public var typeName: String { "[Int: String]" }
-
-  public var literalString: String {
-    let elements = self.map { key, value in
-      // Escape quotes and newlines
-      let escaped =
-        value
-        .replacingOccurrences(of: "\\", with: "\\\\")
-        .replacingOccurrences(of: "\"", with: "\\\"")
-        .replacingOccurrences(of: "\n", with: "\\n")
-        .replacingOccurrences(of: "\r", with: "\\r")
-        .replacingOccurrences(of: "\t", with: "\\t")
-      return "\(key): \"\(escaped)\""
-    }.joined(separator: ", ")
-    return "[\(elements)]"
   }
 }

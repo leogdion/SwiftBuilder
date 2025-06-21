@@ -33,7 +33,7 @@ import SwiftSyntax
 public struct Enum: CodeBlock {
   private let name: String
   private let members: [CodeBlock]
-  private var inheritance: String?
+  private var inheritance: [String] = []
   private var attributes: [AttributeInfo] = []
 
   /// Creates an `enum` declaration.
@@ -46,11 +46,11 @@ public struct Enum: CodeBlock {
   }
 
   /// Sets the inheritance for the enum.
-  /// - Parameter type: The type to inherit from.
+  /// - Parameter inheritance: The types to inherit from.
   /// - Returns: A copy of the enum with the inheritance set.
-  public func inherits(_ type: String) -> Self {
+  public func inherits(_ inheritance: String...) -> Self {
     var copy = self
-    copy.inheritance = type
+    copy.inheritance = inheritance
     return copy
   }
 
@@ -70,11 +70,26 @@ public struct Enum: CodeBlock {
     let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
 
     var inheritanceClause: InheritanceClauseSyntax?
-    if let inheritance = inheritance {
-      let inheritedType = InheritedTypeSyntax(
-        type: IdentifierTypeSyntax(name: .identifier(inheritance)))
+    if !inheritance.isEmpty {
+      let inheritedTypes = inheritance.map { type in
+        InheritedTypeSyntax(
+          type: IdentifierTypeSyntax(name: .identifier(type)))
+      }
       inheritanceClause = InheritanceClauseSyntax(
-        colon: .colonToken(), inheritedTypes: InheritedTypeListSyntax([inheritedType]))
+        colon: .colonToken(),
+        inheritedTypes: InheritedTypeListSyntax(
+          inheritedTypes.enumerated().map { idx, inherited in
+            var inheritedType = inherited
+            if idx < inheritedTypes.count - 1 {
+              inheritedType = inheritedType.with(
+                \.trailingComma,
+                TokenSyntax.commaToken(trailingTrivia: .space)
+              )
+            }
+            return inheritedType
+          }
+        )
+      )
     }
 
     let memberBlock = MemberBlockSyntax(
@@ -139,108 +154,5 @@ public struct Enum: CodeBlock {
       )
     }
     return AttributeListSyntax(attributeElements)
-  }
-}
-
-/// A Swift `case` declaration inside an `enum`.
-public struct EnumCase: CodeBlock {
-  private let name: String
-  private var literalValue: Literal?
-
-  /// Creates a `case` declaration.
-  /// - Parameter name: The name of the case.
-  public init(_ name: String) {
-    self.name = name
-    self.literalValue = nil
-  }
-
-  /// Sets the raw value of the case to a Literal.
-  /// - Parameter value: The literal value.
-  /// - Returns: A copy of the case with the raw value set.
-  public func equals(_ value: Literal) -> Self {
-    var copy = self
-    copy.literalValue = value
-    return copy
-  }
-
-  /// Sets the raw value of the case to a string (for backward compatibility).
-  /// - Parameter value: The string value.
-  /// - Returns: A copy of the case with the raw value set.
-  public func equals(_ value: String) -> Self {
-    self.equals(.string(value))
-  }
-
-  /// Sets the raw value of the case to an integer (for backward compatibility).
-  /// - Parameter value: The integer value.
-  /// - Returns: A copy of the case with the raw value set.
-  public func equals(_ value: Int) -> Self {
-    self.equals(.integer(value))
-  }
-
-  /// Sets the raw value of the case to a float (for backward compatibility).
-  /// - Parameter value: The float value.
-  /// - Returns: A copy of the case with the raw value set.
-  public func equals(_ value: Double) -> Self {
-    self.equals(.float(value))
-  }
-
-  public var syntax: SyntaxProtocol {
-    let caseKeyword = TokenSyntax.keyword(.case, trailingTrivia: .space)
-    let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
-
-    var initializer: InitializerClauseSyntax?
-    if let literal = literalValue {
-      switch literal {
-      case .string(let value):
-        initializer = InitializerClauseSyntax(
-          equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-          value: StringLiteralExprSyntax(
-            openingQuote: .stringQuoteToken(),
-            segments: StringLiteralSegmentListSyntax([
-              .stringSegment(StringSegmentSyntax(content: .stringSegment(value)))
-            ]),
-            closingQuote: .stringQuoteToken()
-          )
-        )
-      case .float(let value):
-        initializer = InitializerClauseSyntax(
-          equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-          value: FloatLiteralExprSyntax(literal: .floatLiteral(String(value)))
-        )
-      case .integer(let value):
-        initializer = InitializerClauseSyntax(
-          equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-          value: IntegerLiteralExprSyntax(digits: .integerLiteral(String(value)))
-        )
-      case .nil:
-        initializer = InitializerClauseSyntax(
-          equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-          value: NilLiteralExprSyntax(nilKeyword: .keyword(.nil))
-        )
-      case .boolean(let value):
-        initializer = InitializerClauseSyntax(
-          equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-          value: BooleanLiteralExprSyntax(literal: value ? .keyword(.true) : .keyword(.false))
-        )
-      }
-    }
-
-    return EnumCaseDeclSyntax(
-      caseKeyword: caseKeyword,
-      elements: EnumCaseElementListSyntax([
-        EnumCaseElementSyntax(
-          leadingTrivia: .space,
-          _: nil,
-          name: identifier,
-          _: nil,
-          parameterClause: nil,
-          _: nil,
-          rawValue: initializer,
-          _: nil,
-          trailingComma: nil,
-          trailingTrivia: .newline
-        )
-      ])
-    )
   }
 }

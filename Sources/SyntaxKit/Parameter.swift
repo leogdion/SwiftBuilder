@@ -52,6 +52,15 @@ public struct Parameter: CodeBlock {
     self.isUnnamed = isUnnamed
   }
 
+  /// Creates an unlabeled parameter for function calls or initializers.
+  /// - Parameter value: The value of the parameter.
+  public init(unlabeled value: String) {
+    self.name = ""
+    self.type = ""
+    self.defaultValue = value
+    self.isUnnamed = true
+  }
+
   /// Adds an attribute to the parameter declaration.
   /// - Parameters:
   ///   - attribute: The attribute name (without the @ symbol).
