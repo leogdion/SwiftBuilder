@@ -93,7 +93,8 @@ public struct Parameter: CodeBlock {
         expression: ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(name)))
       )
     }
-    // Note: If you want to support attributes in parameter syntax, you would need to update the function signature generation in Function.swift to use these attributes.
+    // Note: If you want to support attributes in parameter syntax, you would need to
+    // update the function signature generation in Function.swift to use these attributes.
   }
 
   /// Creates a single-name parameter (same label and internal name).
@@ -107,8 +108,12 @@ public struct Parameter: CodeBlock {
   /// Creates a two-name parameter where the external label differs from the internal name.
   /// Example: `Parameter("value", labeled: "forKey", type: "String")` maps to
   /// `forKey value: String` in the generated Swift.
-  public init(_ internalName: String, labeled externalLabel: String, type: String,
-              defaultValue: String? = nil) {
+  public init(
+    _ internalName: String,
+    labeled externalLabel: String,
+    type: String,
+    defaultValue: String? = nil
+  ) {
     self.name = internalName
     self.label = externalLabel
     self.type = type

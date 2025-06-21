@@ -1,5 +1,5 @@
 //
-//  Throw.swift
+//  Function+Modifiers.swift
 //  SyntaxKit
 //
 //  Created by Leo Dion.
@@ -29,22 +29,31 @@
 
 import SwiftSyntax
 
-public struct Throw: CodeBlock {
-  private let expr: CodeBlock
-
-  public init(_ expr: CodeBlock) {
-    self.expr = expr
+extension Function {
+  /// Marks the function as `static`.
+  /// - Returns: A copy of the function marked as `static`.
+  public func `static`() -> Self {
+    var copy = self
+    copy.isStatic = true
+    return copy
   }
 
-  public var syntax: SyntaxProtocol {
-    let expression =
-      expr.syntax.as(ExprSyntax.self)
-      ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
-    return StmtSyntax(
-      ThrowStmtSyntax(
-        throwKeyword: .keyword(.throw, trailingTrivia: .space),
-        expression: expression
-      )
-    )
+  /// Marks the function as `mutating`.
+  /// - Returns: A copy of the function marked as `mutating`.
+  public func mutating() -> Self {
+    var copy = self
+    copy.isMutating = true
+    return copy
+  }
+
+  /// Adds an attribute to the function declaration.
+  /// - Parameters:
+  ///   - attribute: The attribute name (without the @ symbol).
+  ///   - arguments: The arguments for the attribute, if any.
+  /// - Returns: A copy of the function with the attribute added.
+  public func attribute(_ attribute: String, arguments: [String] = []) -> Self {
+    var copy = self
+    copy.attributes.append(AttributeInfo(name: attribute, arguments: arguments))
+    return copy
   }
 }

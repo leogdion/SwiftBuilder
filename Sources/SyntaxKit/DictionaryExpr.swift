@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the "Software"), to deal in the Software without
+//  files (the “Software”), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -49,7 +49,7 @@ public struct DictionaryExpr: CodeBlock, LiteralValue {
 
   /// Renders this dictionary as a Swift literal string.
   public var literalString: String {
-    let elementStrings = elements.map { key, value in
+    let elementStrings = elements.map { _, _ in
       let keyString: String
       let valueString: String
 
@@ -57,7 +57,7 @@ public struct DictionaryExpr: CodeBlock, LiteralValue {
       // In a real implementation, we'd need to convert DictionaryValue to string
       keyString = "key"
       valueString = "value"
-      
+
       return "\(keyString): \(valueString)"
     }
     return "[\(elementStrings.joined(separator: ", "))]"
@@ -86,4 +86,4 @@ public struct DictionaryExpr: CodeBlock, LiteralValue {
       return DictionaryExprSyntax(content: .elements(dictionaryElements))
     }
   }
-} 
+}

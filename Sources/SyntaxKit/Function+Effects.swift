@@ -1,5 +1,5 @@
 //
-//  Throw.swift
+//  Function+Effects.swift
 //  SyntaxKit
 //
 //  Created by Leo Dion.
@@ -29,22 +29,37 @@
 
 import SwiftSyntax
 
-public struct Throw: CodeBlock {
-  private let expr: CodeBlock
-
-  public init(_ expr: CodeBlock) {
-    self.expr = expr
+extension Function {
+  /// Function effect specifiers (async/throws combinations)
+  internal enum Effect {
+    case none
+    /// synchronous effect specifier: throws or rethrows
+    case `throws`(isRethrows: Bool)
+    case async
+    /// combined async and throws/rethrows
+    case asyncThrows(isRethrows: Bool)
   }
 
-  public var syntax: SyntaxProtocol {
-    let expression =
-      expr.syntax.as(ExprSyntax.self)
-      ?? ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier("")))
-    return StmtSyntax(
-      ThrowStmtSyntax(
-        throwKeyword: .keyword(.throw, trailingTrivia: .space),
-        expression: expression
-      )
-    )
+  /// Marks the function as `throws` or `rethrows`.
+  /// - Parameter rethrows: Pass `true` to emit `rethrows` instead of `throws`.
+  public func `throws`(isRethrows: Bool = false) -> Self {
+    var copy = self
+    copy.effect = .throws(isRethrows: isRethrows)
+    return copy
+  }
+
+  /// Marks the function as `async`.
+  public func async() -> Self {
+    var copy = self
+    copy.effect = .async
+    return copy
+  }
+
+  /// Marks the function as `async throws` or `async rethrows`.
+  /// - Parameter rethrows: Pass `true` to emit `async rethrows`.
+  public func asyncThrows(isRethrows: Bool = false) -> Self {
+    var copy = self
+    copy.effect = .asyncThrows(isRethrows: isRethrows)
+    return copy
   }
 }
