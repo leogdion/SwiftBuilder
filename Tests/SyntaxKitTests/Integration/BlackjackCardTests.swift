@@ -32,4 +32,4 @@ internal struct BlackjackCardTests {
 
     #expect(normalizedGenerated == normalizedExpected)
   }
-} 
+}

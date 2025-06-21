@@ -42,4 +42,4 @@ final class ForLoopTests {
     #expect(generated.contains("for number in numbers where number % 2"))
     #expect(generated.contains("print(number)"))
   }
-} 
+}

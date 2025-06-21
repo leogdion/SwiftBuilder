@@ -141,4 +141,4 @@ public struct EnumCase: CodeBlock {
       ])
     )
   }
-} 
+}
